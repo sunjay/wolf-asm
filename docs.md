@@ -12,17 +12,17 @@ hardware or extra CPUs.
 * Turing complete?
 * Limited memory
 * Limited registers (if register machine)
-* System calls
+* System calls or memory mapped IO
 * Flags: Carry, Zero, Overflow, etc.
 
 ## File layout
 
 * file extension: `.ax` (assembly language extended)
-* section 1 (optional): `.static` (case-insensitive) on its own line
+* `section .static` (case-insensitive) on its own line
   * contains static data declarations
   * the data is laid out exactly as specified, in the order specified, with no
     additional padding inserted between items of different sizes
-* section 2 (required): `.code` (case-insensitive) on its own line
+* `section .code` (case-insensitive) on its own line
   * contains source code (instructions)
   * executes from top to bottom
 
@@ -58,7 +58,7 @@ Used in the `.static` section.
 Example:
 
 ```asm
-.static
+section .static
 
 # no label = data at the start of the section that cannot be explicitly
 # referred to in assembly code
@@ -74,7 +74,7 @@ ARR1:  # a labelled region of data whose location is named `ARR1`
 Used in the `.code` section.
 
 * comment
-  * `#` character to the end of the line
+  * `#` or `;` character to the end of the line
 * immediate
   * decimal number: `0`, `1`, `2`, `3`, `1_000_000`, etc.
   * two's complement number: `-1`, `-2`, `-3`, `0`, `1`, `2`, etc.
@@ -85,7 +85,7 @@ Used in the `.code` section.
   * e.g. `abc`, `L1`, `x2`
   * use `label:` to designate the address of a given section of the executable
 * register
-  * 64 general purpose registers: `$0`, `$1`, `$2`, etc. (up to `$63`)
+  * 64 general purpose registers (64-bit): `$0`, `$1`, `$2`, etc. (up to `$63`)
   * stack pointer: `$sp` - 64-bit top address of the stack (next available slot)
   * frame pointer: `$fp` - 64-bit base address of the stack (base pointer)
 * data directives
@@ -95,7 +95,7 @@ Used in the `.code` section.
 Example:
 
 ```asm
-.code
+section .code
 
 main:
   add $1, $2   # $1 = $1 + $2
@@ -106,13 +106,79 @@ main:
 ## Calling Convention
 
 * return address is stored in register `$?` (TODO)
+* pop calls should be in the opposite order to push calls
+
+## Syscalls
+
+To make a syscall, place the syscall number in `$0` and use the `syscall`
+instruction. Some syscalls take arguments in other registers. See the
+documentation below for more details.
+
+* `open`: `$0 = 0`
+  * Arguments:
+    * `$1` - address of file path bytes
+    * `$2` - length of file path (in bytes)
+  * Returns:
+    * `$0` - file descriptor
+  * On Error:
+    * `$0` is set to -1
+  * Notes:
+    * Special file descriptors: `0` is stdin, `1` is stdout, `2` is stderr
+* `read`: `$0 = 1`
+  * Arguments:
+    * `$1` - file descriptor
+    * `$2` - address of buffer to read bytes into
+    * `$3` - size of buffer (number of bytes to read)
+  * Returns:
+    * `$0` - the number of bytes that were read
+  * On Error:
+    * `$0` is set to -1
+* `write`: `$0 = 2`
+  * Arguments:
+    * `$1` - file descriptor
+    * `$2` - address of buffer to write bytes from
+    * `$3` - size of buffer (number of bytes to write)
+  * Returns:
+    * `$0` - the number of bytes that were written
+  * On Error:
+    * `$0` is set to -1
 
 ## Example Programs
 
 This implements a hello world program: (filename: `hello.ax`)
 
 ```asm
-TODO
+section .static
+
+# Declare a string with the message we want to print
+message:
+  .bytes 'hello, world!'
+length:
+  .b8 13
+
+section .code
+
+main:
+  push $fp
+  mov8 $fp, $sp
+
+  # Populate arguments for write syscall
+
+  # File descriptor 1 is stdout
+  mov8 $1, 1
+  # Set $2 to the address of the message
+  mov8 $2, message
+  # Load the value at address `length` into $3
+  load8 $3, length
+
+  # Set syscall register to value for write syscall
+  mov8 $0, 2
+  # Run the syscall
+  syscall
+  # Technically, we should check $0 to see if all the bytes were written
+
+  pop $fp
+  ret
 ```
 
 This implements the `cat` command: (filename: `cat.ax`)
@@ -128,7 +194,7 @@ Instruction names are case-insensitive.
 ### Conventions
 
 * `dest` - destination register
-* `source` - operand immediate or register
+* `source` - operand immediate, label, or register
 * `loc` - an address, usually specified using a label
 
 ### Arithmetic
@@ -155,10 +221,14 @@ Instruction names are case-insensitive.
 
 * `mov{1,2,4,8} dest, source` - copies data between registers or assigns a value
   to a register
-* `ld{1,2,4,8} dest, source`
+* `ld{1,2,4,8} dest, loc`
+  * Only the specified number of bytes is loaded
+  * The loaded bytes are placed in the destination, aligned with the least
+    significant bit
+  * e.g. loading 0xffff into 0x1111111111111111 gives you 0x111111111111ffff
   * Values in memory must be loaded into registers before they may be used in
     other instructions
-* `st{1,2,4,8} dest, source`
+* `st{1,2,4,8} loc, source`
 * `push`
 * `pop`
 
