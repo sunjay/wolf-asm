@@ -14,6 +14,7 @@ hardware or extra CPUs.
 * Limited registers (if register machine)
 * System calls or memory mapped IO
 * Flags: Carry, Zero, Overflow, etc.
+* Sign extension
 
 ## File layout
 
@@ -144,7 +145,7 @@ documentation below for more details.
   * On Error:
     * `$0` is set to -1
 
-## Example Programs
+### Example Programs
 
 This implements a hello world program: (filename: `hello.ax`)
 
@@ -153,19 +154,19 @@ section .code
 
 main:
   push $fp
-  mov8 $fp, $sp
+  mov $fp, $sp
 
   # Populate arguments for write syscall
 
   # File descriptor 1 is stdout
-  mov8 $1, 1
+  mov $1, 1
   # Set $2 to the address of the message
-  mov8 $2, message
+  mov $2, message
   # Load the value at address `length` into $3
   load8 $3, length
 
   # Set syscall register to value for write syscall
-  mov8 $0, 2
+  mov $0, 2
   # Run the syscall
   syscall
   # Technically, we should check $0 to see if all the bytes were written
@@ -220,16 +221,23 @@ Instruction names are case-insensitive.
 
 ### Memory
 
-* `mov{1,2,4,8} dest, source` - copies data between registers or assigns a value
+* `mov dest, source` - copies data between registers or assigns a value
   to a register
-* `ld{1,2,4,8} dest, loc`
-  * Only the specified number of bytes is loaded
-  * The loaded bytes are placed in the destination, aligned with the least
-    significant bit
-  * e.g. loading 0xffff into 0x1111111111111111 gives you 0x111111111111ffff
+* `load{1,2,4,8} dest, loc` or `loadu{1,2,4,8} dest, loc` - loads a value from
+  memory into a register
+  * The loaded value has size: 1, 2, 4, or 8 bytes
+  * If `load` is used and the value is 1, 2, or 4 bytes, the value is
+    sign-extended prior to being assigned into the register
+  * If `loadu` is used and the value is 1, 2, or 4 bytes, the value is
+    zero-extended prior to being assigned into the register
   * Values in memory must be loaded into registers before they may be used in
     other instructions
-* `st{1,2,4,8} loc, source`
+* `store{1,2,4,8} loc, source` - stores 1, 2, 4, or 8 bytes a register's value
+  into the given memory location
+  * If storing 1, 2, or 4 bytes, the bytes copied from the register will be
+    aligned with the least-significant bit of the register
+  * That is, the lower bytes will always be copied in cases where less than 8
+    bytes are requested
 * `push`
 * `pop`
 
