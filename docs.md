@@ -88,7 +88,6 @@ Used in the `.code` section.
   * 64 general purpose registers: `$0`, `$1`, `$2`, etc. (up to `$63`)
   * stack pointer: `$sp` - 64-bit top address of the stack (next available slot)
   * frame pointer: `$fp` - 64-bit base address of the stack (base pointer)
-  * program counter: `$pc` - 64-bit address of the *next* instruction to be executed (read-only)
 
 Example:
 
