@@ -63,10 +63,10 @@ Example:
 # no label = data at the start of the section that cannot be explicitly
 # referred to in assembly code
 
-.b1 100  # initialize 1 byte to the value 100
+  .b1 100  # initialize 1 byte to the value 100
 
 ARR1:  # a labelled region of data whose location is named `ARR1`
-.zero 10  # initialize 10 bytes to zero
+  .zero 10  # initialize 10 bytes to zero
 ```
 
 ## Instruction Syntax
@@ -95,9 +95,9 @@ Example:
 .code
 
 main:
-add $1, $2   # $1 = $1 + $2
-sub $1, 5    # $1 = $1 + 5
-ret
+  add $1, $2   # $1 = $1 + $2
+  sub $1, 5    # $1 = $1 + 5
+  ret
 ```
 
 ## Calling Convention
