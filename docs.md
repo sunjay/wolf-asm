@@ -25,6 +25,7 @@ hardware or extra CPUs.
 * `section .code` (case-insensitive) on its own line
   * contains source code (instructions)
   * executes from top to bottom
+* The sections are ordered: `.static`, `.code`
 
 ## Static Data Declaration Syntax
 
@@ -148,14 +149,6 @@ documentation below for more details.
 This implements a hello world program: (filename: `hello.ax`)
 
 ```asm
-section .static
-
-# Declare a string with the message we want to print
-message:
-  .bytes 'hello, world!'
-length:
-  .b8 13
-
 section .code
 
 main:
@@ -179,6 +172,14 @@ main:
 
   pop $fp
   ret
+
+section .static
+
+# Declare a string with the message we want to print
+message:
+  .bytes 'hello, world!'
+length:
+  .b8 13
 ```
 
 This implements the `cat` command: (filename: `cat.ax`)
