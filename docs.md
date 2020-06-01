@@ -88,6 +88,9 @@ Used in the `.code` section.
   * 64 general purpose registers: `$0`, `$1`, `$2`, etc. (up to `$63`)
   * stack pointer: `$sp` - 64-bit top address of the stack (next available slot)
   * frame pointer: `$fp` - 64-bit base address of the stack (base pointer)
+* data directives
+  * any of the directives valid in the `.static` section may also be used in the
+    `.code` section
 
 Example:
 
@@ -122,17 +125,64 @@ TODO
 
 Instruction names are case-insensitive.
 
-### Key
+### Conventions
 
-* `dest` - destination: register or address
-* `source` - operand: immediate, register or address
+* `dest` - destination register
+* `source` - operand immediate or register
+* `loc` - an address, usually specified using a label
 
 ### Arithmetic
 
 * `add dest, source` - add `source` and `dest` and put the result in `dest`
 * `sub dest, source` - subtract `source` and `dest` and put the result in `dest`
+* `mul`
+* `div`
+* `rem` - euclid rem
+
+### Binary
+
+* `shl`
+* `shr`
+* `band`
+* `bor`
+* `xor`
+
+### Comparison
+
+* `cmp source1 source2` - signed comparison
+
+### Memory
+
+* `mov{1,2,4,8} dest, source` - copies data between registers or assigns a value
+  to a register
+* `ld{1,2,4,8} dest, source`
+  * Values in memory must be loaded into registers before they may be used in
+    other instructions
+* `st{1,2,4,8} dest, source`
+* `push`
+* `pop`
 
 ### Control Flow
 
-* `jz`
-* `ret`
+* `jmp` - unconditional jump
+* `je` - jump if equal
+* `jne` - jump if not equal
+* `jg` - jump if greater
+* `jge` - jump if greater or equal
+* `jl` - jump if less
+* `jle` - jump if less or equal
+* `jo` - jump if overflow
+* `jno` - jump if no overflow
+* `jz` - jump if zero
+* `jnz` - jump if not zero
+* `js` - jump if signed (sign bit is set)
+* `jns` - jump if not signed (sign bit is not set)
+* `call loc` - pushes the value of the program counter onto the stack and then
+  jumps to the given location
+* `ret` - pops the value at the top of the stack and sets the program counter to it
+* `nop` -
+* `syscall`
+
+### Floating Point
+
+* TODO
