@@ -122,6 +122,56 @@ Before syscalls become available, IO is done through memory-mapped IO.
   respective next 1, 2, 4, or 8 bytes from standard input into the destination
   register.
 
+### Example Programs
+
+This implements a hello world program: (filename: `hello.ax`)
+
+```asm
+section .code
+
+main:
+  push $fp
+  mov $fp, $sp
+
+  # Loop through and write each character
+
+  # $8 = the address of the current character
+  mov $8, message
+  # $9 = the address one past the last character in the string
+  load8 $9, length
+  add $9, message
+
+loop:
+  cmp $8, $9
+  jge end
+
+  # Write the current character
+  store8 0xffff_ffff_000c, $8
+  # Move to the next character
+  add $8, 1
+
+  # Continue the loop
+  jmp loop
+
+end:
+  pop $fp
+  ret
+
+section .static
+
+# Declare a string with the message we want to print
+message:
+  .bytes 'hello, world!'
+length:
+  .b8 13
+```
+
+This implements the `cat` command: (filename: `cat.ax`)
+
+```asm
+TODO
+```
+
 ## Syscalls
 
 To make a syscall, place the syscall number in `$0` and use the `syscall`
@@ -209,7 +259,7 @@ Instruction names are case-insensitive.
 
 * `dest` - destination register
 * `source` - operand immediate, label, or register
-* `loc` - an address, usually specified using a label
+* `loc` - a register, or an address (usually specified using a label)
 
 ### Arithmetic
 
