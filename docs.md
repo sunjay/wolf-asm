@@ -28,6 +28,16 @@ hardware or extra CPUs.
   * executes from top to bottom
 * The sections are ordered: `.static`, `.code`
 
+## Assembler Directives
+
+Available for use in any section.
+
+* `.include "path/to/file.ax"` - equivalent to copying/pasting the contents of
+  the specified file directly at the location of the `.include` statement
+* `.const NAME immediate` - declares a named constant that can be used in place
+  of an immediate value. The immediate value will be substituted as-is. The name
+  must be a valid label and must be unique among all labels and other constants.
+
 ## Static Data Declaration Syntax
 
 Used in the `.static` section.
@@ -36,6 +46,8 @@ Used in the `.static` section.
   * an ASCII alphabetic character followed by any number of alphanumeric characters
   * e.g. `abc`, `L1`, `x2`
   * use `label:` to designate the address of a given section of the executable
+  * labels must be unique throughout the entire program (a program may be one or
+    more files joined by `.include`)
 * string literal
   * single or double quoted ASCII characters, e.g. `'a'`, `"123abc\n"`
   * supports string escapes like `\n`, `\t`, `\x{FF}`, `\b{00011000}`
