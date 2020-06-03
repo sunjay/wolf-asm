@@ -110,6 +110,18 @@ main:
 * return address is stored in register `$?` (TODO)
 * pop calls should be in the opposite order to push calls
 
+## Memory Mapped IO
+
+Before syscalls become available, IO is done through memory-mapped IO.
+
+* When a value is stored at address `0xffff_ffff_000c`, the lower 4-bytes
+  (32-bits) are sent to standard output. The bytes are interpreted as a unicode
+  scalar value. If the bytes are not valid as a unique scalar value, a
+  `U+FFFD REPLACEMENT CHARACTER` (&#65533;) is outputted instead.
+* Loading a 1, 2, 4, or 8 byte value from address `0xffff_ffff_0004` places the
+  respective next 1, 2, 4, or 8 bytes from standard input into the destination
+  register.
+
 ## Syscalls
 
 To make a syscall, place the syscall number in `$0` and use the `syscall`
