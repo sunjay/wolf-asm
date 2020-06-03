@@ -120,7 +120,7 @@ Before syscalls become available, IO is done through memory-mapped IO.
   `U+FFFD REPLACEMENT CHARACTER` (&#65533;) is outputted instead.
 * Loading a 1, 2, 4, or 8 byte value from address `0xffff_ffff_0004` places the
   respective next 1, 2, 4, or 8 bytes from standard input into the destination
-  register.
+  register. At EOF, a value of `0` will be loaded.
 
 ### Example Programs
 
@@ -171,7 +171,27 @@ length:
 This implements the `cat` command: (filename: `cat.ax`)
 
 ```asm
-TODO
+section .code
+
+main:
+  push $fp
+  mov $fp, $sp
+
+loop:
+  # Loop through and write each received byte
+  load1 $0, 0xffff_ffff_0004
+  # Quit at EOF
+  jz end
+
+  # Write the character
+  store1 0xffff_ffff_000c, $0
+
+  # Continue the loop
+  jmp loop
+
+end:
+  pop $fp
+  ret
 ```
 
 ## Syscalls
