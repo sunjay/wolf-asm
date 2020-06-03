@@ -145,8 +145,10 @@ loop:
   cmp $8, $9
   jge end
 
+  # Load the current character
+  load1 $10, $8
   # Write the current character
-  store8 0xffff_ffff_000c, $8
+  store8 0xffff_ffff_000c, $10
   # Move to the next character
   add $8, 1
 
