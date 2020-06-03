@@ -37,6 +37,9 @@ Available for use in any section.
 * `.const NAME immediate` - declares a named constant that can be used in place
   of an immediate value. The immediate value will be substituted as-is. The name
   must be a valid label and must be unique among all labels and other constants.
+  The name defined by a constant becomes available to all lines following the
+  constant. Even files added using `.include` may use these constants as long as
+  they are included after the constant declaration.
 
 ## Static Data Declaration Syntax
 
@@ -92,7 +95,7 @@ Used in the `.code` section.
 * immediate
   * decimal number: `0`, `1`, `2`, `3`, `1_000_000`, etc.
   * two's complement number: `-1`, `-2`, `-3`, `0`, `1`, `2`, etc.
-  * hexadecimal number: `0x123`
+  * hexadecimal number: `0x1f3`
   * binary number: `0b0100_1000`
 * label
   * an ASCII alphabetic character followed by any number of alphanumeric characters
