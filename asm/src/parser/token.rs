@@ -47,6 +47,8 @@ pub enum TokenKind {
 
     /// A `:` character
     Colon,
+    /// A `,` character
+    Comma,
 
     /// The `\n` character
     Newline,

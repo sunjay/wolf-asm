@@ -37,6 +37,7 @@ impl<'a> Lexer<'a> {
         #[deny(unreachable_patterns)]
         let res = match (current_char, self.scanner.peek()) {
             (b':', _) => Ok(self.byte_token(start, Colon)),
+            (b',', _) => Ok(self.byte_token(start, Comma)),
             (b'\n', _) => Ok(self.byte_token(start, Newline)),
 
             (b'"', _) |
@@ -629,6 +630,11 @@ mod tests {
     #[test]
     fn colon() {
         expect_token!(b":", t!(Colon));
+    }
+
+    #[test]
+    fn comma() {
+        expect_token!(b",", t!(Comma));
     }
 
     #[test]
