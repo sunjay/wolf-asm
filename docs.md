@@ -46,7 +46,8 @@ Available for use in any section.
 Used in the `.static` section.
 
 * label
-  * an ASCII alphabetic character followed by any number of alphanumeric characters
+  * an ASCII alphabetic character followed by any number of alphanumeric
+    characters or underscores
   * e.g. `abc`, `L1`, `x2`
   * use `label:` to designate the address of a given section of the executable
   * labels must be unique throughout the entire program (a program may be one or
@@ -97,6 +98,8 @@ Used in the `.code` section.
   * two's complement number: `-1`, `-2`, `-3`, `0`, `1`, `2`, etc.
   * hexadecimal number: `0x1f3`
   * binary number: `0b0100_1000`
+  * Underscores in literals are ignored, however the `0x` or `0b` prefix must
+    not contain any `_` characters
 * label
   * an ASCII alphabetic character followed by any number of alphanumeric characters
   * e.g. `abc`, `L1`, `x2`

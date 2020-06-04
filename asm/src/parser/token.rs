@@ -7,6 +7,15 @@ pub enum Keyword {
     Section,
 }
 
+impl Keyword {
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "section" => Some(Keyword::Section),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LitKind {
     /// An integer literal, e.g. `0`, `1`, `-402`, `1_000_000`, `0x1f3`, `0b0100_1000`
@@ -20,14 +29,6 @@ pub enum LitKind {
     Bytes,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum RegisterKind {
-    /// A named register like `$sp` or `$fp`
-    Named,
-    /// A numbered register like `$0`, `$1`, `$63`
-    Numbered,
-}
-
 /// The different kinds of tokens that can be produced by the lexer
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenKind {
@@ -39,7 +40,7 @@ pub enum TokenKind {
     Ident,
 
     /// A register, e.g. `$0`, `$1`, `$63`, `$sp`, `$fp`, etc.
-    Register(RegisterKind),
+    Register,
 
     /// A literal
     Literal(LitKind),
@@ -49,23 +50,46 @@ pub enum TokenKind {
 
     /// The `\n` character
     Newline,
+
+    /// The end of a file
+    Eof,
+
+    /// A placeholder token used to indicate an error but still allow lexing to continue
+    Error,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Register {
+    /// A named register like `$sp` or `$fp`
     Named(Arc<str>),
+    /// A numbered register like `$0`, `$1`, `$63`
     Numbered(u8),
+}
+
+impl From<u8> for Register {
+    fn from(value: u8) -> Self {
+        Register::Numbered(value)
+    }
+}
+
+impl<'a> From<&'a str> for Register {
+    fn from(value: &'a str) -> Self {
+        Register::Named(value.into())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenValue {
-    /// An interned string representing the identifier
-    ///
-    /// For `DotIdent` tokens, this is the identifier *after* the '.' character
+    /// An interned string representing the identifier, e.g. `label_name`, `.const`
     Ident(Arc<str>),
 
     /// The value of a named or numbered register
     Register(Register),
+
+    /// An integer literal value, up to 64-bits in size
+    ///
+    /// Needs to be 128 bits to fit the range of both i64 and u64
+    Integer(i128),
 
     /// The unescaped bytes from a byte string literal
     Bytes(Arc<[u8]>),
@@ -73,10 +97,10 @@ pub enum TokenValue {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
-    kind: TokenKind,
-    span: Span,
+    pub kind: TokenKind,
+    pub span: Span,
     /// Some token kinds have data associated with them
-    value: Option<TokenValue>,
+    pub value: Option<TokenValue>,
 }
 
 impl Token {
