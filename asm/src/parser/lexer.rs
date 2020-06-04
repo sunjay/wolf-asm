@@ -35,9 +35,9 @@ impl<'a> Lexer<'a> {
 
         // Allows the compiler to help us a bit here
         #[deny(unreachable_patterns)]
-        match (current_char, self.scanner.peek()) {
-            (b':', _) => self.byte_token(start, Colon),
-            (b'\n', _) => self.byte_token(start, Newline),
+        let res = match (current_char, self.scanner.peek()) {
+            (b':', _) => Ok(self.byte_token(start, Colon)),
+            (b'\n', _) => Ok(self.byte_token(start, Newline)),
 
             (b'"', _) |
             (b'\'', _) => self.bytes_lit(start, current_char),
@@ -47,20 +47,22 @@ impl<'a> Lexer<'a> {
 
             (b'.', Some(b'a' ..= b'z')) |
             (b'.', Some(b'A' ..= b'Z')) |
-            (b'.', Some(b'_')) => self.dot_ident(start),
+            (b'.', Some(b'_')) => Ok(self.dot_ident(start)),
 
             (b'a' ..= b'z', _) |
             (b'A' ..= b'Z', _) |
-            (b'_', _) => self.ident(start),
+            (b'_', _) => Ok(self.ident(start)),
 
             (b'$', _) => self.register(start),
 
             (ch, _) => {
                 let token = self.byte_token(start, Error);
                 self.diag.span_error(token.span, format!("unknown start of token `{}`", ch as char)).emit();
-                token
+                Err(token)
             },
-        }
+        };
+
+        res.unwrap_or_else(|err| err)
     }
 
     fn ignore_whitespace_comments(&mut self) {
@@ -113,17 +115,14 @@ impl<'a> Lexer<'a> {
     }
 
     // Parses the remaining byte string literal after `"` or `'`
-    fn bytes_lit(&mut self, start: usize, quote: u8) -> Token {
+    fn bytes_lit(&mut self, start: usize, quote: u8) -> Result<Token, Token> {
         let mut unescaped_text = Vec::new();
         loop {
             match self.scanner.next() {
                 Some(ch) if ch == quote => break,
 
                 Some(b'\\') => {
-                    let unescaped_byte = match self.unescape_byte(start) {
-                        Ok(ch) => ch,
-                        Err(token) => return token,
-                    };
+                    let unescaped_byte = self.unescape_byte(start)?;
                     unescaped_text.push(unescaped_byte);
                 },
 
@@ -139,7 +138,7 @@ impl<'a> Lexer<'a> {
                         }
                     }
 
-                    return token;
+                    return Err(token);
                 },
 
                 Some(ch) => {
@@ -149,7 +148,7 @@ impl<'a> Lexer<'a> {
         }
 
         let value = TokenValue::Bytes(unescaped_text.into());
-        self.token_to_current(start, Literal(LitKind::Bytes), value)
+        Ok(self.token_to_current(start, Literal(LitKind::Bytes), value))
     }
 
     /// Interprets a byte escape sequence assuming the starting `\` has already been parsed
@@ -243,48 +242,44 @@ impl<'a> Lexer<'a> {
     /// Parses an integer literal, given a starting digit or negative sign
     ///
     /// The produced value will be 128-bits, but it will not exceed the range [i64::min(), u64::max()]
-    fn integer_lit(&mut self, start: usize, start_byte: u8) -> Token {
+    fn integer_lit(&mut self, start: usize, start_byte: u8) -> Result<Token, Token> {
         // If the start digit is zero, we may have a hex or binary literal
         let value = match (start_byte, self.scanner.peek()) {
-            (b'0', Some(b'x')) => self.hex_lit_value(start),
-            (b'0', Some(b'b')) => self.binary_lit_value(start),
-            _ => self.decimal_lit_value(start, start_byte),
-        };
-
-        let value = match value {
-            Ok(value) => value,
-            Err(token) => return token,
+            (b'0', Some(b'x')) => self.hex_lit_value(start)?,
+            (b'0', Some(b'b')) => self.binary_lit_value(start)?,
+            _ => self.decimal_lit_value(start, start_byte)?,
         };
 
         if value < i64::MIN as i128 || value > u64::MAX as i128 {
             let token = self.token_to_current(start, Error, None);
             self.diag.span_error(token.span, "integer literal out of 64-bit range").emit();
-            return token;
+            return Err(token);
         }
 
         // An integer cannot be directly followed by an identifier with no whitespace in between
         if matches!(self.scanner.peek(), Some(b'a'..=b'z') | Some(b'A'..=b'Z')) {
             // Skip the first character
             self.scanner.next();
-            // Avoid bogus errors by skipping the next number or identifier
+            // Try to avoid bogus errors by skipping the next number or identifier
             let ignore_start = self.scanner.current_pos();
             match self.scanner.next() {
                 Some(b'a'..=b'z') | Some(b'A'..=b'Z') => {
                     self.ident(ignore_start);
                 },
                 Some(current_byte@b'0'..=b'9') => {
-                    self.integer_lit(ignore_start, current_byte);
+                    // Ignore further errors
+                    self.integer_lit(ignore_start, current_byte).map(|_| ()).unwrap_or(());
                 },
                 _ => {},
             }
 
             let token = self.token_to_current(start, Error, None);
             self.diag.span_error(token.span, "invalid integer literal").emit();
-            return token;
+            return Err(token);
         }
 
         let value = TokenValue::Integer(value);
-        self.token_to_current(start, Literal(LitKind::Integer), value)
+        Ok(self.token_to_current(start, Literal(LitKind::Integer), value))
     }
 
     fn hex_lit_value(&mut self, start: usize) -> Result<i128, Token> {
@@ -388,12 +383,8 @@ impl<'a> Lexer<'a> {
         // Skip the first letter
         self.scanner.next();
 
-        // Get the identifier
-        let token = self.ident(self.scanner.current_pos());
-        if token.kind == Error {
-            // Propagate error
-            return token;
-        }
+        // Parse the identifier
+        self.ident(start);
 
         let value = self.scanner.slice(start, self.scanner.current_pos());
         let value = TokenValue::Ident(self.intern_str(value));
@@ -401,6 +392,8 @@ impl<'a> Lexer<'a> {
     }
 
     /// Parses an identifier, assuming that the first character has already been parsed
+    ///
+    /// Since the first character has already been parsed, this can never fail
     fn ident(&mut self, start: usize) -> Token {
         // We've already got a valid start character, so let's just look for further characters
         while let Some(ch) = self.scanner.peek() {
@@ -422,25 +415,22 @@ impl<'a> Lexer<'a> {
     }
 
     /// Parses a register, assuming that the starting `$` character has already been parsed
-    fn register(&mut self, start: usize) -> Token {
+    fn register(&mut self, start: usize) -> Result<Token, Token> {
         let reg_name_start = self.scanner.current_pos();
         match self.scanner.next() {
             Some(b'a' ..= b'z') => {
                 let name_token = self.ident(reg_name_start);
                 match name_token.kind {
-                    // Propagate error
-                    Error => name_token,
-
                     TokenKind::Ident => {
                         let name = name_token.unwrap_ident().clone();
                         let value = TokenValue::Register(token::Register::Named(name));
-                        self.token_to_current(start, Register, value)
+                        Ok(self.token_to_current(start, Register, value))
                     },
 
                     _ => {
                         let token = self.token_to_current(start, Error, None);
                         self.diag.span_error(token.span, "invalid register name").emit();
-                        token
+                        Err(token)
                     },
                 }
             },
@@ -460,7 +450,7 @@ impl<'a> Lexer<'a> {
                         // isn't too large.
                         let token = self.token_to_current(start, Error, None);
                         self.diag.span_error(token.span, "integer literal is too large").emit();
-                        return token;
+                        return Err(token);
                     },
 
                     //TODO: This code is more robust and will work once this feature is stabilized:
@@ -481,19 +471,19 @@ impl<'a> Lexer<'a> {
                 };
 
                 let value = TokenValue::Register(token::Register::Numbered(value));
-                self.token_to_current(start, Register, value)
+                Ok(self.token_to_current(start, Register, value))
             },
 
             Some(_) => {
                 let token = self.token_to_current(start, Error, None);
                 self.diag.span_error(token.span, "invalid register").emit();
-                token
+                Err(token)
             },
 
             None => {
                 let token = self.token_to_current(start, Error, None);
                 self.diag.span_error(token.span, "unexpected EOF while parsing register").emit();
-                token
+                Err(token)
             },
         }
     }
