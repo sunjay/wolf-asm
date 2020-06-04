@@ -123,6 +123,25 @@ main:
   ret
 ```
 
+## Flags
+
+A status register contains the current state of the processor.
+
+| Bit # | Mask   | Abbreviation | Description                  | Category | =1                    | =0                      |
+|-------|--------|--------------|------------------------------|----------|-----------------------|-------------------------|
+| 0     | 0x0001 | CF           | Carry flag                   | Status   | CY (Carry)            | NC (No Carry)           |
+| 1     | 0x0002 |              | Reserved, always 1 in EFLAGS |          |                       |                         |
+| 2     | 0x0004 | PF           | Parity flag                  | Status   | PE (Parity Even)      | PO (Parity Odd)         |
+| 3     | 0x0008 |              | Reserved                     |          |                       |                         |
+| 4     | 0x0010 | AF           | Adjust flag                  | Status   | AC (Auxiliary Carry)  | NA (No Auxiliary Carry) |
+| 5     | 0x0020 |              | Reserved                     |          |                       |                         |
+| 6     | 0x0040 | ZF           | Zero flag                    | Status   | ZR (Zero)             | NZ (Not Zero)           |
+| 7     | 0x0080 | SF           | Sign flag                    | Status   | NG (Negative)         | PL (Positive)           |
+| 8     | 0x0100 | TF           | Trap flag (single step)      | Control  |                       |                         |
+| 9     | 0x0200 | IF           | Interrupt enable flag        | Control  | EI (Enable Interrupt) | DI (Disable Interrupt)  |
+| 10    | 0x0400 | DF           | Direction flag               | Control  | DN (Down)             | UP (Up)                 |
+| 11    | 0x0800 | OF           | Overflow flag                | Status   | OV (Overflow)         | NV (Not Overflow)       |
+
 ## Calling Convention
 
 * return address is stored in register `$?` (TODO)
@@ -319,7 +338,11 @@ Instruction names are case-insensitive.
 
 ### Comparison
 
-* `cmp source1 source2` - signed comparison
+* `test source1 source2` - bit-wise logical and that throws away its result but
+  sets the ZF (zero), SF (sign), and PF (parity) bits
+* `cmp source1 source2` - comparison performed as a (signed) subtraction that
+  throws away its result but sets the ZF (zero), SF (sign), PF (parity),
+  CF (carry), and OF (overflow), bits
 
 ### Memory
 
@@ -348,10 +371,14 @@ Instruction names are case-insensitive.
 * `jmp` - unconditional jump
 * `je` - jump if equal
 * `jne` - jump if not equal
-* `jg` - jump if greater
-* `jge` - jump if greater or equal
-* `jl` - jump if less
-* `jle` - jump if less or equal
+* `jg` - jump if greater (signed comparison)
+* `jge` - jump if greater or equal (signed comparison)
+* `ja` - jump if above (unsigned comparison)
+* `jae` - jump if above or equal (unsigned comparison)
+* `jl` - jump if less (signed comparison)
+* `jle` - jump if less or equal (signed comparison)
+* `jb` - jump if below (unsigned comparison)
+* `jbe` - jump if below or equal (unsigned comparison)
 * `jo` - jump if overflow
 * `jno` - jump if no overflow
 * `jz` - jump if zero
