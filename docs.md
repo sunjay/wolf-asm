@@ -332,8 +332,8 @@ Instruction names are case-insensitive.
 
 * `shl`
 * `shr`
-* `band`
-* `bor`
+* `and`
+* `or`
 * `xor`
 
 ### Comparison
@@ -388,7 +388,7 @@ Instruction names are case-insensitive.
 * `call loc` - pushes the value of the program counter onto the stack and then
   jumps to the given location
 * `ret` - pops the value at the top of the stack and sets the program counter to it
-* `nop` -
+* `nop` - no-op instruction (does nothing)
 * `syscall`
 
 ### Floating Point

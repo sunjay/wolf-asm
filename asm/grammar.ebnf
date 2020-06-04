@@ -1,0 +1,90 @@
+(* The grammar of the ax assembly language.
+ *
+ * This file is not guaranteed to be fully up to date with the parser. The code
+ * should be treated as the source of truth for what the actual grammar is.
+ *)
+
+program ::= stmt*
+stmt ::= label* (section_header | directive | static_data | instr)? newline
+
+label ::= ident ':'
+section_header ::= 'section' ('.static' | '.code')
+
+directive ::= include | const
+include ::= '.include' bytes_lit
+const ::= '.const' ident immediate
+
+static_data ::= static_bytes | static_zero | static_uninit | static_bytes
+static_bytes ::= ('.b1' | '.b2' | '.b4' | '.b8') immediate
+static_zero ::= '.zero' integer_lit
+static_uninit ::= '.uninit' integer_lit
+static_bytes ::= '.bytes' bytes_lit
+
+dest ::= register
+source ::= register | immediate | ident
+loc ::= register | immediate | ident
+immediate ::= integer_lit
+
+instr ::= instr_add | instr_sub | instr_mul | instr_div | instr_rem
+        | instr_shl | instr_shr | instr_and | instr_or | instr_xor
+        | instr_cmp
+        | instr_mov | instr_load1 | instr_load2 | instr_load4 | instr_load8
+        | instr_loadu1 | instr_loadu2 | instr_loadu4 | instr_loadu8
+        | instr_store1 | instr_store2 | instr_store4 | instr_store8
+        | instr_push | instr_pop
+        | instr_jmp | instr_je | instr_jne
+        | instr_jg | instr_jge | instr_ja | instr_jae
+        | instr_jl | instr_jle | instr_jb | instr_jbe
+        | instr_jo | instr_jno | instr_jz | instr_jnz
+        | instr_js | instr_jns | instr_call | instr_ret | instr_nop
+
+instr_add ::= 'add'
+instr_sub ::= 'sub'
+instr_mul ::= 'mul'
+instr_div ::= 'div'
+instr_rem ::= 'rem'
+
+instr_shl ::= 'shl'
+instr_shr ::= 'shr'
+instr_and ::= 'and'
+instr_or ::= 'or'
+instr_xor ::= 'xor'
+
+instr_cmp ::= 'cmp'
+
+instr_mov ::= 'mov'
+instr_load1 ::= 'load1'
+instr_load2 ::= 'load2'
+instr_load4 ::= 'load4'
+instr_load8 ::= 'load8'
+instr_loadu1 ::= 'loadu1'
+instr_loadu2 ::= 'loadu2'
+instr_loadu4 ::= 'loadu4'
+instr_loadu8 ::= 'loadu8'
+instr_store1 ::= 'store1'
+instr_store2 ::= 'store2'
+instr_store4 ::= 'store4'
+instr_store8 ::= 'store8'
+instr_push ::= 'push'
+instr_pop ::= 'pop'
+
+instr_jmp ::= 'jmp'
+instr_je ::= 'je'
+instr_jne ::= 'jne'
+instr_jg ::= 'jg'
+instr_jge ::= 'jge'
+instr_ja ::= 'ja'
+instr_jae ::= 'jae'
+instr_jl ::= 'jl'
+instr_jle ::= 'jle'
+instr_jb ::= 'jb'
+instr_jbe ::= 'jbe'
+instr_jo ::= 'jo'
+instr_jno ::= 'jno'
+instr_jz ::= 'jz'
+instr_jnz ::= 'jnz'
+instr_js ::= 'js'
+instr_jns ::= 'jns'
+instr_call ::= 'call'
+instr_ret ::= 'ret'
+instr_nop ::= 'nop'
