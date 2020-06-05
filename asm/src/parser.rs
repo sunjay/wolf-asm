@@ -274,7 +274,34 @@ fn const_directive(input: Input) -> ParseResult<ast::Const> {
 }
 
 fn static_data(input: Input) -> ParseResult<ast::StaticData> {
-    todo!()
+    static_bytes(input).map_output(ast::StaticData::StaticBytes)
+        .or_parse(|| static_zero(input).map_output(ast::StaticData::StaticZero))
+        .or_parse(|| static_uninit(input).map_output(ast::StaticData::StaticUninit))
+        .or_parse(|| static_byte_string(input).map_output(ast::StaticData::StaticByteStr))
+}
+
+fn static_bytes(input: Input) -> ParseResult<ast::StaticBytes> {
+    dot_ident(input, ".b1").map_output(|_| 1)
+        .or_parse(|| dot_ident(input, ".b2").map_output(|_| 2))
+        .or_parse(|| dot_ident(input, ".b4").map_output(|_| 4))
+        .or_parse(|| dot_ident(input, ".b8").map_output(|_| 8))
+        .and_parse(immediate)
+        .map_output(|(size, value)| ast::StaticBytes {size, value})
+}
+
+fn static_zero(input: Input) -> ParseResult<ast::StaticZero> {
+    dot_ident(input, ".zero").and_parse(integer_lit)
+        .map_output(|(_, nbytes)| ast::StaticZero {nbytes})
+}
+
+fn static_uninit(input: Input) -> ParseResult<ast::StaticUninit> {
+    dot_ident(input, ".uninit").and_parse(integer_lit)
+        .map_output(|(_, nbytes)| ast::StaticUninit {nbytes})
+}
+
+fn static_byte_string(input: Input) -> ParseResult<ast::StaticByteStr> {
+    dot_ident(input, ".bytes").and_parse(bytes_lit)
+        .map_output(|(_, bytes)| ast::StaticByteStr {bytes})
 }
 
 fn instr(input: Input) -> ParseResult<ast::Instr> {
