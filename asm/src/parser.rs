@@ -305,6 +305,36 @@ fn static_byte_string(input: Input) -> ParseResult<ast::StaticByteStr> {
 }
 
 fn instr(input: Input) -> ParseResult<ast::Instr> {
+    let (mut input, name) = ident(input)?;
+    let mut args = Vec::new();
+
+    // Note: This code will need to change if instructions can ever end with something other than a
+    // newline
+    while newline(input).is_err() {
+        let (next_input, arg) = instr_arg(input)?;
+        args.push(arg);
+        input = next_input;
+
+        // Stop if we reach a newline
+        if newline(input).is_ok() {
+            break;
+        }
+
+        // Next token must be a comma then
+        let (next_input, _) = tk(input, TokenKind::Comma)?;
+        input = next_input;
+    }
+
+    Ok((input, ast::Instr {name, args}))
+}
+
+fn instr_arg(input: Input) -> ParseResult<ast::InstrArg> {
+    register(input).map_output(ast::InstrArg::Register)
+        .or_parse(|| immediate(input).map_output(ast::InstrArg::Immediate))
+        .or_parse(|| ident(input).map_output(ast::InstrArg::Name))
+}
+
+fn register(input: Input) -> ParseResult<ast::Register> {
     todo!()
 }
 

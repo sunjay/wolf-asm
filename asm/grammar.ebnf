@@ -20,6 +20,7 @@ static_zero ::= '.zero' integer_lit
 static_uninit ::= '.uninit' integer_lit
 static_byte_string ::= '.bytes' bytes_lit
 
-instr ::= ident (instr_arg ',')* instr_arg?
+(* Trailing commas are not allowed *)
+instr ::= ident ((instr_arg ',')* instr_arg)?
 instr_arg ::= register | immediate | ident
 immediate ::= integer_lit
