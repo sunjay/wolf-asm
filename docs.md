@@ -381,6 +381,9 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
     sign-extended prior to being assigned into the register
   * If `loadu` is used and the value is 1, 2, or 4 bytes, the value is
     zero-extended prior to being assigned into the register
+  * `load8` and `loadu8` have the exact same behaviour since the value is
+    already 64-bit and thus does not need to be extended to assign into the
+    register
   * Values in memory must be loaded into registers before they may be used in
     other instructions
 * `store{1,2,4,8} loc, source` - stores 1, 2, 4, or 8 bytes a register's value
