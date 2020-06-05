@@ -2,6 +2,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::ops::Range;
+use std::cmp::max;
 use std::iter::once;
 
 use super::span::Span;
@@ -80,7 +81,8 @@ impl LineNumbers {
 
     /// Returns the line number corresponding to the given index in the source file
     pub fn number(&self, index: usize) -> usize {
-        self.offsets.binary_search(&index).unwrap_or_else(|index| index)
+        // Edge case: very first offset will give you a line number of zero, which we correct to 1
+        max(self.offsets.binary_search(&index).unwrap_or_else(|index| index), 1)
     }
 }
 
