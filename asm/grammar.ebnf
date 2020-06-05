@@ -14,11 +14,11 @@ directive ::= include | const
 include ::= '.include' bytes_lit
 const ::= '.const' ident immediate
 
-static_data ::= static_bytes | static_zero | static_uninit | static_bytes
+static_data ::= static_bytes | static_zero | static_uninit | static_byte_string
 static_bytes ::= ('.b1' | '.b2' | '.b4' | '.b8') immediate
 static_zero ::= '.zero' integer_lit
 static_uninit ::= '.uninit' integer_lit
-static_bytes ::= '.bytes' bytes_lit
+static_byte_string ::= '.bytes' bytes_lit
 
 instr ::= ident (instr_arg ',')* instr_arg?
 instr_arg ::= register | immediate | ident
