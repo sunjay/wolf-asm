@@ -135,7 +135,11 @@ impl<'a> fmt::Display for ParseError<'a> {
             },
         }
 
-        write!(f, ", found: {}", actual.kind)
+        write!(f, ", found: ")?;
+        match actual.kind {
+            TokenKind::DotIdent => write!(f, "{}", actual.unwrap_ident()),
+            kind => write!(f, "{}", kind),
+        }
     }
 }
 
@@ -252,7 +256,10 @@ fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
 }
 
 fn section_header(input: Input) -> ParseResult<ast::Section> {
-    todo!()
+    tk(input, TokenKind::Keyword(Keyword::Section)).and_parse(|input| {
+        dot_ident(input, ".static").map_output(|_| ast::Section::Static)
+            .or_parse(|| dot_ident(input, ".code").map_output(|_| ast::Section::Code))
+    }).map_output(|(_, section)| section)
 }
 
 fn include(input: Input) -> ParseResult<ast::Include> {
@@ -280,6 +287,20 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
 
 fn newline(input: Input) -> ParseResult<()> {
     tk(input, TokenKind::Newline).map_output(|_| ())
+}
+
+/// Attempts to parse a dot_ident with the given name
+fn dot_ident<'a>(input: Input<'a>, name: &'static str) -> ParseResult<'a, &'a Token> {
+    tk(input, TokenKind::DotIdent).and_then(|(next_input, token)| {
+        if &**token.unwrap_ident() == name {
+            Ok((next_input, token))
+        } else {
+            Err((input, ParseError {
+                expected: vec![name.into()],
+                actual: token,
+            }))
+        }
+    })
 }
 
 fn tk(input: Input, kind: TokenKind) -> ParseResult<&Token> {
