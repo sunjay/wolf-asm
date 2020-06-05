@@ -351,10 +351,16 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
 * `ror dest, source`
 * `rcl dest, source`
 * `rcr dest, source`
+* `and dest, source` - perform bitwise AND operation on `dest` and `source` and
+  store the result in `dest`
+* `or dest, source` - perform bitwise OR operation on `dest` and `source` and
+  store the result in `dest`
+* `xor dest, source` - perform bitwise XOR operation on `dest` and `source` and
+  store the result in `dest`
 
 ### Comparison
 
-* `test source1 source2` - bit-wise logical and that throws away its result but
+* `test source1 source2` - bitwise logical and that throws away its result but
   sets the ZF (zero), SF (sign), and PF (parity) bits
 * `cmp source1 source2` - comparison performed as a (signed) subtraction that
   throws away its result but sets the ZF (zero), SF (sign), PF (parity),
