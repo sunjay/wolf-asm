@@ -388,6 +388,8 @@ impl<'a> Lexer<'a> {
         self.ident(start);
 
         let value = self.scanner.slice(start, self.scanner.current_pos());
+        // Identifiers are case-insensitive
+        let value = value.to_ascii_lowercase();
         let value = TokenValue::Ident(self.intern_str(value));
         self.token_to_current(start, TokenKind::DotIdent, value)
     }
@@ -409,6 +411,8 @@ impl<'a> Lexer<'a> {
         match token::Keyword::from_str(value) {
             Some(kw) => self.token_to_current(start, Keyword(kw), None),
             None => {
+                // Identifiers are case-insensitive
+                let value = value.to_ascii_lowercase();
                 let value = TokenValue::Ident(self.intern_str(value));
                 self.token_to_current(start, TokenKind::Ident, value)
             },
@@ -504,8 +508,8 @@ impl<'a> Lexer<'a> {
         Token {kind, span, value: value.into()}
     }
 
-    fn intern_str(&mut self, value: &str) -> Arc<str> {
-        match self.interned_strings.get(value) {
+    fn intern_str(&mut self, value: String) -> Arc<str> {
+        match self.interned_strings.get(&*value) {
             Some(interned) => interned.clone(),
             None => {
                 let interned: Arc<str> = value.into();
