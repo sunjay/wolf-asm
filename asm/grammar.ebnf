@@ -25,9 +25,10 @@ source ::= register | immediate | ident
 loc ::= register | immediate | ident
 immediate ::= integer_lit
 
-instr ::= instr_add | instr_sub | instr_mul | instr_div | instr_rem
-        | instr_shl | instr_shr | instr_and | instr_or | instr_xor
-        | instr_cmp
+instr ::= instr_add | instr_sub | instr_mul | instr_div | instr_mulu | instr_divu
+        | instr_shl | instr_shr | instr_sal | instr_sar | instr_rol | instr_ror
+        | instr_rcl | instr_rcr | instr_and | instr_or | instr_xor
+        | instr_test | instr_cmp
         | instr_mov | instr_load1 | instr_load2 | instr_load4 | instr_load8
         | instr_loadu1 | instr_loadu2 | instr_loadu4 | instr_loadu8
         | instr_store1 | instr_store2 | instr_store4 | instr_store8
@@ -38,53 +39,61 @@ instr ::= instr_add | instr_sub | instr_mul | instr_div | instr_rem
         | instr_jo | instr_jno | instr_jz | instr_jnz
         | instr_js | instr_jns | instr_call | instr_ret | instr_nop
 
-instr_add ::= 'add'
-instr_sub ::= 'sub'
-instr_mul ::= 'mul'
-instr_div ::= 'div'
-instr_rem ::= 'rem'
+instr_add ::= 'add' dest ',' source
+instr_sub ::= 'sub' dest ',' source
+instr_mul ::= 'mul' (dest ',')? dest ',' source
+instr_mulu ::= 'mulu' (dest ',')? dest ',' source
+instr_div ::= 'div' (dest ',')? dest ',' source
+instr_divu ::= 'divu' (dest ',')? dest ',' source
 
-instr_shl ::= 'shl'
-instr_shr ::= 'shr'
-instr_and ::= 'and'
-instr_or ::= 'or'
-instr_xor ::= 'xor'
+instr_shl ::= 'shl' dest ',' source
+instr_shr ::= 'shr' dest ',' source
+instr_sal ::= 'sal' dest ',' source
+instr_sar ::= 'sar' dest ',' source
+instr_rol ::= 'rol' dest ',' source
+instr_ror ::= 'ror' dest ',' source
+instr_rcl ::= 'rcl' dest ',' source
+instr_rcr ::= 'rcr' dest ',' source
+instr_and ::= 'and' dest ',' source
+instr_or ::= 'or' dest ',' source
+instr_xor ::= 'xor' dest ',' source
 
-instr_cmp ::= 'cmp'
+instr_test ::= 'test' source ',' source
+instr_cmp ::= 'cmp' source ',' source
 
-instr_mov ::= 'mov'
-instr_load1 ::= 'load1'
-instr_load2 ::= 'load2'
-instr_load4 ::= 'load4'
-instr_load8 ::= 'load8'
-instr_loadu1 ::= 'loadu1'
-instr_loadu2 ::= 'loadu2'
-instr_loadu4 ::= 'loadu4'
-instr_loadu8 ::= 'loadu8'
-instr_store1 ::= 'store1'
-instr_store2 ::= 'store2'
-instr_store4 ::= 'store4'
-instr_store8 ::= 'store8'
-instr_push ::= 'push'
-instr_pop ::= 'pop'
+instr_mov ::= 'mov' dest ',' source
+instr_load1 ::= 'load1' dest ',' loc
+instr_load2 ::= 'load2' dest ',' loc
+instr_load4 ::= 'load4' dest ',' loc
+instr_load8 ::= 'load8' dest ',' loc
+instr_loadu1 ::= 'loadu1' dest ',' loc
+instr_loadu2 ::= 'loadu2' dest ',' loc
+instr_loadu4 ::= 'loadu4' dest ',' loc
+instr_loadu8 ::= 'loadu8' dest ',' loc
+instr_store1 ::= 'store1' loc ',' dest
+instr_store2 ::= 'store2' loc ',' dest
+instr_store4 ::= 'store4' loc ',' dest
+instr_store8 ::= 'store8' loc ',' dest
+instr_push ::= 'push' source
+instr_pop ::= 'pop' dest
 
-instr_jmp ::= 'jmp'
-instr_je ::= 'je'
-instr_jne ::= 'jne'
-instr_jg ::= 'jg'
-instr_jge ::= 'jge'
-instr_ja ::= 'ja'
-instr_jae ::= 'jae'
-instr_jl ::= 'jl'
-instr_jle ::= 'jle'
-instr_jb ::= 'jb'
-instr_jbe ::= 'jbe'
-instr_jo ::= 'jo'
-instr_jno ::= 'jno'
-instr_jz ::= 'jz'
-instr_jnz ::= 'jnz'
-instr_js ::= 'js'
-instr_jns ::= 'jns'
-instr_call ::= 'call'
+instr_jmp ::= 'jmp' loc
+instr_je ::= 'je' loc
+instr_jne ::= 'jne' loc
+instr_jg ::= 'jg' loc
+instr_jge ::= 'jge' loc
+instr_ja ::= 'ja' loc
+instr_jae ::= 'jae' loc
+instr_jl ::= 'jl' loc
+instr_jle ::= 'jle' loc
+instr_jb ::= 'jb' loc
+instr_jbe ::= 'jbe' loc
+instr_jo ::= 'jo' loc
+instr_jno ::= 'jno' loc
+instr_jz ::= 'jz' loc
+instr_jnz ::= 'jnz' loc
+instr_js ::= 'js' loc
+instr_jns ::= 'jns' loc
+instr_call ::= 'call' loc
 instr_ret ::= 'ret'
 instr_nop ::= 'nop'
