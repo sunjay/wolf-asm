@@ -122,6 +122,14 @@ impl Token {
         }
     }
 
+    /// Returns the value of this token as an integer or panics
+    pub fn unwrap_integer(&self) -> i128 {
+        match self.value {
+            Some(TokenValue::Integer(value)) => value,
+            _ => unreachable!("bug: expected a register"),
+        }
+    }
+
     /// Returns the value of this token as a byte string or panics
     pub fn unwrap_bytes(&self) -> &Arc<[u8]> {
         match &self.value {
