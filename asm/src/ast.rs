@@ -17,10 +17,7 @@ pub enum Stmt {
     Include(Include),
     Const(Const),
 
-    StaticBytes(StaticBytes),
-    StaticZero(StaticZero),
-    StaticUninit(StaticUninit),
-    StaticByteStr(StaticByteStr),
+    StaticData(StaticData),
 
     Instr(Instr),
 }
@@ -44,6 +41,14 @@ pub struct Include {
 pub struct Const {
     pub name: Ident,
     pub value: Immediate,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum StaticData {
+    StaticBytes(StaticBytes),
+    StaticZero(StaticZero),
+    StaticUninit(StaticUninit),
+    StaticByteStr(StaticByteStr),
 }
 
 /// The `.b1`, `.b2`, `.b4`, or `.b8` static data directive

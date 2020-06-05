@@ -6,12 +6,11 @@
 
 program ::= stmt*
 stmt ::= label* stmt_body? newline
-stmt_body ::= section_header | directive | static_data | instr
+stmt_body ::= section_header | include | const | static_data | instr
 
 label ::= ident ':'
 section_header ::= 'section' ('.static' | '.code')
 
-directive ::= include | const
 include ::= '.include' bytes_lit
 const ::= '.const' ident immediate
 

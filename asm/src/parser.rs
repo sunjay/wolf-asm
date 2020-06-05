@@ -13,7 +13,7 @@ use crate::ast;
 use crate::diagnostics::Diagnostics;
 
 use scanner::Scanner;
-use token::{Token, TokenKind};
+use token::{Token, TokenKind, Keyword};
 use lexer::Lexer;
 
 type Input<'a> = &'a [Token];
@@ -215,6 +215,30 @@ fn label(input: Input) -> ParseResult<ast::Ident> {
 
 /// Parses the "body" of a statement (i.e. the portion of the stmt without labels or newline)
 fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
+    section_header(input).map_output(ast::Stmt::Section)
+        .or_parse(|| include(input).map_output(ast::Stmt::Include))
+        .or_parse(|| const_directive(input).map_output(ast::Stmt::Const))
+        .or_parse(|| static_data(input).map_output(ast::Stmt::StaticData))
+        .or_parse(|| instr(input).map_output(ast::Stmt::Instr))
+}
+
+fn section_header(input: Input) -> ParseResult<ast::Section> {
+    todo!()
+}
+
+fn include(input: Input) -> ParseResult<ast::Include> {
+    todo!()
+}
+
+fn const_directive(input: Input) -> ParseResult<ast::Const> {
+    todo!()
+}
+
+fn static_data(input: Input) -> ParseResult<ast::StaticData> {
+    todo!()
+}
+
+fn instr(input: Input) -> ParseResult<ast::Instr> {
     todo!()
 }
 
