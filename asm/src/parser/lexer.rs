@@ -724,7 +724,7 @@ mod tests {
 
         // decimal or hex digit
         expect_error!(b"0b2");
-        expect_tokens!(b"0bF", &[t!(Error), ident!("F")]);
+        expect_tokens!(b"0bF", &[t!(Error), ident!("f")]);
     }
 
     #[test]
@@ -774,9 +774,9 @@ mod tests {
     #[test]
     fn idents() {
         expect_token!(b"a", ident!("a"));
-        expect_token!(b"bF", ident!("bF"));
-        expect_token!(b"L1", ident!("L1"));
-        expect_token!(b"_L1", ident!("_L1"));
+        expect_token!(b"bF", ident!("bf"));
+        expect_token!(b"L1", ident!("l1"));
+        expect_token!(b"_L1", ident!("_l1"));
         expect_token!(b"abc_efod_fso2190_123___", ident!("abc_efod_fso2190_123___"));
     }
 
@@ -788,9 +788,9 @@ mod tests {
     #[test]
     fn dot_idents() {
         expect_token!(b".a", dot_ident!(".a"));
-        expect_token!(b".bF", dot_ident!(".bF"));
-        expect_token!(b".L1", dot_ident!(".L1"));
-        expect_token!(b"._L1", dot_ident!("._L1"));
+        expect_token!(b".bF", dot_ident!(".bf"));
+        expect_token!(b".L1", dot_ident!(".l1"));
+        expect_token!(b"._L1", dot_ident!("._l1"));
         expect_token!(b".abc_efod_fso2190_123___", dot_ident!(".abc_efod_fso2190_123___"));
     }
 
