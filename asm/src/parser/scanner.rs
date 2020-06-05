@@ -29,23 +29,9 @@ impl<'a> Scanner<'a> {
         Some(ch)
     }
 
-    /// Advances the scanner twice
-    ///
-    /// Usually used after a call to `peek2`.
-    pub fn next2(&mut self) {
-        self.next();
-        self.next();
-    }
-
     /// Returns the next character in the source text, but does not advance the scanner
     pub fn peek(&self) -> Option<u8> {
         self.source.get(self.current)
-    }
-
-    /// Returns the next character after the next character in the source text, but does not
-    /// advance the scanner
-    pub fn peek2(&self) -> Option<u8> {
-        self.source.get(self.current+1)
     }
 
     /// Creates a new span that is empty (from `index` to `index`)
@@ -56,22 +42,6 @@ impl<'a> Scanner<'a> {
     /// Creates a new span for a single byte
     pub fn byte_span(&self, index: usize) -> Span {
         self.span(index, index+1)
-    }
-
-    /// Advances the scanner, and creates a new span between `start` and its current position
-    ///
-    /// Usually used after `peek` to include that character in the span
-    pub fn next_span(&mut self, start: usize) -> Span {
-        self.next();
-        self.span(start, self.current)
-    }
-
-    /// Advances the scanner twice, and creates a new span between `start` and its current position
-    ///
-    /// Usually used after `peek2` to include the next two characters in the span
-    pub fn next2_span(&mut self, start: usize) -> Span {
-        self.next2();
-        self.span(start, self.current)
     }
 
     /// Creates a new span between the given byte indexes
