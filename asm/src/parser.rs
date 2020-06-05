@@ -27,14 +27,22 @@ type ParseResult<'a, O> = Result<(Input<'a>, O), (Input<'a>, ParseError<'a>)>;
 trait TryParse<'a, I: 'a>: Sized {
     type Output;
 
+    /// Runs a function on the output of a parser (if it hasn't errored), returning the input as is
     fn map_output<T, F>(self, f: F) -> ParseResult<'a, T>
         where F: FnOnce(Self::Output) -> T;
 
+    /// Runs the provided parser only if this result was successful
+    ///
+    /// The parser is run with the input immediately after this parser.
     fn and_parse<T, F>(self, f: F) -> ParseResult<'a, (Self::Output, T)>
         where F: FnOnce(I) -> ParseResult<'a, T>;
 
+    /// Runs the provided parser only if this one did not succeed
+    ///
+    /// If both parsers produce an error, the error from the parser that proceeded the furthest is
+    /// preferred. If both errors proceeded the same amount, the errors are merged.
     fn or_parse<F>(self, f: F) -> ParseResult<'a, Self::Output>
-        where F: FnOnce(I) -> ParseResult<'a, Self::Output>;
+        where F: FnOnce() -> ParseResult<'a, Self::Output>;
 }
 
 impl<'a, O> TryParse<'a, Input<'a>> for ParseResult<'a, O> {
@@ -55,9 +63,20 @@ impl<'a, O> TryParse<'a, Input<'a>> for ParseResult<'a, O> {
     }
 
     fn or_parse<F>(self, f: F) -> ParseResult<'a, Self::Output>
-        where F: FnOnce(Input<'a>) -> ParseResult<'a, Self::Output>
+        where F: FnOnce() -> ParseResult<'a, Self::Output>
     {
-        todo!()
+        use RelativePosition::*;
+        match self {
+            Ok((input, output)) => Ok((input, output)),
+            Err((input1, err1)) => match f() {
+                Ok((input, output)) => Ok((input, output)),
+                Err((input2, err2)) => match relative_position_to(input2, input1) {
+                    Behind => Err((input1, err1)),
+                    Same => Err((input1, err1.merge(err2))),
+                    Ahead => Err((input2, err2)),
+                },
+            },
+        }
     }
 }
 
@@ -88,6 +107,27 @@ impl<'a> fmt::Display for ParseError<'a> {
         }
 
         write!(f, ", found: {}", actual.kind)
+    }
+}
+
+impl<'a> ParseError<'a> {
+    pub fn merge(self, other: Self) -> Self {
+        let Self {mut expected, actual} = self;
+        let Self {expected: other_expected, actual: other_actual} = other;
+
+        assert!(actual == other_actual,
+            "bug: cannot merge errors where `actual` item is different");
+
+        for item in other_expected {
+            if !expected.contains(&item) {
+                expected.push(item);
+            }
+        }
+
+        Self {
+            expected,
+            actual,
+        }
     }
 }
 
@@ -196,4 +236,26 @@ fn tk(input: Input, kind: TokenKind) -> ParseResult<&Token> {
 
 fn advance(input: Input) -> (Input, &Token) {
     (&input[1..], &input[0])
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum RelativePosition {
+    /// The left input is behind the right input (left has advanced less than right)
+    Behind,
+    /// The left input is at the same position as the right input
+    Same,
+    /// The left input is ahead of the right input (left has advanced more than right)
+    Ahead,
+}
+
+fn relative_position_to(input: Input, other: Input) -> RelativePosition {
+    let self_ptr = input.as_ptr();
+    let other_ptr = other.as_ptr();
+
+    use std::cmp::Ordering::*;
+    match self_ptr.cmp(&other_ptr) {
+        Less => RelativePosition::Behind,
+        Equal => RelativePosition::Same,
+        Greater => RelativePosition::Ahead,
+    }
 }
