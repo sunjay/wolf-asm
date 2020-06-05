@@ -46,11 +46,12 @@ fn write_message(
     prefix_color: Color,
     message: &str,
 ) -> io::Result<()> {
-    if let Some(FilePos {path, start_line, end_line}) = pos {
-        if start_line == end_line {
-            write!(out, "[{}:{}] ", path.display(), start_line)?;
+    if let Some(FilePos {path, start_line, start_offset, end_line, end_offset}) = pos {
+        if start_line == end_line && start_offset == end_offset-1 {
+            write!(out, "[{}:{}:{}] ", path.display(), start_line, start_offset)?;
         } else {
-            write!(out, "[{}:{}-{}] ", path.display(), start_line, end_line)?;
+            // end offset is always one past the end
+            write!(out, "[{}:{}:{}-{}:{}] ", path.display(), start_line, start_offset, end_line, end_offset-1)?;
         }
     }
 

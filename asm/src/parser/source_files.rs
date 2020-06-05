@@ -2,7 +2,6 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::ops::Range;
-use std::cmp::max;
 use std::iter::once;
 
 use super::span::Span;
@@ -79,10 +78,20 @@ impl LineNumbers {
         Self {offsets}
     }
 
-    /// Returns the line number corresponding to the given index in the source file
-    pub fn number(&self, index: usize) -> usize {
-        // Edge case: very first offset will give you a line number of zero, which we correct to 1
-        max(self.offsets.binary_search(&index).unwrap_or_else(|index| index), 1)
+    /// Returns the (line number, offset) corresponding to the given index in the source file
+    ///
+    /// Both the line number and offset are 1-based
+    pub fn number_offset(&self, index: usize) -> (usize, usize) {
+        let line = self.offsets.binary_search(&index).unwrap_or_else(|index| index);
+        // Edge case: very first offset in the file will give you a line number of zero, which we
+        // correct to 1
+        if line == 0 {
+            (1, 1)
+        } else {
+            let offset = index - self.offsets[line - 1];
+            (line, offset)
+        }
+
     }
 }
 
@@ -99,7 +108,9 @@ struct File {
 pub struct FilePos<'a> {
     pub path: &'a Path,
     pub start_line: usize,
+    pub start_offset: usize,
     pub end_line: usize,
+    pub end_offset: usize,
 }
 
 #[derive(Debug, Default)]
@@ -154,24 +165,16 @@ impl SourceFiles {
 
     /// Returns the resolved file and position information for a span
     pub fn pos(&self, span: Span) -> FilePos {
-        let file = self.file(span.start);
-        FilePos {
-            path: &file.path,
-            start_line: file.line_numbers.number(span.start),
-            end_line: file.line_numbers.number(span.end),
-        }
+        let File {path, line_numbers, ..} = self.file(span.start);
+        let (start_line, start_offset) = line_numbers.number_offset(span.start);
+        let (end_line, end_offset) = line_numbers.number_offset(span.end);
+
+        FilePos {path, start_line, start_offset, end_line, end_offset}
     }
 
     /// Returns the path of the file whose source contains the given index
     pub fn path(&self, index: usize) -> &Path {
         &self.file(index).path
-    }
-
-    /// Returns the line number corresponding to the given index
-    ///
-    /// Automatically looks up the correct file and returns the line number in that file
-    pub fn line(&self, index: usize) -> usize {
-        self.file(index).line_numbers.number(index)
     }
 
     /// Returns the source for the given file handle
