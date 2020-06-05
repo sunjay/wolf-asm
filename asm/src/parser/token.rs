@@ -1,6 +1,7 @@
 use std::fmt;
 use std::sync::Arc;
 
+use crate::ast;
 use super::span::Span;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -105,6 +106,16 @@ pub enum Register {
     Named(Arc<str>),
     /// A numbered register like `$0`, `$1`, `$63`
     Numbered(u8),
+}
+
+impl<'a> From<&'a Register> for ast::Register {
+    fn from(reg: &'a Register) -> Self {
+        use Register::*;
+        match reg {
+            Named(name) => ast::Register::Named(name.clone()),
+            &Numbered(name) => ast::Register::Numbered(name),
+        }
+    }
 }
 
 impl From<u8> for Register {

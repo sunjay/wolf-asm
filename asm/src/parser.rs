@@ -334,10 +334,6 @@ fn instr_arg(input: Input) -> ParseResult<ast::InstrArg> {
         .or_parse(|| ident(input).map_output(ast::InstrArg::Name))
 }
 
-fn register(input: Input) -> ParseResult<ast::Register> {
-    todo!()
-}
-
 fn immediate(input: Input) -> ParseResult<ast::Immediate> {
     integer_lit(input)
 }
@@ -347,6 +343,11 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
         value: token.unwrap_ident().clone(),
         span: token.span,
     })
+}
+
+fn register(input: Input) -> ParseResult<ast::Register> {
+    tk(input, TokenKind::Register)
+        .map_output(|token| token.unwrap_register().into())
 }
 
 fn bytes_lit(input: Input) -> ParseResult<Arc<[u8]>> {
