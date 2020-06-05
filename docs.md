@@ -108,6 +108,9 @@ Used in the `.code` section.
   * 64 general purpose registers (64-bit): `$0`, `$1`, `$2`, etc. (up to `$63`)
   * stack pointer: `$sp` - 64-bit top address of the stack (next available slot)
   * frame pointer: `$fp` - 64-bit base address of the stack (base pointer)
+  * Two special 64-bit registers, `hi` and `lo`, are used to store the results
+    of the `mul`, `mulu`, `div`, and `divu` instructions. These registers can be
+    read using the `mfhi` and `mflo` instructions.
 * data directives
   * any of the directives valid in the `.static` section may also be used in the
     `.code` section
@@ -324,9 +327,17 @@ Instruction names are case-insensitive.
 
 * `add dest, source` - add `source` and `dest` and put the result in `dest`
 * `sub dest, source` - subtract `source` and `dest` and put the result in `dest`
-* `mul`
-* `div`
-* `rem` - euclid rem
+* `mul source1, source2` or `mulu source1, source2` - multiply both operands and
+  place the result in the `hi` and `lo` registers (concatenated as `hi:lo`)
+  * `mul` treats both operands as signed values
+  * `mulu` treats both operands as unsigned values
+* `div source1, source2` or `divu source1, source2` - divide the first operand
+  by the second operand (`source1 / source2`), placing the quotient in `lo` and
+  the remainder in `hi`
+  * `lo = source1 / source2`
+  * `hi = source1 % source2`
+  * `div` treats both operands as signed values
+  * `divu` treats both operands as unsigned values
 
 ### Binary
 
@@ -346,6 +357,10 @@ Instruction names are case-insensitive.
 
 ### Memory
 
+* `mfhi dest` - copies the value in the `hi` register into the given destination
+  register
+* `mflo dest` - copies the value in the `lo` register into the given destination
+  register
 * `mov dest, source` - copies data between registers or assigns a value
   to a register
 * `load{1,2,4,8} dest, loc` or `loadu{1,2,4,8} dest, loc` - loads a value from
