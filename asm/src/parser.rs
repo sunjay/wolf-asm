@@ -8,6 +8,7 @@ pub use span::*;
 pub use source_files::*;
 
 use std::fmt;
+use std::sync::Arc;
 
 use crate::ast;
 use crate::diagnostics::Diagnostics;
@@ -263,11 +264,13 @@ fn section_header(input: Input) -> ParseResult<ast::Section> {
 }
 
 fn include(input: Input) -> ParseResult<ast::Include> {
-    todo!()
+    dot_ident(input, ".include").and_parse(bytes_lit)
+        .map_output(|(_, path)| ast::Include {path})
 }
 
 fn const_directive(input: Input) -> ParseResult<ast::Const> {
-    todo!()
+    dot_ident(input, ".const").and_parse(ident).and_parse(immediate)
+        .map_output(|((_, name), value)| ast::Const {name, value})
 }
 
 fn static_data(input: Input) -> ParseResult<ast::StaticData> {
@@ -278,11 +281,23 @@ fn instr(input: Input) -> ParseResult<ast::Instr> {
     todo!()
 }
 
+fn immediate(input: Input) -> ParseResult<ast::Immediate> {
+    integer_lit(input)
+}
+
 fn ident(input: Input) -> ParseResult<ast::Ident> {
     tk(input, TokenKind::Ident).map_output(|token| ast::Ident {
         value: token.unwrap_ident().clone(),
         span: token.span,
     })
+}
+
+fn bytes_lit(input: Input) -> ParseResult<Arc<[u8]>> {
+    todo!()
+}
+
+fn integer_lit(input: Input) -> ParseResult<i128> {
+    todo!()
 }
 
 fn newline(input: Input) -> ParseResult<()> {
