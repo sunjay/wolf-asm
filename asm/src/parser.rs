@@ -27,6 +27,9 @@ type ParseResult<'a, O> = Result<(Input<'a>, O), (Input<'a>, ParseError<'a>)>;
 trait TryParse<'a, I: 'a>: Sized {
     type Output;
 
+    fn map_output<T, F>(self, f: F) -> ParseResult<'a, T>
+        where F: FnOnce(Self::Output) -> T;
+
     fn and_parse<T, F>(self, f: F) -> ParseResult<'a, (Self::Output, T)>
         where F: FnOnce(I) -> ParseResult<'a, T>;
 
@@ -36,6 +39,12 @@ trait TryParse<'a, I: 'a>: Sized {
 
 impl<'a, O> TryParse<'a, Input<'a>> for ParseResult<'a, O> {
     type Output = O;
+
+    fn map_output<T, F>(self, f: F) -> ParseResult<'a, T>
+        where F: FnOnce(Self::Output) -> T
+    {
+        self.map(|(input, output)| (input, f(output)))
+    }
 
     fn and_parse<T, F>(self, f: F) -> ParseResult<'a, (Self::Output, T)>
         where F: FnOnce(Input<'a>) -> ParseResult<'a, T>
@@ -153,13 +162,19 @@ fn extend_stmts<'a>(
 }
 
 fn label(input: Input) -> ParseResult<ast::Ident> {
-    todo!()
+    ident(input)
+        .and_parse(|input| tk(input, TokenKind::Colon))
+        .map_output(|(label, _)| label)
 }
 
 /// Parses the "body" of a statement (body = without labels and newline)
 ///
 /// Returns `None` if the statement is empty (e.g. just a newline token)
 fn stmt_body(input: Input) -> ParseResult<Option<ast::Stmt>> {
+    todo!()
+}
+
+fn ident(input: Input) -> ParseResult<ast::Ident> {
     todo!()
 }
 
