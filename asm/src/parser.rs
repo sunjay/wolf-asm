@@ -197,6 +197,14 @@ fn program<'a>(mut input: Input<'a>, diag: &Diagnostics) -> (Input<'a>, ast::Pro
         input = extend_stmts(input, diag, &mut stmts);
     }
 
+    // After all the statements have been exhausted, the program should end with EOF
+    match tk(input, TokenKind::Eof) {
+        Ok((next_input, _)) => input = next_input,
+        Err((_, err)) => {
+            diag.span_error(err.actual.span, err.to_string()).emit();
+        },
+    }
+
     (input, ast::Program {stmts})
 }
 
