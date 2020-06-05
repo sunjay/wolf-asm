@@ -1,5 +1,17 @@
 # Unknown section name
 section .statics
 
+section .code
+
+# Multiple labels on one line
+label1: label2: sub $1, $2
+
+# Invalid character in label
+label-3:
+3:
+
+# keyword after identifier
+foo section
+
 # No comma between arguments
 add $0 $1

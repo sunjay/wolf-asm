@@ -215,10 +215,19 @@ fn extend_stmts<'a>(
     diag: &Diagnostics,
     stmts: &mut Vec<ast::Stmt>,
 ) -> Input<'a> {
-    while let Ok((next_input, label)) = label(input) {
-        stmts.push(ast::Stmt::Label(label));
-        input = next_input;
-    }
+    let label_res = loop {
+        match label(input) {
+            Ok((next_input, label)) => {
+                stmts.push(ast::Stmt::Label(label));
+                input = next_input;
+            },
+            // Return the error so it can be used in producing error messages
+            //
+            // This panic will never run, but it ensures that the type is ParseResult<!>. The
+            // `!` type can be used in place of any type and it allows the code below to type check
+            res@Err(_) => break res.map_output(|_| panic!()),
+        }
+    };
 
     // Stop if the next token is a newline since that means this is an empty line
     if let Ok((input, _)) = newline(input) {
@@ -226,7 +235,7 @@ fn extend_stmts<'a>(
     }
 
     // If this line isn't empty, it must be a statement body followed by a newline
-    match stmt_body(input).and_parse(newline) {
+    match label_res.or_parse(|| stmt_body(input).and_parse(newline)) {
         Ok((input, (stmt, _))) => {
             stmts.push(stmt);
             input
