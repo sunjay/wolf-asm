@@ -175,7 +175,10 @@ fn stmt_body(input: Input) -> ParseResult<Option<ast::Stmt>> {
 }
 
 fn ident(input: Input) -> ParseResult<ast::Ident> {
-    todo!()
+    tk(input, TokenKind::Ident).map_output(|token| ast::Ident {
+        value: token.unwrap_ident().clone(),
+        span: token.span,
+    })
 }
 
 fn tk(input: Input, kind: TokenKind) -> ParseResult<&Token> {
