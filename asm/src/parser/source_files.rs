@@ -70,8 +70,8 @@ impl LineNumbers {
     pub fn new(source: FileSource) -> Self {
         // There is always at least one line, starting at offset 0
         let offsets = once(source.start_index()).chain(source.iter_bytes().filter_map(|(offset, ch)| match ch {
-            // Each line starts right after each newline
-            b'\n' => Some(offset + 1),
+            // Each line starts right *after* each newline
+            b'\n' => Some(offset),
             _ => None,
         })).collect();
 
