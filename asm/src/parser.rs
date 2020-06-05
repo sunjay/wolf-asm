@@ -6,6 +6,7 @@ mod lexer;
 
 pub use span::*;
 pub use source_files::*;
+pub use token::*;
 
 use std::fmt;
 use std::sync::Arc;
@@ -165,19 +166,11 @@ impl<'a> ParseError<'a> {
     }
 }
 
-pub fn parse_program(source: FileSource, diag: &Diagnostics) -> ast::Program {
+pub fn collect_tokens(source: FileSource, diag: &Diagnostics) -> Vec<Token> {
     let scanner = Scanner::new(source);
-    let lexer = Lexer::new(scanner, diag);
-    let tokens = collect_tokens(lexer);
+    let mut lexer = Lexer::new(scanner, diag);
 
-    let (input, prog) = program(&tokens, diag);
-    assert!(input.is_empty(), "bug: parser did not consume all input");
-    prog
-}
-
-fn collect_tokens(mut lexer: Lexer) -> Vec<Token> {
     let mut tokens = Vec::new();
-
     loop {
         let token = lexer.next();
         if token.kind == TokenKind::Eof {
@@ -188,6 +181,12 @@ fn collect_tokens(mut lexer: Lexer) -> Vec<Token> {
     }
 
     tokens
+}
+
+pub fn parse_program(tokens: &[Token], diag: &Diagnostics) -> ast::Program {
+    let (input, prog) = program(&tokens, diag);
+    assert!(input.is_empty(), "bug: parser did not consume all input");
+    prog
 }
 
 fn program<'a>(mut input: Input<'a>, diag: &Diagnostics) -> (Input<'a>, ast::Program) {

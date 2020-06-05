@@ -47,7 +47,9 @@ fn main() {
     let program = {
         // New scope because we want to drop this lock guard as soon as possible
         let files = source_files.read();
-        parser::parse_program(files.source(root_file), &diag)
+        let tokens = parser::collect_tokens(files.source(root_file), &diag);
+        check_errors!(&diag);
+        parser::parse_program(&tokens, &diag)
     };
     println!("{:#?}", program);
     check_errors!(&diag);
