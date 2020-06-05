@@ -339,13 +339,18 @@ Instruction names are case-insensitive.
   * `div` treats both operands as signed values
   * `divu` treats both operands as unsigned values
 
-### Binary
+### Bitwise
 
-* `shl`
-* `shr`
-* `and`
-* `or`
-* `xor`
+TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
+
+* `shl dest, source`
+* `shr dest, source`
+* `sal dest, source`
+* `sar dest, source`
+* `rol dest, source`
+* `ror dest, source`
+* `rcl dest, source`
+* `rcr dest, source`
 
 ### Comparison
 
