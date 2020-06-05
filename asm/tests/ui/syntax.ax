@@ -1,0 +1,5 @@
+# Unknown section name
+section .statics
+
+# No comma between arguments
+add $0 $1
