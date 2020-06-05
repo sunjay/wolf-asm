@@ -138,7 +138,7 @@ impl<'a> fmt::Display for ParseError<'a> {
 
         write!(f, ", found: ")?;
         match actual.kind {
-            TokenKind::DotIdent => write!(f, "{}", actual.unwrap_ident()),
+            TokenKind::DotIdent => write!(f, "`{}`", actual.unwrap_ident()),
             kind => write!(f, "{}", kind),
         }
     }
