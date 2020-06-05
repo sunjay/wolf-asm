@@ -213,7 +213,7 @@ fn label(input: Input) -> ParseResult<ast::Ident> {
         .map_output(|(label, _)| label)
 }
 
-/// Parses the "body" of a statement (body = without labels and newline)
+/// Parses the "body" of a statement (i.e. the portion of the stmt without labels or newline)
 fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
     todo!()
 }

@@ -5,7 +5,8 @@
  *)
 
 program ::= stmt*
-stmt ::= label* (section_header | directive | static_data | instr)? newline
+stmt ::= label* stmt_body? newline
+stmt_body ::= section_header | directive | static_data | instr
 
 label ::= ident ':'
 section_header ::= 'section' ('.static' | '.code')
