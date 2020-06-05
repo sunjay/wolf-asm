@@ -14,7 +14,7 @@ use crate::ast;
 use crate::diagnostics::Diagnostics;
 
 use scanner::Scanner;
-use token::{Token, TokenKind, Keyword};
+use token::{Token, TokenKind, Keyword, LitKind};
 use lexer::Lexer;
 
 type Input<'a> = &'a [Token];
@@ -293,11 +293,13 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
 }
 
 fn bytes_lit(input: Input) -> ParseResult<Arc<[u8]>> {
-    todo!()
+    tk(input, TokenKind::Literal(LitKind::Bytes))
+        .map_output(|token| token.unwrap_bytes().clone())
 }
 
 fn integer_lit(input: Input) -> ParseResult<i128> {
-    todo!()
+    tk(input, TokenKind::Literal(LitKind::Integer))
+        .map_output(|token| token.unwrap_integer())
 }
 
 fn newline(input: Input) -> ParseResult<()> {
