@@ -1,3 +1,4 @@
+use std::fmt;
 use std::sync::Arc;
 
 use super::span::Span;
@@ -16,6 +17,15 @@ impl Keyword {
     }
 }
 
+impl fmt::Display for Keyword {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use Keyword::*;
+        match self {
+            Section => write!(f, "`section`"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LitKind {
     /// An integer literal, e.g. `0`, `1`, `-402`, `1_000_000`, `0x1f3`, `0b0100_1000`
@@ -27,6 +37,16 @@ pub enum LitKind {
     ///
     /// e.g. `'abc'`, `'hello, world!\n'`
     Bytes,
+}
+
+impl fmt::Display for LitKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use LitKind::*;
+        match self {
+            Integer => write!(f, "an integer"),
+            Bytes => write!(f, "a byte string literal"),
+        }
+    }
 }
 
 /// The different kinds of tokens that can be produced by the lexer
@@ -58,6 +78,25 @@ pub enum TokenKind {
 
     /// A placeholder token used to indicate an error but still allow lexing to continue
     Error,
+}
+
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use TokenKind::*;
+        match self {
+            Keyword(kw) => write!(f, "{}", kw),
+            DotIdent => write!(f, "`.`"),
+            Ident => write!(f, "an identifier"),
+            Register => write!(f, "a register"),
+            Literal(lit) => write!(f, "{}", lit),
+            Colon => write!(f, "`:`"),
+            Comma => write!(f, "`,`"),
+            Newline => write!(f, "a newline"),
+            Eof => write!(f, "end of file"),
+
+            Error => panic!("The Error token kind should not be formatted"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
