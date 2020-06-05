@@ -80,10 +80,39 @@ impl<'a, O> TryParse<'a, Input<'a>> for ParseResult<'a, O> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+enum Expected {
+    Kind(TokenKind),
+    /// Any arbitrary syntax (rendered with backticks in error message)
+    Syntax(&'static str),
+}
+
+impl From<TokenKind> for Expected {
+    fn from(kind: TokenKind) -> Self {
+        Expected::Kind(kind)
+    }
+}
+
+impl From<&'static str> for Expected {
+    fn from(syntax: &'static str) -> Self {
+        Expected::Syntax(syntax)
+    }
+}
+
+impl fmt::Display for Expected {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use Expected::*;
+        match self {
+            Kind(kind) => write!(f, "{}", kind),
+            Syntax(syntax) => write!(f, "`{}`", syntax),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 struct ParseError<'a> {
-    /// The token kinds expected to be found
-    pub expected: Vec<TokenKind>,
+    /// The items expected to be found
+    pub expected: Vec<Expected>,
     /// The token that was actually found
     pub actual: &'a Token,
 }
@@ -260,7 +289,7 @@ fn tk(input: Input, kind: TokenKind) -> ParseResult<&Token> {
         Ok((next_input, token))
     } else {
         Err((input, ParseError {
-            expected: vec![kind],
+            expected: vec![kind.into()],
             actual: token,
         }))
     }
