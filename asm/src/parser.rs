@@ -136,12 +136,18 @@ fn extend_stmts<'a>(
             input
         },
 
-        Err((input, err)) => {
+        Err((mut input, err)) => {
             diag.span_error(err.actual.span, err.to_string()).emit();
 
             // Error recovery is done at a statement level. Read until the end of the line and keep trying
             // to parse the remainder of the file.
-            todo!()
+            while input.get(0).map(|tk| tk.kind != TokenKind::Newline).unwrap_or(false) {
+                let (next_input, _) = advance(input);
+                input = next_input;
+            }
+            // Advance past new line
+            let (next_input, _) = advance(input);
+            next_input
         },
     }
 }
