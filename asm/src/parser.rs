@@ -179,9 +179,15 @@ fn extend_stmts<'a>(
         input = next_input;
     }
 
-    match stmt_body(input).and_parse(|input| tk(input, TokenKind::Newline)) {
+    // Stop if the next token is a newline since that means this is an empty line
+    if let Ok((input, _)) = newline(input) {
+        return input;
+    }
+
+    // If this line isn't empty, it must be a statement body followed by a newline
+    match stmt_body(input).and_parse(newline) {
         Ok((input, (stmt, _))) => {
-            stmts.extend(stmt);
+            stmts.push(stmt);
             input
         },
 
@@ -208,9 +214,7 @@ fn label(input: Input) -> ParseResult<ast::Ident> {
 }
 
 /// Parses the "body" of a statement (body = without labels and newline)
-///
-/// Returns `None` if the statement is empty (e.g. just a newline token)
-fn stmt_body(input: Input) -> ParseResult<Option<ast::Stmt>> {
+fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
     todo!()
 }
 
@@ -219,6 +223,10 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
         value: token.unwrap_ident().clone(),
         span: token.span,
     })
+}
+
+fn newline(input: Input) -> ParseResult<()> {
+    tk(input, TokenKind::Newline).map_output(|_| ())
 }
 
 fn tk(input: Input, kind: TokenKind) -> ParseResult<&Token> {
