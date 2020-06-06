@@ -33,7 +33,10 @@ hardware or extra CPUs.
 Available for use in any section.
 
 * `.include "path/to/file.ax"` - equivalent to copying/pasting the contents of
-  the specified file directly at the location of the `.include` statement
+  the specified file directly at the location of the `.include` statement.
+  Relative paths are resolved relative to the directory of the file in which the
+  `.include` directive is parsed. That is, if `a/b/c.ax` contains an `.include`
+  directive, that directive path will be resolved relative to `a/b`.
 * `.const NAME immediate` - declares a named constant that can be used in place
   of an immediate value. The immediate value will be substituted as-is. The name
   must be a valid label and must be unique among all labels and other constants.
