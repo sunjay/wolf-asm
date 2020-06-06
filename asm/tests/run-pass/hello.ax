@@ -1,0 +1,39 @@
+section .code
+
+main:
+  push $fp
+  mov $fp, $sp
+
+  # Loop through and write each character
+
+  # $8 = the address of the current character
+  mov $8, message
+  # $9 = the address one past the last character in the string
+  load8 $9, length
+  add $9, message
+
+loop:
+  cmp $8, $9
+  jge end
+
+  # Load the current character
+  load1 $10, $8
+  # Write the current character
+  store8 0xffff_ffff_000c, $10
+  # Move to the next character
+  add $8, 1
+
+  # Continue the loop
+  jmp loop
+
+end:
+  pop $fp
+  ret
+
+section .static
+
+# Declare a string with the message we want to print
+message:
+  .bytes 'hello, world!'
+length:
+  .b8 13

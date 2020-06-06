@@ -1,0 +1,21 @@
+section .code
+
+main:
+  push $fp
+  mov $fp, $sp
+
+loop:
+  # Loop through and write each received byte
+  load1 $0, 0xffff_ffff_0004
+  # Quit at EOF
+  jz end
+
+  # Write the character
+  store1 0xffff_ffff_000c, $0
+
+  # Continue the loop
+  jmp loop
+
+end:
+  pop $fp
+  ret
