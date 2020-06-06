@@ -13,5 +13,15 @@ label-3:
 # keyword after identifier
 foo section
 
+loop:
+
 # No comma between arguments
 add $0 $1
+div $0, $1 $2 ; comment at the end of a line # woo
+
+; a comment
+
+call $0
+nop
+
+jmp loop
