@@ -1,5 +1,6 @@
 [package]
 name = "asm"
+description = "Assembler for the ax assembly language"
 version = "0.1.0"
 authors = ["Sunjay Varma <varma.sunjay@gmail.com>"]
 edition = "2018"
@@ -9,3 +10,4 @@ edition = "2018"
 [dependencies]
 parking_lot = "0.10"
 termcolor = "1.1"
+structopt = "0.3"
