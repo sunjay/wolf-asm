@@ -2,7 +2,6 @@
 //! validations have been completed.
 
 use std::fmt;
-use std::sync::Arc;
 
 use crate::ast;
 use crate::parser::Span;
@@ -96,20 +95,6 @@ pub enum InstrArg {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Register {
-    pub kind: RegisterKind,
-    pub span: Span,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum RegisterKind {
-    /// A named register like `$sp` or `$fp`
-    Named(Arc<str>),
-    /// A numbered register like `$0`, `$1`, `$63`
-    Numbered(u8),
-}
-
-#[derive(Debug, Clone, PartialEq)]
 pub struct Size {
     pub value: u64,
     pub span: Span,
@@ -121,6 +106,8 @@ impl fmt::Display for Size {
     }
 }
 
+pub type Register = ast::Register;
+pub type RegisterKind = ast::RegisterKind;
 /// An immediate value
 pub type Immediate = ast::Immediate;
 pub type Integer = ast::Integer;
