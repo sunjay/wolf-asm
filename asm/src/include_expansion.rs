@@ -69,7 +69,7 @@ fn expand_includes_impl(
         // Record the initial error count so we can determine if any *new* errors were produced
         let init_errors = diag.emitted_errors();
 
-        let ast::Include {path: included_path} = match stmt {
+        let ast::Include {path: included_path, span: _} = match stmt {
             ast::Stmt::Include(include) => include,
             stmt => {
                 expanded_stmts.push(stmt);

@@ -76,6 +76,8 @@ impl SectionKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Include {
     pub path: Bytes,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// A `.const` directive
@@ -83,6 +85,8 @@ pub struct Include {
 pub struct Const {
     pub name: Ident,
     pub value: Immediate,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, PartialEq)]

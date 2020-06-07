@@ -283,12 +283,18 @@ fn section_header(input: Input) -> ParseResult<ast::Section> {
 
 fn include(input: Input) -> ParseResult<ast::Include> {
     dot_ident(input, ".include").and_parse(bytes_lit)
-        .map_output(|(_, path)| ast::Include {path})
+        .map_output(|(dir, path)| {
+            let span = dir.span.to(path.span);
+            ast::Include {path, span}
+        })
 }
 
 fn const_directive(input: Input) -> ParseResult<ast::Const> {
     dot_ident(input, ".const").and_parse(ident).and_parse(immediate)
-        .map_output(|((_, name), value)| ast::Const {name, value})
+        .map_output(|((dir, name), value)| {
+            let span = dir.span.to(value.span);
+            ast::Const {name, value, span}
+        })
 }
 
 fn static_data(input: Input) -> ParseResult<ast::StaticData> {
