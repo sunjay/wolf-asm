@@ -20,15 +20,81 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
     // result in some false negatives, but is still a better user experience overall in many cases.
 
     //TODO: Sort the statements into `code_section` and `static_section` variables
-    let mut stmts = Vec::new();
+    let mut code_section: Option<asm::Section> = None;
+    let mut static_section: Option<asm::Section> = None;
+    let mut stmts = None;
+    let mut labels = Vec::new();
     for stmt in prog.stmts {
-        let stmt = consts.subst(stmt);
-        stmts.extend(validate_stmt(stmt, diag));
-        // Error recovery: No checking if validation failed because we want to produce as many
-        // errors as possible by going through all the statements we can.
+        let validated_stmt = match stmt {
+            ast::Stmt::Label(label) => {
+                labels.push(label);
+                continue;
+            },
+
+            ast::Stmt::Section(section) => match section.kind {
+                ast::SectionKind::Code => {
+                    if static_section.is_some() {
+                        diag.span_error(section.span, "the `.code` section must occur before the `.static` section").emit();
+                    }
+
+                    match &code_section {
+                        Some(prev) => diag.span_error(section.span, "duplicate `.code` section")
+                            .span_note(prev.section_header_span, "previously declared here").emit(),
+                        None => code_section = Some(asm::Section {
+                            section_header_span: section.span,
+                            stmts: Vec::new(),
+                        }),
+                    }
+
+                    stmts = Some(&mut code_section.as_mut().unwrap().stmts);
+                    continue;
+                },
+                ast::SectionKind::Static => {
+                    match &static_section {
+                        Some(prev) => diag.span_error(section.span, "duplicate `.static` section")
+                            .span_note(prev.section_header_span, "previously declared here").emit(),
+                        None => static_section = Some(asm::Section {
+                            section_header_span: section.span,
+                            stmts: Vec::new(),
+                        }),
+                    }
+
+                    stmts = Some(&mut static_section.as_mut().unwrap().stmts);
+                    continue;
+                },
+            },
+
+            ast::Stmt::Include(_) => unreachable!("bug: all includes should be resolved by now"),
+
+            // Already handled above
+            ast::Stmt::Const(_) => continue,
+
+            ast::Stmt::StaticData(static_data) => {
+                let static_data = consts.subst_static_data(static_data);
+                validate_static_data(static_data, diag).map(asm::StmtKind::StaticData)
+            },
+
+            ast::Stmt::Instr(instr) => {
+                let instr = consts.subst_instr(instr);
+                validate_instr(instr, diag).map(asm::StmtKind::Instr)
+            },
+        };
+
+        // Error recovery: No quitting early if errors were produced above because we want to
+        // get through as many statements as possible before exiting.
+
+        if let Some(kind) = validated_stmt {
+            match &mut stmts {
+                Some(stmts) => {
+                    stmts.push(asm::Stmt {labels, kind});
+                    labels = Vec::new();
+                },
+                None => diag.span_error(kind.span(), "all assembly statements must occur within a section, e.g. `section .code`").emit(),
+            }
+        }
     }
 
-    todo!()
+    asm::Program {code_section, static_section}
 }
 
 /// Attempts to ensure that all label names are unique
@@ -60,7 +126,12 @@ fn unique_labels(prog: &ast::Program, diag: &Diagnostics) -> HashSet<ast::Ident>
     labels
 }
 
-/// Validates a statement to ensure that it is valid assembly language
-fn validate_stmt(stmt: ast::Stmt, diag: &Diagnostics) -> Option<asm::Stmt> {
+/// Validates a static data directive to ensure that it is valid assembly language
+fn validate_static_data(stmt: ast::StaticData, diag: &Diagnostics) -> Option<asm::StaticData> {
+    todo!()
+}
+
+/// Validates an instruction to ensure that it is valid assembly language
+fn validate_instr(stmt: ast::Instr, diag: &Diagnostics) -> Option<asm::Instr> {
     todo!()
 }

@@ -10,9 +10,9 @@ use crate::parser::Span;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     /// The statements in the `.code` section
-    pub code_section: Section,
+    pub code_section: Option<Section>,
     /// The statements in the `.static` section
-    pub static_section: Section,
+    pub static_section: Option<Section>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -34,6 +34,12 @@ pub struct Stmt {
 pub enum StmtKind {
     StaticData(StaticData),
     Instr(Instr),
+}
+
+impl StmtKind {
+    pub fn span(&self) -> Span {
+        todo!()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
