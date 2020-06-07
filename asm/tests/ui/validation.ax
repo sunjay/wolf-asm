@@ -1,0 +1,43 @@
+# Wrong order of sections
+section .static
+
+.const a 32
+
+# Duplicate label name
+foo: foo:
+  .b8 32323232
+
+  # Value out of range
+  .b1 256
+
+# Duplicate constant with the same value is allowed and NOT an error
+.const a 32
+# Constant using a previously defined constant
+.const b a
+
+# Duplicate constant with a different value (warning)
+.const a 33
+
+bar:
+  # This will get the value 32
+  .b8 b
+  # This will get the value 33
+  .b8 a
+
+# Duplicate label name
+foo:
+
+  # Negative size
+  .zero -12
+  .uninit -1
+
+  # Empty strings are allowed and NOT an error
+  .bytes ''
+  .bytes ""
+
+section .code
+
+
+
+# Duplicate section
+section .static
