@@ -3,12 +3,25 @@ section .code
 .const a 123
 .const b 391
 
-mov $1, a
-# Compute $1 = a - b
-sub $1, b
+main:
+  push $fp
+  mov $fp, $sp
 
-# Print the result
-call print_int
-call print_newline
+  # Push registers used in this routine
+  push $1
+
+  mov $1, a
+  # Compute $1 = a - b
+  sub $1, b
+
+  # Print the result
+  call print_int
+  call print_newline
+
+  # Pop registers used in this routine
+  pop $1
+
+  pop $fp
+  ret
 
 .include 'print.ax'
