@@ -27,11 +27,14 @@ foo:
   .zero -12
   .uninit -1
 
-  # Empty strings are allowed and NOT an error
-  .bytes ''
-  .bytes ""
-
 section .code
+
+  #TODO: Test cases for each instruction
+  add $1 a # Valid
 
 # Duplicate section
 section .static
+
+  # Empty strings are allowed and NOT an error
+  .bytes ''
+  .bytes ""
