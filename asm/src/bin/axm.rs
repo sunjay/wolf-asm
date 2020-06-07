@@ -126,7 +126,7 @@ fn main() {
     };
     check_errors!(&diag);
 
-    let expanded_program = expand_includes(program, &source_files, &diag, MAX_INCLUDE_DEPTH);
+    let expanded_program = expand_includes(&program_path, program, &source_files, &diag, MAX_INCLUDE_DEPTH);
     check_errors!(&diag);
 
     println!("{:#?}", expanded_program);

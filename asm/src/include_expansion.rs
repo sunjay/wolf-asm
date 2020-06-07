@@ -1,6 +1,7 @@
 use std::str;
 use std::sync::Arc;
 use std::path::Path;
+use std::borrow::Cow;
 
 use parking_lot::RwLock;
 
@@ -19,6 +20,7 @@ use crate::diagnostics::Diagnostics;
 /// If no errors occur, the returned program is guaranteed to not have any remaining `.include`
 /// directives in it.
 pub fn expand_includes(
+    prog_path: &Path,
     prog: ast::Program,
     source_files: &Arc<RwLock<SourceFiles>>,
     diag: &Diagnostics,
@@ -61,10 +63,18 @@ pub fn expand_includes(
 
         // Note that we don't validate the extension of included files since that can be anything
 
-        //TODO: Resolve path relative to currently processed file
+        // Included paths are resolved relative to the file they are included in
+        let included_path = if included_path.is_relative() {
+            // Even `Path::new("foo.ax").parent()` will return `Some(Path::new(""))`
+            let parent_dir = prog_path.parent()
+                .expect("bug: if a source file has been read, it must have a parent directory");
+            Cow::Owned(parent_dir.join(included_path))
+        } else {
+            Cow::Borrowed(included_path)
+        };
 
         // Need this separate variable so that the lock on source files ends before diag.span_error()
-        let included_file = source_files.write().add_file(included_path);
+        let included_file = source_files.write().add_file(&included_path);
         let included_file = match included_file {
             Ok(file_handle) => file_handle,
             Err(err) => {
@@ -88,6 +98,7 @@ pub fn expand_includes(
 
         // Recurse and expand the included program
         let ast::Program {stmts: included_stmts} = expand_includes(
+            &included_path,
             included_prog,
             source_files,
             diag,
