@@ -37,7 +37,11 @@ pub enum StmtKind {
 
 impl StmtKind {
     pub fn span(&self) -> Span {
-        todo!()
+        use StmtKind::*;
+        match self {
+            StaticData(static_data) => static_data.span(),
+            Instr(instr) => instr.span(),
+        }
     }
 }
 
@@ -49,33 +53,69 @@ pub enum StaticData {
     StaticByteStr(StaticByteStr),
 }
 
+impl StaticData {
+    pub fn span(&self) -> Span {
+        use StaticData::*;
+        match self {
+            StaticBytes(data) => data.span,
+            StaticZero(data) => data.span,
+            StaticUninit(data) => data.span,
+            StaticByteStr(data) => data.span,
+        }
+    }
+}
+
 /// The `.b1`, `.b2`, `.b4`, or `.b8` static data directive
-///
+#[derive(Debug, Clone, PartialEq)]
+pub struct StaticBytes {
+    pub value: StaticBytesValue,
+    /// The span of the entire directive
+    pub span: Span,
+}
+
 /// Note that each value is in **little-endian** byte order.
 #[derive(Debug, Clone, PartialEq)]
-pub enum StaticBytes {
+pub enum StaticBytesValue {
     B1(u8, Span),
     B2([u8; 2], Span),
     B4([u8; 4], Span),
     B8([u8; 8], Span),
 }
 
+impl StaticBytesValue {
+    pub fn span(&self) -> Span {
+        use StaticBytesValue::*;
+        match *self {
+            B1(_, span) |
+            B2(_, span) |
+            B4(_, span) |
+            B8(_, span) => span,
+        }
+    }
+}
+
 /// The `.zero` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticZero {
     pub nbytes: Size,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// The `.uninit` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticUninit {
     pub nbytes: Size,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// The `.bytes` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticByteStr {
     pub bytes: Bytes,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 //TODO: Define validated representation of instructions
@@ -87,11 +127,33 @@ pub struct Instr {
     pub args: Vec<InstrArg>,
 }
 
+impl Instr {
+    pub fn span(&self) -> Span {
+        let Self {name, args} = self;
+
+        match args.last() {
+            Some(arg) => name.span.to(arg.span()),
+            None => name.span,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum InstrArg {
     Register(Register),
     Immediate(Immediate),
     Name(Ident),
+}
+
+impl InstrArg {
+    pub fn span(&self) -> Span {
+        use InstrArg::*;
+        match self {
+            Register(reg) => reg.span,
+            Immediate(imm) => imm.span,
+            Name(name) => name.span,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

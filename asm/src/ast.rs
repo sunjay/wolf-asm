@@ -40,23 +40,34 @@ impl Stmt {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
     pub kind: SectionKind,
+    /// The span of the entire section declaration
     pub span: Span,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SectionKind {
     /// The `.static` section
-    Static,
+    Static(Span),
     /// The `.code` section
-    Code,
+    Code(Span),
 }
 
 impl fmt::Display for SectionKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use SectionKind::*;
         match self {
-            Static => write!(f, ".static"),
-            Code => write!(f, ".code"),
+            Static(_) => write!(f, ".static"),
+            Code(_) => write!(f, ".code"),
+        }
+    }
+}
+
+impl SectionKind {
+    pub fn span(self) -> Span {
+        use SectionKind::*;
+        match self {
+            Static(span) |
+            Code(span) => span,
         }
     }
 }
@@ -88,24 +99,32 @@ pub struct StaticBytes {
     /// Either 1, 2, 4, or 8
     pub size: u8,
     pub value: Immediate,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// The `.zero` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticZero {
     pub nbytes: Integer,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// The `.uninit` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticUninit {
     pub nbytes: Integer,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 /// The `.bytes` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticByteStr {
     pub bytes: Bytes,
+    /// The span of the entire directive
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -116,11 +135,33 @@ pub struct Instr {
     pub args: Vec<InstrArg>,
 }
 
+impl Instr {
+    pub fn span(&self) -> Span {
+        let Self {name, args} = self;
+
+        match args.last() {
+            Some(arg) => name.span.to(arg.span()),
+            None => name.span,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum InstrArg {
     Register(Register),
     Immediate(Immediate),
     Name(Ident),
+}
+
+impl InstrArg {
+    pub fn span(&self) -> Span {
+        use InstrArg::*;
+        match self {
+            Register(reg) => reg.span,
+            Immediate(imm) => imm.span,
+            Name(name) => name.span,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -273,9 +273,12 @@ fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
 
 fn section_header(input: Input) -> ParseResult<ast::Section> {
     tk(input, TokenKind::Keyword(Keyword::Section)).and_parse(|input| {
-        dot_ident(input, ".static").map_output(|token| (ast::SectionKind::Static, token.span))
-            .or_parse(|| dot_ident(input, ".code").map_output(|token| (ast::SectionKind::Code, token.span)))
-    }).map_output(|(_, (kind, span))| ast::Section {kind, span})
+        dot_ident(input, ".static").map_output(|token| ast::SectionKind::Static(token.span))
+            .or_parse(|| dot_ident(input, ".code").map_output(|token| ast::SectionKind::Code(token.span)))
+    }).map_output(|(kw, kind)| ast::Section {
+        kind,
+        span: kw.span.to(kind.span()),
+    })
 }
 
 fn include(input: Input) -> ParseResult<ast::Include> {
@@ -296,27 +299,39 @@ fn static_data(input: Input) -> ParseResult<ast::StaticData> {
 }
 
 fn static_bytes(input: Input) -> ParseResult<ast::StaticBytes> {
-    dot_ident(input, ".b1").map_output(|_| 1)
-        .or_parse(|| dot_ident(input, ".b2").map_output(|_| 2))
-        .or_parse(|| dot_ident(input, ".b4").map_output(|_| 4))
-        .or_parse(|| dot_ident(input, ".b8").map_output(|_| 8))
+    dot_ident(input, ".b1").map_output(|tk| (1, tk.span))
+        .or_parse(|| dot_ident(input, ".b2").map_output(|tk| (2, tk.span)))
+        .or_parse(|| dot_ident(input, ".b4").map_output(|tk| (4, tk.span)))
+        .or_parse(|| dot_ident(input, ".b8").map_output(|tk| (8, tk.span)))
         .and_parse(immediate)
-        .map_output(|(size, value)| ast::StaticBytes {size, value})
+        .map_output(|((size, dir_span), value)| {
+            let span = dir_span.to(value.span);
+            ast::StaticBytes {size, value, span}
+        })
 }
 
 fn static_zero(input: Input) -> ParseResult<ast::StaticZero> {
     dot_ident(input, ".zero").and_parse(integer_lit)
-        .map_output(|(_, nbytes)| ast::StaticZero {nbytes})
+        .map_output(|(dir, nbytes)| {
+            let span = dir.span.to(nbytes.span);
+            ast::StaticZero {nbytes, span}
+        })
 }
 
 fn static_uninit(input: Input) -> ParseResult<ast::StaticUninit> {
     dot_ident(input, ".uninit").and_parse(integer_lit)
-        .map_output(|(_, nbytes)| ast::StaticUninit {nbytes})
+        .map_output(|(dir, nbytes)| {
+            let span = dir.span.to(nbytes.span);
+            ast::StaticUninit {nbytes, span}
+        })
 }
 
 fn static_byte_string(input: Input) -> ParseResult<ast::StaticByteStr> {
     dot_ident(input, ".bytes").and_parse(bytes_lit)
-        .map_output(|(_, bytes)| ast::StaticByteStr {bytes})
+        .map_output(|(dir, bytes)| {
+            let span = dir.span.to(bytes.span);
+            ast::StaticByteStr {bytes, span}
+        })
 }
 
 fn instr(input: Input) -> ParseResult<ast::Instr> {

@@ -32,7 +32,7 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
             },
 
             ast::Stmt::Section(section) => match section.kind {
-                ast::SectionKind::Code => {
+                ast::SectionKind::Code(_) => {
                     if static_section.is_some() {
                         diag.span_error(section.span, "the `.code` section must occur before the `.static` section").emit();
                     }
@@ -49,7 +49,8 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
                     stmts = Some(&mut code_section.as_mut().unwrap().stmts);
                     continue;
                 },
-                ast::SectionKind::Static => {
+
+                ast::SectionKind::Static(_) => {
                     match &static_section {
                         Some(prev) => diag.span_error(section.span, "duplicate `.static` section")
                             .span_note(prev.section_header_span, "previously declared here").emit(),
