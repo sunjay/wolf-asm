@@ -117,8 +117,10 @@ fn unique_labels(prog: &ast::Program, diag: &Diagnostics) -> HashSet<ast::Ident>
                     .emit();
                 continue;
             },
+
             None => {
-                debug_assert!(!labels.insert(label.clone()), "bug: label should not be present");
+                debug_assert!(labels.insert(label.clone()),
+                    "bug: expected to be inserting label for the first time");
             },
         }
     }
