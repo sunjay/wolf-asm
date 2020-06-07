@@ -18,7 +18,6 @@ foo: foo:
   .b1 256
   .b2 65536
   .b4 4294967296
-  .b8 18446744073709551616
 
   # Min/Max values should be fine
   .b1 0
@@ -37,8 +36,8 @@ foo: foo:
 .const a 33
 
 bar:
-  # This will get the value 33
-  .b8 a
+  # This will get the value 33 for `a`
+  add $1, a
 
   # Conflict with label name
   .const bar 981
@@ -53,7 +52,7 @@ foo:
 section .code
 
   #TODO: Test cases for each instruction
-  add $1 a # Valid
+  add $1, a # Valid
 
 # Duplicate section
 section .static
