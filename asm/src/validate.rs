@@ -36,7 +36,28 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
 /// Returns the set of all label names in the program, including, in the case of an error, label
 /// names that may have been defined more than once.
 fn unique_labels(prog: &ast::Program, diag: &Diagnostics) -> HashSet<ast::Ident> {
-    todo!()
+    let mut labels: HashSet<ast::Ident> = HashSet::new();
+
+    for stmt in &prog.stmts {
+        let label = match stmt {
+            ast::Stmt::Label(label) => label,
+            _ => continue,
+        };
+
+        match labels.get(label) {
+            Some(other_label) => {
+                diag.span_error(label.span, format!("duplicate label name `{}`", label))
+                    .span_note(other_label.span, "originally defined here")
+                    .emit();
+                continue;
+            },
+            None => {
+                debug_assert!(!labels.insert(label.clone()), "bug: label should not be present");
+            },
+        }
+    }
+
+    labels
 }
 
 /// Validates a statement to ensure that it is valid assembly language
