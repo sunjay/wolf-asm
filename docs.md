@@ -40,13 +40,14 @@ Available for use in any section.
 * `.const NAME immediate` - declares a named constant that can be used in place
   of an immediate value. The immediate value will be substituted as-is for each
   instance of the name found throughout the file. The name may only be used in
-  positions where an immediate would be valid. The constant name must be
-  distinct from all labels declared anywhere in the file. Constant names are
-  available to all statements after the constant declaration. Constants can be
-  redeclared with a different value later in a file or in an included file.
-  Files added using `.include` may use these constants as long as they are
-  included after the constant declaration. Warning: Included files may redeclare
-  constants and this can lead to bugs.
+  positions where an immediate would be valid.
+  * Scope: The constant name will be available for use in all statements after
+    the `.const` directive. This includes statements in files included after the
+    `.const` directive. Multiple declarations of a constant name can exist as
+    long as they have the same immediate value. It is a warning to redefine a
+    constant name with a different immediate value.
+  * Uniqueness: The constant name must be distinct from all labels declared
+    anywhere in the program or in any included files.
 
 ## Static Data Declaration Syntax
 
