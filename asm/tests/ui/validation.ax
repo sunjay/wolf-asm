@@ -12,15 +12,11 @@ foo: foo:
 
 # Duplicate constant with the same value is allowed and NOT an error
 .const a 32
-# Constant using a previously defined constant
-.const b a
 
 # Duplicate constant with a different value (warning)
 .const a 33
 
 bar:
-  # This will get the value 32
-  .b8 b
   # This will get the value 33
   .b8 a
 
@@ -36,8 +32,6 @@ foo:
   .bytes ""
 
 section .code
-
-
 
 # Duplicate section
 section .static
