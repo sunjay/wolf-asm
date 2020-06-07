@@ -13,9 +13,13 @@ use termcolor::ColorChoice;
 use structopt::StructOpt;
 
 use asm::{
-    parser::{self, SourceFiles},
     diagnostics::Diagnostics,
+    parser::{self, SourceFiles},
+    include_expansion::expand_includes,
 };
+
+/// The maximum number of times we are allowed to recurse when expanding `.include` directives
+const MAX_INCLUDE_DEPTH: usize = 5;
 
 /// A command line argument that configures the coloring of the output
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -120,8 +124,12 @@ fn main() {
         check_errors!(&diag);
         parser::parse_program(&tokens, &diag)
     };
-    println!("{:#?}", program);
     check_errors!(&diag);
+
+    let expanded_program = expand_includes(program, &source_files, &diag, MAX_INCLUDE_DEPTH);
+    check_errors!(&diag);
+
+    println!("{:#?}", expanded_program);
 
     dbg!(output_path);
 }

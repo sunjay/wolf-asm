@@ -22,6 +22,15 @@ pub enum Stmt {
     Instr(Instr),
 }
 
+impl Stmt {
+    pub fn is_include(&self) -> bool {
+        match self {
+            Stmt::Include(_) => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
     pub kind: SectionKind,
