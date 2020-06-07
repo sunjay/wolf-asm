@@ -38,11 +38,15 @@ Available for use in any section.
   `.include` directive is parsed. That is, if `a/b/c.ax` contains an `.include`
   directive, that directive path will be resolved relative to `a/b`.
 * `.const NAME immediate` - declares a named constant that can be used in place
-  of an immediate value. The immediate value will be substituted as-is. The name
-  must be a valid label and must be unique among all labels and other constants.
-  The name defined by a constant becomes available to all lines following the
-  constant. Even files added using `.include` may use these constants as long as
-  they are included after the constant declaration.
+  of an immediate value. The immediate value will be substituted as-is for each
+  instance of the name found throughout the file. The name may only be used in
+  positions where an immediate would be valid. The constant name must be
+  distinct from all labels declared anywhere in the file. Constant names are
+  available to all statements after the constant declaration. Constants can be
+  redeclared with a different value later in a file or in an included file.
+  Files added using `.include` may use these constants as long as they are
+  included after the constant declaration. Warning: Included files may redeclare
+  constants and this can lead to bugs.
 
 ## Static Data Declaration Syntax
 
