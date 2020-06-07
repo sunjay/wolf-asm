@@ -50,6 +50,18 @@ impl Diagnostics {
         self.level(Level::Warning, message)
     }
 
+    pub fn info<'a>(&'a self, message: impl Into<Cow<'a, str>>) -> DiagnosticWriter<'a> {
+        self.level(Level::Info, message)
+    }
+
+    pub fn note<'a>(&'a self, message: impl Into<Cow<'a, str>>) -> DiagnosticWriter<'a> {
+        self.level(Level::Note, message)
+    }
+
+    pub fn help<'a>(&'a self, message: impl Into<Cow<'a, str>>) -> DiagnosticWriter<'a> {
+        self.level(Level::Help, message)
+    }
+
     pub fn level<'a>(&'a self, level: Level, message: impl Into<Cow<'a, str>>) -> DiagnosticWriter<'a> {
         self.diagnostic_writer(Diagnostic {
             title: Message {
