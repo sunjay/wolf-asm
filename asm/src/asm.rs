@@ -76,7 +76,7 @@ pub struct StaticBytes {
 /// Note that each value is in **little-endian** byte order.
 #[derive(Debug, Clone, PartialEq)]
 pub enum StaticBytesValue {
-    B1(u8, Span),
+    B1([u8; 1], Span),
     B2([u8; 2], Span),
     B4([u8; 4], Span),
     B8([u8; 8], Span),

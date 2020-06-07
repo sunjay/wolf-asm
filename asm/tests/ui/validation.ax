@@ -60,3 +60,6 @@ section .static
   # Empty strings are allowed and NOT an error
   .bytes ''
   .bytes ""
+
+# Duplicate section
+section .code
