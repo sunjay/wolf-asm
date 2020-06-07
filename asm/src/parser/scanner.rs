@@ -13,7 +13,7 @@ impl<'a> Scanner<'a> {
     pub fn new(source: FileSource<'a>) -> Self {
         Self {
             source,
-            current: 0,
+            current: source.start_index(),
         }
     }
 
