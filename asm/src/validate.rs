@@ -19,7 +19,6 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
     // continue and potentially find more errors if we can during the validation process. This may
     // result in some false negatives, but is still a better user experience overall in many cases.
 
-    //TODO: Sort the statements into `code_section` and `static_section` variables
     let mut code_section: Option<asm::Section> = None;
     let mut static_section: Option<asm::Section> = None;
     let mut stmts = None;
