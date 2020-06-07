@@ -339,8 +339,8 @@ Instruction names are case-insensitive.
   * divide `dest` by `source` and put the quotient into `dest`
   * if `dest_rem` is provided, the remainder from the division will be put into it
   * `dest` and `dest_rem` are not allowed to be the same
-  * `dest = source1 / source2`
-  * `dest_rem = source1 % source2`
+  * `dest = dest / source`
+  * `dest_rem = dest % source`
   * `div` treats both operands as signed values
   * `divu` treats both operands as unsigned values
 * `rem dest, source` or `remu dest, source` - divide `dest` by `source` and put
