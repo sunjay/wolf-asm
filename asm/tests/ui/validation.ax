@@ -40,6 +40,9 @@ bar:
   # This will get the value 33
   .b8 a
 
+  # Conflict with label name
+  .const bar 981
+
 # Duplicate label name
 foo:
 

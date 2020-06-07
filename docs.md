@@ -41,11 +41,11 @@ Available for use in any section.
   of an immediate value. The immediate value will be substituted as-is for each
   instance of the name found throughout the file. The name may only be used in
   positions where an immediate would be valid.
-  * Scope: The constant name will be available for use in all statements after
-    the `.const` directive. This includes statements in files included after the
-    `.const` directive. Multiple declarations of a constant name can exist as
-    long as they have the same immediate value. It is a warning to redefine a
-    constant name with a different immediate value.
+  * Scope: The constant name will be available throughout the entire file and
+    all included files, regardless of where it is declared. Multiple
+    declarations of a constant name can exist as long as they have the same
+    immediate value. It is a warning to redefine a constant name with a
+    different immediate value.
   * Uniqueness: The constant name must be distinct from all labels declared
     anywhere in the program or in any included files.
 
