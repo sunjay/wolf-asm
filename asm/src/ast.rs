@@ -142,6 +142,7 @@ pub type Immediate = Integer;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Integer {
+    /// Value will not exceed the range [i64::min(), u64::max()]
     pub value: i128,
     pub span: Span,
 }
