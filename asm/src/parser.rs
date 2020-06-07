@@ -9,7 +9,6 @@ pub use source_files::*;
 pub use token::*;
 
 use std::fmt;
-use std::sync::Arc;
 
 use crate::ast;
 use crate::diagnostics::Diagnostics;
@@ -274,9 +273,9 @@ fn stmt_body(input: Input) -> ParseResult<ast::Stmt> {
 
 fn section_header(input: Input) -> ParseResult<ast::Section> {
     tk(input, TokenKind::Keyword(Keyword::Section)).and_parse(|input| {
-        dot_ident(input, ".static").map_output(|_| ast::Section::Static)
-            .or_parse(|| dot_ident(input, ".code").map_output(|_| ast::Section::Code))
-    }).map_output(|(_, section)| section)
+        dot_ident(input, ".static").map_output(|token| (ast::SectionKind::Static, token.span))
+            .or_parse(|| dot_ident(input, ".code").map_output(|token| (ast::SectionKind::Code, token.span)))
+    }).map_output(|(_, (kind, span))| ast::Section {kind, span})
 }
 
 fn include(input: Input) -> ParseResult<ast::Include> {
@@ -362,18 +361,24 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
 }
 
 fn register(input: Input) -> ParseResult<ast::Register> {
-    tk(input, TokenKind::Register)
-        .map_output(|token| token.unwrap_register().into())
+    tk(input, TokenKind::Register).map_output(|token| ast::Register {
+        kind: token.unwrap_register().into(),
+        span: token.span,
+    })
 }
 
-fn bytes_lit(input: Input) -> ParseResult<Arc<[u8]>> {
-    tk(input, TokenKind::Literal(LitKind::Bytes))
-        .map_output(|token| token.unwrap_bytes().clone())
+fn bytes_lit(input: Input) -> ParseResult<ast::Bytes> {
+    tk(input, TokenKind::Literal(LitKind::Bytes)).map_output(|token| ast::Bytes {
+        value: token.unwrap_bytes().clone(),
+        span: token.span,
+    })
 }
 
-fn integer_lit(input: Input) -> ParseResult<i128> {
-    tk(input, TokenKind::Literal(LitKind::Integer))
-        .map_output(|token| token.unwrap_integer())
+fn integer_lit(input: Input) -> ParseResult<ast::Integer> {
+    tk(input, TokenKind::Literal(LitKind::Integer)).map_output(|token| ast::Integer {
+        value: token.unwrap_integer(),
+        span: token.span,
+    })
 }
 
 fn newline(input: Input) -> ParseResult<()> {

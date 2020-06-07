@@ -23,17 +23,33 @@ pub enum Stmt {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Section {
+pub struct Section {
+    pub kind: SectionKind,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SectionKind {
     /// The `.static` section
     Static,
     /// The `.code` section
     Code,
 }
 
+impl fmt::Display for SectionKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use SectionKind::*;
+        match self {
+            Static => write!(f, ".static"),
+            Code => write!(f, ".code"),
+        }
+    }
+}
+
 /// An `.include` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct Include {
-    pub path: Arc<[u8]>,
+    pub path: Bytes,
 }
 
 /// A `.const` directive
@@ -62,19 +78,19 @@ pub struct StaticBytes {
 /// The `.zero` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticZero {
-    pub nbytes: i128,
+    pub nbytes: Integer,
 }
 
 /// The `.uninit` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticUninit {
-    pub nbytes: i128,
+    pub nbytes: Integer,
 }
 
 /// The `.bytes` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticByteStr {
-    pub bytes: Arc<[u8]>,
+    pub bytes: Bytes,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -93,7 +109,13 @@ pub enum InstrArg {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Register {
+pub struct Register {
+    pub kind: RegisterKind,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum RegisterKind {
     /// A named register like `$sp` or `$fp`
     Named(Arc<str>),
     /// A numbered register like `$0`, `$1`, `$63`
@@ -101,7 +123,32 @@ pub enum Register {
 }
 
 /// An immediate value
-pub type Immediate = i128;
+pub type Immediate = Integer;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Integer {
+    pub value: i128,
+    pub span: Span,
+}
+
+impl fmt::Display for Integer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Bytes {
+    pub value: Arc<[u8]>,
+    pub span: Span,
+}
+
+impl fmt::Display for Bytes {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = String::from_utf8_lossy(&self.value);
+        write!(f, "{}", s)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ident {

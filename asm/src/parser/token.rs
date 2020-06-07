@@ -108,12 +108,12 @@ pub enum Register {
     Numbered(u8),
 }
 
-impl<'a> From<&'a Register> for ast::Register {
+impl<'a> From<&'a Register> for ast::RegisterKind {
     fn from(reg: &'a Register) -> Self {
         use Register::*;
         match reg {
-            Named(name) => ast::Register::Named(name.clone()),
-            &Numbered(name) => ast::Register::Numbered(name),
+            Named(name) => ast::RegisterKind::Named(name.clone()),
+            &Numbered(name) => ast::RegisterKind::Numbered(name),
         }
     }
 }
