@@ -4,6 +4,7 @@
 use std::fmt;
 use std::sync::Arc;
 
+use crate::ast;
 use crate::parser::Span;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -102,21 +103,6 @@ pub enum RegisterKind {
     Numbered(u8),
 }
 
-/// An immediate value
-pub type Immediate = Integer;
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Integer {
-    pub value: i128,
-    pub span: Span,
-}
-
-impl fmt::Display for Integer {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Size {
     pub value: u64,
@@ -129,27 +115,8 @@ impl fmt::Display for Size {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Bytes {
-    pub value: Arc<[u8]>,
-    pub span: Span,
-}
-
-impl fmt::Display for Bytes {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = String::from_utf8_lossy(&self.value);
-        write!(f, "{}", s)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Ident {
-    pub value: Arc<str>,
-    pub span: Span,
-}
-
-impl fmt::Display for Ident {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
+/// An immediate value
+pub type Immediate = ast::Immediate;
+pub type Integer = ast::Integer;
+pub type Bytes = ast::Bytes;
+pub type Ident = ast::Ident;
