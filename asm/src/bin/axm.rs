@@ -19,7 +19,7 @@ use asm::{
 };
 
 /// The maximum number of times we are allowed to recurse when expanding `.include` directives
-const MAX_INCLUDE_DEPTH: usize = 5;
+const MAX_INCLUDE_DEPTH: usize = 50;
 
 /// A command line argument that configures the coloring of the output
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

@@ -1,7 +1,8 @@
 use std::str;
 use std::sync::Arc;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::borrow::Cow;
+use std::fmt::Write;
 
 use parking_lot::RwLock;
 
@@ -26,6 +27,20 @@ pub fn expand_includes(
     diag: &Diagnostics,
     depth: usize,
 ) -> ast::Program {
+    let mut path_stack = Vec::new();
+    expand_includes_impl(prog_path, prog, source_files, diag, depth, &mut path_stack)
+}
+
+fn expand_includes_impl(
+    prog_path: &Path,
+    prog: ast::Program,
+    source_files: &Arc<RwLock<SourceFiles>>,
+    diag: &Diagnostics,
+    depth: usize,
+    path_stack: &mut Vec<PathBuf>,
+) -> ast::Program {
+    path_stack.push(prog_path.to_path_buf());
+
     // This avoids a lot of unnecessary copying in exchange for an extra pass over the statements
     let has_includes = prog.stmts.iter().any(|stmt| stmt.is_include());
     if !has_includes {
@@ -33,7 +48,15 @@ pub fn expand_includes(
     }
 
     if depth == 0 {
-        diag.error("surpassed maximum include expansion attempts").emit();
+        let mut msg = "maximum `.include` recursion depth reached while reading files:\n".to_string();
+        for (i, path) in path_stack.iter().enumerate().rev() {
+            // unwrap() is safe because writing to a String can't fail
+            write!(msg, "    {:2}. {}", i+1, path.display()).unwrap();
+            if i != 0 {
+                writeln!(msg).unwrap();
+            }
+        }
+        diag.error(msg).emit();
         return prog;
     }
 
@@ -97,12 +120,13 @@ pub fn expand_includes(
         }
 
         // Recurse and expand the included program
-        let ast::Program {stmts: included_stmts} = expand_includes(
+        let ast::Program {stmts: included_stmts} = expand_includes_impl(
             &included_path,
             included_prog,
             source_files,
             diag,
             depth-1,
+            path_stack,
         );
         // Even if this expansion ends with errors, we still want to include as much in the final
         // result as we can, that's why we aren't checking `diag.emitted_errors()` here.
