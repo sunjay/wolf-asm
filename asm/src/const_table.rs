@@ -71,14 +71,23 @@ impl ConstTable {
             return instr;
         }
 
-        // Preserve the span of the replaced value so error messages point to the right place
         let ast::Instr {name, args} = instr;
         ast::Instr {
             name,
             args: args.into_iter().map(|arg| match arg {
-                ast::InstrArg::Name(name) => self.const_values.get(&name)
-                    .map(|const_stmt| ast::InstrArg::Immediate(const_stmt.0.value.clone()))
-                    .unwrap_or_else(|| ast::InstrArg::Name(name)),
+                ast::InstrArg::Name(name) => match self.const_values.get(&name) {
+                    Some(ConstEntry(ast::Const {value: const_value, ..}))  => {
+                        ast::InstrArg::Immediate(ast::Integer {
+                            value: const_value.value,
+                            // Preserve the span of the replaced value so error messages point to
+                            // the right place
+                            span: name.span,
+                        })
+                    },
+
+                    None => ast::InstrArg::Name(name),
+                },
+
                 arg => arg,
             }).collect(),
         }
