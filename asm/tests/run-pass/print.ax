@@ -1,0 +1,102 @@
+################################################################################
+#
+# A file of useful printing procedures. Use `.include 'print.ax'` in the code
+# `.code` section of your program to add these procedures.
+#
+################################################################################
+
+# Memory address which can be written to in order to write characters
+.const STDOUT 0xffff_ffff_000c
+
+################################################################################
+#
+# print_newline
+#
+# Description: Prints a newline `\n` character and returns.
+#
+################################################################################
+print_newline:
+  push $fp
+  mov $fp, $sp
+
+  # ASCII 10 = newline `\n`
+  store1 STDOUT, 10
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# print_int $1
+#
+# Description: A procedure for formatting and printing a two's complement
+# integer from register $1 in base 10. Only the number's digits (and potentially a
+# negative sign) are printed. If you need a newline, print that afterwards using
+# the `print_newline` procedure. The value in $1 is not modified.
+#
+################################################################################
+print_int:
+  push $fp
+  mov $fp, $sp
+
+  # Save registers used in this procedure
+  push $1
+  push $2
+  push $3
+
+  # Check if value is negative
+  cmp $1, 0
+  jge positive
+
+  # Number is negative
+
+  # Print negative sign (ASCII 45 = negative sign `-`)
+  store1 STDOUT, 45
+  # Negate the number so it is now positive
+  mov $2, 0
+  # 0 - $1 = -$1
+  sub $2, $1
+  mov $1, $2
+
+# Determine the digits of the number assuming it is positive
+positive:
+  # The digits are stored onto the stack in backwards order and then printed
+  # back-to-front
+
+  # $3 = The number of digits pushed onto the stack
+  mov $3, 0
+
+  # After this, $1 = $1 / 10 = the next number to process
+  #             $2 = $1 % 10 = the last digit of the current number
+  divu $2, $1, 10
+
+  # Push the digit
+  push $2
+  # Record that a digit was found
+  add $3, 1
+
+  # Check if we've reached zero
+  cmp $1, 0
+  jne positive
+
+# Print the digits in the reverse of the order they are stored on the stack
+printdigits:
+  # Get the next digit
+  pop $2
+  # Add to the digit so it becomes the right ASCII code (ASCII 48 = zero `0`)
+  add $2, 48
+  # Print the digit
+  store1 STDOUT, $2
+
+  # Decrement the digit counter
+  sub $3, 1
+  # Continue printing if there are still digits
+  jnz printdigits
+
+  # Load registers used in this procedure
+  pop $3
+  pop $2
+  pop $1
+
+  pop $fp
+  ret

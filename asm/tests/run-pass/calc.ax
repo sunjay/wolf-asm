@@ -1,0 +1,14 @@
+section .code
+
+.const a 123
+.const b 391
+
+mov $1, a
+# Compute $1 = a - b
+sub $1, b
+
+# Print the result
+call print_int
+call print_newline
+
+.include 'print.ax'
