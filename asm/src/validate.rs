@@ -71,7 +71,6 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
             ast::Stmt::Const(_) => continue,
 
             ast::Stmt::StaticData(static_data) => {
-                let static_data = consts.subst_static_data(static_data);
                 validate_static_data(static_data, diag).map(asm::StmtKind::StaticData)
             },
 

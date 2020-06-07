@@ -67,12 +67,15 @@ Used in the `.static` section.
   * declare and initialize 1, 2, 4, or 8 bytes to a given value
   * e.g. `.b1 3` initializes a byte to the value 3
   * negative values are initialized as two's complement values
+  * the value must be an immediate value and not a label/constant name
 * `.zero`
   * fills a given number of bytes with zero
   * e.g. `.zero 100` initializes 100 bytes to zero
+  * the value must be an immediate value and not a label/constant name
 * `.uninit`
   * declares the given number of bytes but does not initialize them
   * e.g. `.uninit 30` declares 30 uninitialized bytes
+  * the value must be an immediate value and not a label/constant name
 * `.bytes`
   * declares and initializes bytes to the ASCII values of each character in the
     given string literal
