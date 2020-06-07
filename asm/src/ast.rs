@@ -4,6 +4,7 @@
 
 use std::fmt;
 use std::sync::Arc;
+use std::borrow::Borrow;
 
 use crate::parser::Span;
 
@@ -163,7 +164,7 @@ impl fmt::Display for Bytes {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ident {
     pub value: Arc<str>,
     pub span: Span,
@@ -172,5 +173,11 @@ pub struct Ident {
 impl fmt::Display for Ident {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.value)
+    }
+}
+
+impl Borrow<str> for Ident {
+    fn borrow(&self) -> &str {
+        &self.value
     }
 }

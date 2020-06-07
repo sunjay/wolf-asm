@@ -16,6 +16,7 @@ use asm::{
     diagnostics::Diagnostics,
     parser::{self, SourceFiles},
     include_expansion::expand_includes,
+    validate::validate_program,
 };
 
 /// The maximum number of times we are allowed to recurse when expanding `.include` directives
@@ -129,7 +130,12 @@ fn main() {
     let expanded_program = expand_includes(&program_path, program, &source_files, &diag, MAX_INCLUDE_DEPTH);
     check_errors!(&diag);
 
-    println!("{:#?}", expanded_program);
+    dbg!(&expanded_program);
+
+    let validated_program = validate_program(expanded_program, &diag);
+    check_errors!(&diag);
+
+    dbg!(&validated_program);
 
     dbg!(output_path);
 }
