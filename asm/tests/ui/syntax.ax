@@ -3,6 +3,26 @@ section .statics
 
 section .code
 
+# No immediate argument
+.const a
+# No arguments
+.const
+
+# No arguments
+.include
+
+# No arguments
+.b1
+.b2
+.b4
+.b8
+.zero
+.uninit
+.bytes
+
+# Multiple directives on the same line
+.b1 32 .b2 391010
+
 # Multiple labels on one line
 label1: label2: sub $1, $2
 
