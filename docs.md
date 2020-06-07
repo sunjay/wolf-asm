@@ -329,17 +329,16 @@ Instruction names are case-insensitive.
 * `sub dest, source` - subtract `source` and `dest` and put the result in `dest`
 * `mul dest, source` or `mul dest_hi, dest, source` or
   `mulu dest, source` or `mulu dest_hi, dest, source`
-  * multiply `dest` and `source` and put the lower 64-bits of the result into
-    `dest`
-  * if `dest_hi` is provided, the upper 64-bits of the result will be placed
-    into it
+  * multiply `dest` and `source` and put the lower 64-bits of the result into `dest`
+  * if `dest_hi` is provided, the upper 64-bits of the result will be placed into it
+  * `dest` and `dest_hi` are not allowed to be the same
   * `mul` treats both operands as signed values
   * `mulu` treats both operands as unsigned values
 * `div dest, source` or `div dest_rem, dest, source` or
   `divu dest, source` or `divu dest_rem, dest, source`
   * divide `dest` by `source` and put the quotient into `dest`
-  * if `dest_rem` is provided, the remainder from the division will be put into
-    it
+  * if `dest_rem` is provided, the remainder from the division will be put into it
+  * `dest` and `dest_rem` are not allowed to be the same
   * `dest = source1 / source2`
   * `dest_rem = source1 % source2`
   * `div` treats both operands as signed values
