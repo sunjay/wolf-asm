@@ -166,6 +166,13 @@ impl InstrArg {
             Name(name) => name.span,
         }
     }
+
+    pub fn is_name(&self) -> bool {
+        match self {
+            InstrArg::Name(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
