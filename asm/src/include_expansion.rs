@@ -27,7 +27,10 @@ pub fn expand_includes(
     diag: &Diagnostics,
     depth: usize,
 ) -> ast::Program {
-    let mut path_stack = Vec::new();
+    let mut path_stack = vec![prog_path.to_path_buf()];
+    // Since we know the maximum number of items that can be added, let's allocate immediately
+    path_stack.reserve_exact(depth+1);
+
     expand_includes_impl(prog_path, prog, source_files, diag, depth, &mut path_stack)
 }
 
@@ -39,8 +42,6 @@ fn expand_includes_impl(
     depth: usize,
     path_stack: &mut Vec<PathBuf>,
 ) -> ast::Program {
-    path_stack.push(prog_path.to_path_buf());
-
     // This avoids a lot of unnecessary copying in exchange for an extra pass over the statements
     let has_includes = prog.stmts.iter().any(|stmt| stmt.is_include());
     if !has_includes {
@@ -65,6 +66,9 @@ fn expand_includes_impl(
     let mut expanded_stmts = Vec::with_capacity(stmts.len());
 
     for stmt in stmts {
+        // Record the initial error count so we can determine if any *new* errors were produced
+        let init_errors = diag.emitted_errors();
+
         let ast::Include {path: included_path} = match stmt {
             ast::Stmt::Include(include) => include,
             stmt => {
@@ -108,18 +112,19 @@ fn expand_includes_impl(
         };
 
         let tokens = collect_tokens(source_files.read().source(included_file), diag);
-        if diag.emitted_errors() > 0 {
+        if diag.emitted_errors() > init_errors {
             // Finish this pass before stopping in case there are further errors
             continue;
         }
 
         let included_prog = parse_program(&tokens, diag);
-        if diag.emitted_errors() > 0 {
+        if diag.emitted_errors() > init_errors {
             // Finish this pass before stopping in case there are further errors
             continue;
         }
 
         // Recurse and expand the included program
+        path_stack.push(included_path.to_path_buf());
         let ast::Program {stmts: included_stmts} = expand_includes_impl(
             &included_path,
             included_prog,
@@ -128,6 +133,7 @@ fn expand_includes_impl(
             depth-1,
             path_stack,
         );
+        path_stack.pop();
         // Even if this expansion ends with errors, we still want to include as much in the final
         // result as we can, that's why we aren't checking `diag.emitted_errors()` here.
 
