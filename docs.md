@@ -343,6 +343,10 @@ Instruction names are case-insensitive.
   * `dest_rem = source1 % source2`
   * `div` treats both operands as signed values
   * `divu` treats both operands as unsigned values
+* `rem dest, source` or `remu dest, source` - divide `dest` by `source` and put
+  the remainder in `dest`
+  * This instruction is equivalent to `div` or `divu` if no `dest` argument was
+    passed in
 
 ### Bitwise
 
