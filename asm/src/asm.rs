@@ -1,6 +1,5 @@
-//! Abstract Syntax Tree
-//!
-//! This is the closest representation to the actual syntax.
+//! An intermediate representation of the program after constants have been substituted and all
+//! validations have been completed.
 
 use std::fmt;
 use std::sync::Arc;
@@ -9,67 +8,31 @@ use crate::parser::Span;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
+    /// The statements in the `.code` section
+    pub code_section: Section,
+    /// The statements in the `.static` section
+    pub static_section: Section,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Section {
+    pub section_header_span: Span,
     pub stmts: Vec<Stmt>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Stmt {
-    Label(Ident),
+pub struct Stmt {
+    /// The labels preceding this statement
+    ///
+    /// The label names are guaranteed to be unique with each other and with any other `Stmt`
+    pub labels: Vec<Ident>,
+    pub kind: StmtKind,
+}
 
-    Section(Section),
-
-    Include(Include),
-    Const(Const),
-
+#[derive(Debug, Clone, PartialEq)]
+pub enum StmtKind {
     StaticData(StaticData),
-
     Instr(Instr),
-}
-
-impl Stmt {
-    pub fn is_include(&self) -> bool {
-        match self {
-            Stmt::Include(_) => true,
-            _ => false,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Section {
-    pub kind: SectionKind,
-    pub span: Span,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SectionKind {
-    /// The `.static` section
-    Static,
-    /// The `.code` section
-    Code,
-}
-
-impl fmt::Display for SectionKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use SectionKind::*;
-        match self {
-            Static => write!(f, ".static"),
-            Code => write!(f, ".code"),
-        }
-    }
-}
-
-/// An `.include` directive
-#[derive(Debug, Clone, PartialEq)]
-pub struct Include {
-    pub path: Bytes,
-}
-
-/// A `.const` directive
-#[derive(Debug, Clone, PartialEq)]
-pub struct Const {
-    pub name: Ident,
-    pub value: Immediate,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -81,23 +44,26 @@ pub enum StaticData {
 }
 
 /// The `.b1`, `.b2`, `.b4`, or `.b8` static data directive
+///
+/// Note that each value is in **little-endian** byte order.
 #[derive(Debug, Clone, PartialEq)]
-pub struct StaticBytes {
-    /// Either 1, 2, 4, or 8
-    pub size: u8,
-    pub value: Immediate,
+pub enum StaticBytes {
+    B1(u8, Span),
+    B2([u8; 2], Span),
+    B4([u8; 4], Span),
+    B8([u8; 8], Span),
 }
 
 /// The `.zero` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticZero {
-    pub nbytes: Integer,
+    pub nbytes: Size,
 }
 
 /// The `.uninit` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticUninit {
-    pub nbytes: Integer,
+    pub nbytes: Size,
 }
 
 /// The `.bytes` directive
@@ -106,6 +72,7 @@ pub struct StaticByteStr {
     pub bytes: Bytes,
 }
 
+//TODO: Define validated representation of instructions
 #[derive(Debug, Clone, PartialEq)]
 pub struct Instr {
     /// The name of the instruction (lowercase), e.g. `add`
@@ -145,6 +112,18 @@ pub struct Integer {
 }
 
 impl fmt::Display for Integer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Size {
+    pub value: u64,
+    pub span: Span,
+}
+
+impl fmt::Display for Size {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.value)
     }
