@@ -119,6 +119,15 @@ pub struct StaticByteStr {
     pub span: Span,
 }
 
+macro_rules! count_tokens {
+    ($t:tt $($ts:tt)*) => {
+        1 + count_tokens!($($ts)*)
+    };
+    () => {
+        0
+    };
+}
+
 macro_rules! instr {
     (
         $(#[$m:meta])*
@@ -138,9 +147,20 @@ macro_rules! instr {
 
         impl $instr_enum {
             pub fn validate(instr: ast::Instr, diag: &Diagnostics) -> Self {
-                let ast::Instr {name, args} = instr;
+                match &*instr.name.value {
+                    $(
+                        $instr_name => $instr_enum::$instr_variant(
+                            $instr_struct::validate(instr, diag)
+                        ),
+                    )*
 
-                todo!()
+                    _ => {
+                        diag.span_error(instr.name.span, format!("unknown instruction `{}`", instr.name.value)).emit();
+
+                        // Error Recovery: Default to a `nop` instruction
+                        $instr_enum::Nop(Nop {span: instr.name.span})
+                    },
+                }
             }
 
             pub fn span(&self) -> Span {
@@ -159,6 +179,42 @@ macro_rules! instr {
                 /// The span of the entire instruction
                 pub span: Span,
             }
+
+            impl $instr_struct {
+                pub fn validate(instr: ast::Instr, diag: &Diagnostics) -> Self {
+                    let span = instr.span();
+                    let ast::Instr {name, mut args} = instr;
+
+                    let expected_args = count_tokens!($($instr_field)*);
+                    let provided_args = args.len();
+
+                    // Allows us to access the arguments in the right order using pop() and without
+                    // paying to shift the elements every time
+                    args.reverse();
+
+                    $(
+                        let $instr_field = match args.pop() {
+                            Some(arg) => $instr_value_ty::validate(arg, diag),
+                            None => {
+                                diag.span_error(name.span, format!("expected a {} argument for `{}` instruction (takes {} arguments)", $instr_value_ty::arg_type_name(), name, expected_args)).emit();
+
+                                // Error Recovery: use a default value so we can return *something*
+                                // and keep checking for more errors
+                                $instr_value_ty::error_default(name.span)
+                            },
+                        };
+                    )*
+
+                    if provided_args > expected_args {
+                        diag.span_error(name.span, format!("expected {} arguments for `{}` instruction, found {} arguments", expected_args, name, provided_args)).emit();
+                    }
+
+                    Self {
+                        $($instr_field,)*
+                        span,
+                    }
+                }
+            }
         )*
     };
 }
@@ -168,6 +224,9 @@ instr! {
     pub enum Instr {
         #[name = "add"]
         Add(struct Add {dest: Destination, source: Source}),
+
+        #[name = "nop"]
+        Nop(struct Nop {}),
     }
 }
 
@@ -180,6 +239,11 @@ pub enum Source {
 }
 
 impl Source {
+    /// Returns a name for this kind of argument that can be used in errors
+    pub fn arg_type_name() -> &'static str {
+        "source"
+    }
+
     pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
         match arg {
             ast::InstrArg::Register(reg) => Source::Register(reg),
@@ -187,6 +251,14 @@ impl Source {
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Source::Label(label),
         }
+    }
+
+    /// Returns a default value for this type in case of an error (for error recovery)
+    pub fn error_default(span: Span) -> Self {
+        Source::Register(Register {
+            kind: RegisterKind::Numbered(0),
+            span,
+        })
     }
 }
 
@@ -197,6 +269,11 @@ pub enum Destination {
 }
 
 impl Destination {
+    /// Returns a name for this kind of argument that can be used in errors
+    pub fn arg_type_name() -> &'static str {
+        "destination"
+    }
+
     pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
             ast::InstrArg::Register(reg) => Destination::Register(reg),
@@ -205,12 +282,17 @@ impl Destination {
                 diag.span_error(span, format!("expected a register, found `{}`", arg)).emit();
 
                 // Error Recovery: Just use a default register so the program can keep going
-                Destination::Register(Register {
-                    kind: RegisterKind::Numbered(0),
-                    span,
-                })
+                Self::error_default(span)
             },
         }
+    }
+
+    /// Returns a default value for this type in case of an error (for error recovery)
+    pub fn error_default(span: Span) -> Self {
+        Destination::Register(Register {
+            kind: RegisterKind::Numbered(0),
+            span,
+        })
     }
 }
 
@@ -223,6 +305,11 @@ pub enum Location {
 }
 
 impl Location {
+    /// Returns a name for this kind of argument that can be used in errors
+    pub fn arg_type_name() -> &'static str {
+        "location"
+    }
+
     pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
         match arg {
             ast::InstrArg::Register(reg) => Location::Register(reg),
@@ -230,6 +317,14 @@ impl Location {
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Location::Label(label),
         }
+    }
+
+    /// Returns a default value for this type in case of an error (for error recovery)
+    pub fn error_default(span: Span) -> Self {
+        Location::Register(Register {
+            kind: RegisterKind::Numbered(0),
+            span,
+        })
     }
 }
 

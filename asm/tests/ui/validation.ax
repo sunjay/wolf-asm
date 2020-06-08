@@ -51,8 +51,20 @@ foo:
 
 section .code
 
-  #TODO: Test cases for each instruction
-  add $1, a # Valid
+  # Unknown instruction
+  foo $1
+
+  add $1, a # valid
+  add a, $1 # immediate not allowed as destination
+  add 123, $1 # immediate not allowed as destination
+  add # no arguments
+  add $1 # one argument
+  add $1, $2, $3 # extra argument
+  add 123, $1, $2, $3 # immediate as destination and extra arguments
+
+  nop # valid
+  nop $1 # extra argument
+  nop $1, $2 # extra arguments
 
 # Duplicate section
 section .static
