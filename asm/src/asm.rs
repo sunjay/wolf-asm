@@ -133,7 +133,7 @@ macro_rules! instr {
         $(#[$m:meta])*
         $v:vis enum $instr_enum:ident {
             $(
-                #[name = $instr_name:literal]
+                #[name = $instr_name:literal $(, cond = $cond:expr)?]
                 $instr_variant:ident(struct $instr_struct:ident {
                     $( $instr_field:ident : $instr_value_ty:ident ),* $(,)?
                 }),
@@ -149,7 +149,7 @@ macro_rules! instr {
             pub fn validate(instr: ast::Instr, diag: &Diagnostics) -> Self {
                 match &*instr.name.value {
                     $(
-                        $instr_name => $instr_enum::$instr_variant(
+                        $instr_name $(if $cond(&instr))? => $instr_enum::$instr_variant(
                             $instr_struct::validate(instr, diag)
                         ),
                     )*
@@ -226,6 +226,15 @@ instr! {
         Add(struct Add {dest: Destination, source: Source}),
         #[name = "sub"]
         Sub(struct Sub {dest: Destination, source: Source}),
+
+        #[name = "mul", cond = |instr: &ast::Instr| instr.args.len() == 2]
+        Mul(struct Mul {dest: Destination, source: Source}),
+        #[name = "mul"]
+        MulRem(struct MulRem {dest_hi: Destination, dest: Destination, source: Source}),
+        #[name = "mulu", cond = |instr: &ast::Instr| instr.args.len() == 2]
+        Mulu(struct Mulu {dest: Destination, source: Source}),
+        #[name = "mulu"]
+        MuluRem(struct MuluRem {dest_hi: Destination, dest: Destination, source: Source}),
 
         #[name = "load1"]
         Load1(struct Load1 {dest: Destination, loc: Location}),
