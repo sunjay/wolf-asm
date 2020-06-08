@@ -147,6 +147,7 @@ macro_rules! instr {
 
         impl $instr_enum {
             pub fn validate(instr: ast::Instr, diag: &Diagnostics) -> Self {
+                #![deny(unreachable_patterns)]
                 match &*instr.name.value {
                     $(
                         $instr_name $(if $cond(&instr))? => $instr_enum::$instr_variant(
