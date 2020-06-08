@@ -223,6 +223,9 @@ macro_rules! instr {
 instr! {
     #[derive(Debug, Clone, PartialEq)]
     pub enum Instr {
+        #[name = "nop"]
+        Nop(struct Nop {}),
+
         #[name = "add"]
         Add(struct Add {dest: Destination, source: Source}),
         #[name = "sub"]
@@ -251,11 +254,91 @@ instr! {
         #[name = "remu"]
         Remu(struct Remu {dest: Destination, source: Source}),
 
+        #[name = "and"]
+        And(struct And {dest: Destination, source: Source}),
+        #[name = "or"]
+        Or(struct Or {dest: Destination, source: Source}),
+        #[name = "xor"]
+        Xor(struct Xor {dest: Destination, source: Source}),
+
+        #[name = "test"]
+        Test(struct Test {dest: Source, source: Source}),
+        #[name = "cmp"]
+        Cmp(struct Cmp {dest: Source, source: Source}),
+
+        #[name = "mov"]
+        Mov(struct Mov {dest: Destination, source: Source}),
+
         #[name = "load1"]
         Load1(struct Load1 {dest: Destination, loc: Location}),
+        #[name = "loadu1"]
+        Loadu1(struct Loadu1 {dest: Destination, loc: Location}),
+        #[name = "load2"]
+        Load2(struct Load2 {dest: Destination, loc: Location}),
+        #[name = "loadu2"]
+        Loadu2(struct Loadu2 {dest: Destination, loc: Location}),
+        #[name = "load4"]
+        Load4(struct Load4 {dest: Destination, loc: Location}),
+        #[name = "loadu4"]
+        Loadu4(struct Loadu4 {dest: Destination, loc: Location}),
+        #[name = "load8"]
+        Load8(struct Load8 {dest: Destination, loc: Location}),
+        #[name = "loadu8"]
+        Loadu8(struct Loadu8 {dest: Destination, loc: Location}),
 
-        #[name = "nop"]
-        Nop(struct Nop {}),
+        #[name = "store1"]
+        Store1(struct Store1 {loc: Location, dest: Destination}),
+        #[name = "store2"]
+        Store2(struct Store2 {loc: Location, dest: Destination}),
+        #[name = "store4"]
+        Store4(struct Store4 {loc: Location, dest: Destination}),
+        #[name = "store8"]
+        Store8(struct Store8 {loc: Location, dest: Destination}),
+
+        #[name = "push"]
+        Push(struct Push {source: Source}),
+        #[name = "pop"]
+        Pop(struct Pop {source: Destination}),
+
+        #[name = "jmp"]
+        Jmp(struct Jmp {loc: Location}),
+        #[name = "je"]
+        Je(struct Je {loc: Location}),
+        #[name = "jne"]
+        Jne(struct Jne {loc: Location}),
+        #[name = "jg"]
+        Jg(struct Jg {loc: Location}),
+        #[name = "jge"]
+        Jge(struct Jge {loc: Location}),
+        #[name = "ja"]
+        Ja(struct Ja {loc: Location}),
+        #[name = "jae"]
+        Jae(struct Jae {loc: Location}),
+        #[name = "jl"]
+        Jl(struct Jl {loc: Location}),
+        #[name = "jle"]
+        Jle(struct Jle {loc: Location}),
+        #[name = "jb"]
+        Jb(struct Jb {loc: Location}),
+        #[name = "jbe"]
+        Jbe(struct Jbe {loc: Location}),
+        #[name = "jo"]
+        Jo(struct Jo {loc: Location}),
+        #[name = "jno"]
+        Jno(struct Jno {loc: Location}),
+        #[name = "jz"]
+        Jz(struct Jz {loc: Location}),
+        #[name = "jnz"]
+        Jnz(struct Jnz {loc: Location}),
+        #[name = "js"]
+        Js(struct Js {loc: Location}),
+        #[name = "jns"]
+        Jns(struct Jns {loc: Location}),
+
+        #[name = "call"]
+        Call(struct Call {loc: Location}),
+        #[name = "ret"]
+        Ret(struct Ret {}),
     }
 }
 
