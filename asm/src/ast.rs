@@ -157,6 +157,17 @@ pub enum InstrArg {
     Name(Ident),
 }
 
+impl fmt::Display for InstrArg {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use InstrArg::*;
+        match self {
+            Register(reg) => write!(f, "{}", reg),
+            Immediate(imm) => write!(f, "{}", imm),
+            Name(name) => write!(f, "{}", name),
+        }
+    }
+}
+
 impl InstrArg {
     pub fn span(&self) -> Span {
         use InstrArg::*;
@@ -181,12 +192,28 @@ pub struct Register {
     pub span: Span,
 }
 
+impl fmt::Display for Register {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "${}", self.kind)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum RegisterKind {
     /// A named register like `$sp` or `$fp`
     Named(Arc<str>),
     /// A numbered register like `$0`, `$1`, `$63`
     Numbered(u8),
+}
+
+impl fmt::Display for RegisterKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use RegisterKind::*;
+        match self {
+            Named(name) => write!(f, "{}", name),
+            Numbered(num) => write!(f, "{}", num),
+        }
+    }
 }
 
 /// An immediate value

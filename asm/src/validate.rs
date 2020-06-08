@@ -24,7 +24,7 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
     let mut stmts = None;
     let mut labels = Vec::new();
     for stmt in prog.stmts {
-        let validated_stmt = match stmt {
+        let kind = match stmt {
             ast::Stmt::Label(label) => {
                 labels.push(label);
                 continue;
@@ -70,26 +70,24 @@ pub fn validate_program(prog: ast::Program, diag: &Diagnostics) -> asm::Program 
             ast::Stmt::Const(_) => continue,
 
             ast::Stmt::StaticData(static_data) => {
-                validate_static_data(static_data, diag).map(asm::StmtKind::StaticData)
+                asm::StmtKind::StaticData(validate_static_data(static_data, diag))
             },
 
             ast::Stmt::Instr(instr) => {
                 let instr = consts.subst_instr(instr);
-                validate_instr(instr, diag).map(asm::StmtKind::Instr)
+                asm::StmtKind::Instr(asm::Instr::validate(instr, diag))
             },
         };
 
         // Error recovery: No quitting early if errors were produced above because we want to
         // get through as many statements as possible before exiting.
 
-        if let Some(kind) = validated_stmt {
-            match &mut stmts {
-                Some(stmts) => {
-                    stmts.push(asm::Stmt {labels, kind});
-                    labels = Vec::new();
-                },
-                None => diag.span_error(kind.span(), "all assembly statements must occur within a section, e.g. `section .code`").emit(),
-            }
+        match &mut stmts {
+            Some(stmts) => {
+                stmts.push(asm::Stmt {labels, kind});
+                labels = Vec::new();
+            },
+            None => diag.span_error(kind.span(), "all assembly statements must occur within a section, e.g. `section .code`").emit(),
         }
     }
 
@@ -128,22 +126,22 @@ fn unique_labels(prog: &ast::Program, diag: &Diagnostics) -> HashSet<ast::Ident>
 }
 
 /// Validates a static data directive to ensure that it is valid assembly language
-fn validate_static_data(stmt: ast::StaticData, diag: &Diagnostics) -> Option<asm::StaticData> {
+fn validate_static_data(stmt: ast::StaticData, diag: &Diagnostics) -> asm::StaticData {
     match stmt {
         ast::StaticData::StaticBytes(static_bytes) => {
-            Some(asm::StaticData::StaticBytes(validate_static_bytes(static_bytes, diag)))
+            asm::StaticData::StaticBytes(validate_static_bytes(static_bytes, diag))
         },
 
         ast::StaticData::StaticZero(static_zero) => {
-            Some(asm::StaticData::StaticZero(validate_static_zero(static_zero, diag)))
+            asm::StaticData::StaticZero(validate_static_zero(static_zero, diag))
         },
 
         ast::StaticData::StaticUninit(static_uninit) => {
-            Some(asm::StaticData::StaticUninit(validate_static_uninit(static_uninit, diag)))
+            asm::StaticData::StaticUninit(validate_static_uninit(static_uninit, diag))
         },
 
         ast::StaticData::StaticByteStr(ast::StaticByteStr {bytes, span}) => {
-            Some(asm::StaticData::StaticByteStr(asm::StaticByteStr {bytes, span}))
+            asm::StaticData::StaticByteStr(asm::StaticByteStr {bytes, span})
         },
     }
 }
@@ -243,9 +241,4 @@ fn validate_size(size: ast::Integer, diag: &Diagnostics) -> asm::Size {
         value,
         span: size.span,
     }
-}
-
-/// Validates an instruction to ensure that it is valid assembly language
-fn validate_instr(stmt: ast::Instr, diag: &Diagnostics) -> Option<asm::Instr> {
-    todo!()
 }

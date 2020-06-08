@@ -5,6 +5,7 @@ use std::fmt;
 
 use crate::ast;
 use crate::parser::Span;
+use crate::diagnostics::Diagnostics;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
@@ -118,40 +119,116 @@ pub struct StaticByteStr {
     pub span: Span,
 }
 
-//TODO: Define validated representation of instructions
-#[derive(Debug, Clone, PartialEq)]
-pub struct Instr {
-    /// The name of the instruction (lowercase), e.g. `add`
-    pub name: Ident,
-    /// The arguments provided to the instruction (possibly empty)
-    pub args: Vec<InstrArg>,
+macro_rules! instr {
+    (
+        $(#[$m:meta])*
+        $v:vis enum $instr_enum:ident {
+            $(
+                #[name = $instr_name:literal]
+                $instr_variant:ident(struct $instr_struct:ident {
+                    $( $instr_field:ident : $instr_value_ty:ident ),* $(,)?
+                }),
+            )*
+        }
+    ) => {
+        $(#[$m])*
+        $v enum $instr_enum {
+            $($instr_variant($instr_struct)),*
+        }
+
+        impl $instr_enum {
+            pub fn validate(instr: ast::Instr, diag: &Diagnostics) -> Self {
+                let ast::Instr {name, args} = instr;
+
+                todo!()
+            }
+
+            pub fn span(&self) -> Span {
+                use $instr_enum::*;
+                match self {
+                    $($instr_variant(instr) => instr.span),*
+                }
+            }
+        }
+
+        $(
+            #[derive(Debug, Clone, PartialEq)]
+            $v struct $instr_struct {
+                $(pub $instr_field : $instr_value_ty,)*
+
+                /// The span of the entire instruction
+                pub span: Span,
+            }
+        )*
+    };
 }
 
-impl Instr {
-    pub fn span(&self) -> Span {
-        let Self {name, args} = self;
+instr! {
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum Instr {
+        #[name = "add"]
+        Add(struct Add {dest: Destination, source: Source}),
+    }
+}
 
-        match args.last() {
-            Some(arg) => name.span.to(arg.span()),
-            None => name.span,
+/// Represents an argument for an instruction that may be used as a source operand
+#[derive(Debug, Clone, PartialEq)]
+pub enum Source {
+    Register(Register),
+    Immediate(Immediate),
+    Label(Ident),
+}
+
+impl Source {
+    pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
+        match arg {
+            ast::InstrArg::Register(reg) => Source::Register(reg),
+            ast::InstrArg::Immediate(imm) => Source::Immediate(imm),
+            // After const expansion, the only names left are labels
+            ast::InstrArg::Name(label) => Source::Label(label),
         }
     }
 }
 
+/// Represents an argument for an instruction that may be used as a destination operand
 #[derive(Debug, Clone, PartialEq)]
-pub enum InstrArg {
+pub enum Destination {
     Register(Register),
-    Immediate(Immediate),
-    Name(Ident),
 }
 
-impl InstrArg {
-    pub fn span(&self) -> Span {
-        use InstrArg::*;
-        match self {
-            Register(reg) => reg.span,
-            Immediate(imm) => imm.span,
-            Name(name) => name.span,
+impl Destination {
+    pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
+        match arg {
+            ast::InstrArg::Register(reg) => Destination::Register(reg),
+            _ => {
+                let span = arg.span();
+                diag.span_error(span, format!("expected a register, found `{}`", arg)).emit();
+
+                // Error Recovery: Just use a default register so the program can keep going
+                Destination::Register(Register {
+                    kind: RegisterKind::Numbered(0),
+                    span,
+                })
+            },
+        }
+    }
+}
+
+/// Represents an argument for an instruction that may be used as a location (address) operand
+#[derive(Debug, Clone, PartialEq)]
+pub enum Location {
+    Register(Register),
+    Immediate(Immediate),
+    Label(Ident),
+}
+
+impl Location {
+    pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
+        match arg {
+            ast::InstrArg::Register(reg) => Location::Register(reg),
+            ast::InstrArg::Immediate(imm) => Location::Immediate(imm),
+            // After const expansion, the only names left are labels
+            ast::InstrArg::Name(label) => Location::Label(label),
         }
     }
 }
