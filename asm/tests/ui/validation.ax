@@ -62,6 +62,16 @@ section .code
   add $1, $2, $3 # extra argument
   add 123, $1, $2, $3 # immediate as destination and extra arguments
 
+  load1 $1, 0x1 # valid
+  load1 $1, a # valid
+  load1 $1, $2 # valid
+  load1 0x1, $2 # immediate not allowed as destination
+  load1 a, $2 # immediate not allowed as destination
+  load1 # no arguments
+  load1 $1 # one argument
+  load1 $21, $22, $23 # extra argument
+  load1 123, $1, $2, $3 # immediate as destination and extra arguments
+
   nop # valid
   nop $1 # extra argument
   nop $1, $2 # extra arguments
