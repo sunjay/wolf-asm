@@ -346,19 +346,41 @@ fn instr(input: Input) -> ParseResult<ast::Instr> {
 
     // Note: This code will need to change if instructions can ever end with something other than a
     // newline
-    while newline(input).is_err() {
-        let (next_input, arg) = instr_arg(input)?;
-        args.push(arg);
-        input = next_input;
 
-        // Stop if we reach a newline
-        if newline(input).is_ok() {
-            break;
-        }
+    match newline(input) {
+        // Stop if we've reached a newline (no arguments)
+        // Do not update `input` so another parser up the stack can consume the newline
+        Ok(_) => {},
 
-        // Next token must be a comma then
-        let (next_input, _) = tk(input, TokenKind::Comma)?;
-        input = next_input;
+        // Otherwise, there must be at least one argument
+        Err(newline_err) => {
+            // This panic will never run, but it will set the type to ParseResult<!> which is used
+            // to allow the code below to type check
+            let mut newline_res = Err(newline_err).map(|()| panic!());
+
+            loop {
+                // Incorporating the newline error gives a better error message
+                let (next_input, arg) = newline_res.or_parse(|| instr_arg(input))?;
+                args.push(arg);
+                input = next_input;
+
+                // Stop if we've reached a newline
+                newline_res = match newline(input) {
+                    // Do not update `input` so another parser up the stack can consume the newline
+                    Ok(_) => break,
+                    Err(newline_err) => Err(newline_err),
+                };
+
+                // Otherwise, there must be a comma (no trailing commas allowed)
+                //
+                // Incorporating the newline error gives a better error message
+                let (next_input, _) = newline_res.clone().map(|_| panic!())
+                    .or_parse(|| tk(input, TokenKind::Comma))?;
+                input = next_input;
+
+                // Since a comma was found, we loop back around and expect there to be an argument
+            }
+        },
     }
 
     Ok((input, ast::Instr {name, args}))

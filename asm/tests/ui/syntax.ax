@@ -39,6 +39,12 @@ loop:
 add $0 $1
 div $0, $1 $2 ; comment at the end of a line # woo
 
+# Trailing comma
+add $0, $1,
+
+# Leading comma
+add, $63, $62
+
 ; a comment
 
 call $0
