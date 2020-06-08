@@ -237,6 +237,20 @@ instr! {
         #[name = "mulu"]
         MuluRem(struct MuluRem {dest_hi: Destination, dest: Destination, source: Source}),
 
+        #[name = "div", cond = |instr: &ast::Instr| instr.args.len() == 2]
+        Div(struct Div {dest: Destination, source: Source}),
+        #[name = "div"]
+        DivRem(struct DivRem {dest_hi: Destination, dest: Destination, source: Source}),
+        #[name = "divu", cond = |instr: &ast::Instr| instr.args.len() == 2]
+        Divu(struct Divu {dest: Destination, source: Source}),
+        #[name = "divu"]
+        DivuRem(struct DivuRem {dest_hi: Destination, dest: Destination, source: Source}),
+
+        #[name = "rem"]
+        Rem(struct Rem {dest: Destination, source: Source}),
+        #[name = "remu"]
+        Remu(struct Remu {dest: Destination, source: Source}),
+
         #[name = "load1"]
         Load1(struct Load1 {dest: Destination, loc: Location}),
 
