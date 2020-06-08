@@ -410,23 +410,23 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
 
 ### Control Flow
 
-* `jmp` - unconditional jump
-* `je` - jump if equal
-* `jne` - jump if not equal
-* `jg` - jump if greater (signed comparison)
-* `jge` - jump if greater or equal (signed comparison)
-* `ja` - jump if above (unsigned comparison)
-* `jae` - jump if above or equal (unsigned comparison)
-* `jl` - jump if less (signed comparison)
-* `jle` - jump if less or equal (signed comparison)
-* `jb` - jump if below (unsigned comparison)
-* `jbe` - jump if below or equal (unsigned comparison)
-* `jo` - jump if overflow
-* `jno` - jump if no overflow
-* `jz` - jump if zero
-* `jnz` - jump if not zero
-* `js` - jump if signed (sign bit is set)
-* `jns` - jump if not signed (sign bit is not set)
+* `jmp loc` - unconditional jump
+* `je loc` - jump if equal
+* `jne loc` - jump if not equal
+* `jg loc` - jump if greater (signed comparison)
+* `jge loc` - jump if greater or equal (signed comparison)
+* `ja loc` - jump if above (unsigned comparison)
+* `jae loc` - jump if above or equal (unsigned comparison)
+* `jl loc` - jump if less (signed comparison)
+* `jle loc` - jump if less or equal (signed comparison)
+* `jb loc` - jump if below (unsigned comparison)
+* `jbe loc` - jump if below or equal (unsigned comparison)
+* `jo loc` - jump if overflow
+* `jno loc` - jump if no overflow
+* `jz loc` - jump if zero
+* `jnz loc` - jump if not zero
+* `js loc` - jump if signed (sign bit is set)
+* `jns loc` - jump if not signed (sign bit is not set)
 * `call loc` - pushes the value of the program counter onto the stack and then
   jumps to the given location
 * `ret` - pops the value at the top of the stack and sets the program counter to it
