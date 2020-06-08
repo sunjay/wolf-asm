@@ -224,6 +224,8 @@ instr! {
     pub enum Instr {
         #[name = "add"]
         Add(struct Add {dest: Destination, source: Source}),
+        #[name = "sub"]
+        Sub(struct Sub {dest: Destination, source: Source}),
 
         #[name = "load1"]
         Load1(struct Load1 {dest: Destination, loc: Location}),
