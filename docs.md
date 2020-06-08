@@ -321,6 +321,45 @@ This implements the `cat` command: (filename: `cat.ax`)
 TODO
 ```
 
+## Instruction Encoding
+
+Instructions are 64-bits wide and (currently) support up to 4 arguments. The
+arguments may either be registers ($0-$63, $sp, $fp) or immediate (64-bit
+values). Since a 64-bit immediate cannot fit within a 64-bit instruction,
+immediates are encoded in little-endian directly after the instruction they
+belong to, in argument order.
+
+The 64-bits of the instruction are divided up as follows (from MSB to LSB):
+
+* `opcode` (16-bits) - the opcode of the instruction being represented, used to
+  determine which operation will be executed
+* `arguments` (8-bits) - the type of each of the 4 arguments in order (2-bits each)
+  * arguments may be one of the following types:
+    * `00` - off (not used)
+    * `01` - register (inline within encoded instruction)
+    * `10` - immediate (64-bit)
+    * `11` - reserved (do not use)
+  * after the first argument configured as `00`, no further arguments may be any
+    other value other than `00`
+  * the argument types are required to be valid for the particular `opcode` in use
+* `registers` (32-bits) - the register for each argument in order
+  * only to be used if the argument's type is `01`
+  * if the argument's type is anything other than `01`, the slot for that
+    particular argument is to be set to zero
+  * values of `0` to `63` specify registers `$0` to `$63`
+  * a value of `64` corresponds to `$sp`
+  * a value of `65` corresponds to `$fp`
+  * all other values are reserved and should not be used
+* the remaining bits are reserved and should not be used
+
+If an argument in the `arguments` section has type `10`, the instruction should
+be followed by the immediate for that instruction. For example, if the 64-bit
+encoding of an instruction specified that arguments 2 and 4 were immediates, the
+instruction should be followed by two 64-bit values for the immediates. The
+order should be the immediate for argument 2 followed by the immediate for
+argument 4. The consequence of this is that decoding an instruction may require
+fetching up to four 64-bit values following that instruction.
+
 ## Instruction Reference
 
 Instruction names are case-insensitive.
