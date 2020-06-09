@@ -117,8 +117,12 @@ Used in the `.code` section.
   * use `label:` to designate the address of a given section of the executable
 * register
   * 64 general purpose registers (64-bit): `$0`, `$1`, `$2`, etc. (up to `$63`)
-  * stack pointer: `$sp` - 64-bit top address of the stack (next available slot)
-  * frame pointer: `$fp` - 64-bit base address of the stack (base pointer)
+  * `$62` and `$63` are reserved for the frame pointer and the stack pointer
+    respectively
+  * stack pointer: `$sp` or `$63` - 64-bit top address of the stack
+    (end of next available slot)
+  * frame pointer: `$fp` or `$62` - 64-bit base address of the stack
+    (base pointer to the end of the current stack frame)
 * data directives
   * any of the directives valid in the `.static` section may also be used in the
     `.code` section
