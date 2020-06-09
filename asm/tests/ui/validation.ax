@@ -54,6 +54,19 @@ section .code
   # Unknown instruction
   foo $1
 
+  # Valid register
+  pop $0
+  pop $32
+  pop $63
+  pop $sp
+  pop $fp
+  # Invalid register
+  pop $64
+  pop $128
+  pop $255
+  pop $foo
+  pop $bp
+
   add $1, a # valid
   add a, $1 # immediate not allowed as destination
   add 123, $1 # immediate not allowed as destination

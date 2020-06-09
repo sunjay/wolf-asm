@@ -203,6 +203,8 @@ pub enum RegisterKind {
     /// A named register like `$sp` or `$fp`
     Named(Arc<str>),
     /// A numbered register like `$0`, `$1`, `$63`
+    ///
+    /// At this stage, this number may be any valid `u8`
     Numbered(u8),
 }
 

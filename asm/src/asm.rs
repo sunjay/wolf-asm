@@ -138,9 +138,9 @@ impl Source {
         "source"
     }
 
-    pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
+    pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Source::Register(reg),
+            ast::InstrArg::Register(reg) => Source::Register(Register::validate(reg, diag)),
             ast::InstrArg::Immediate(imm) => Source::Immediate(imm),
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Source::Label(label),
@@ -170,7 +170,7 @@ impl Destination {
 
     pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Destination::Register(reg),
+            ast::InstrArg::Register(reg) => Destination::Register(Register::validate(reg, diag)),
             _ => {
                 let span = arg.span();
                 diag.span_error(span, format!("expected a register, found `{}`", arg)).emit();
@@ -204,9 +204,9 @@ impl Location {
         "location"
     }
 
-    pub fn validate(arg: ast::InstrArg, _diag: &Diagnostics) -> Self {
+    pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Location::Register(reg),
+            ast::InstrArg::Register(reg) => Location::Register(Register::validate(reg, diag)),
             ast::InstrArg::Immediate(imm) => Location::Immediate(imm),
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Location::Label(label),
@@ -234,8 +234,71 @@ impl fmt::Display for Size {
     }
 }
 
-pub type Register = ast::Register;
-pub type RegisterKind = ast::RegisterKind;
+#[derive(Debug, Clone, PartialEq)]
+pub struct Register {
+    pub kind: RegisterKind,
+    pub span: Span,
+}
+
+impl fmt::Display for Register {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "${}", self.kind)
+    }
+}
+
+impl Register {
+    pub fn validate(reg: ast::Register, diag: &Diagnostics) -> Self {
+        let ast::Register {kind, span} = reg;
+
+        let kind = match kind {
+            ast::RegisterKind::Named(name) if &*name == "sp" => {
+                RegisterKind::StackPointer
+            },
+
+            ast::RegisterKind::Named(name) if &*name == "fp" => {
+                RegisterKind::FramePointer
+            },
+
+            ast::RegisterKind::Numbered(num) if num <= 63 => {
+                RegisterKind::Numbered(num)
+            },
+
+            _ => {
+                diag.span_error(span, format!("invalid register `${}`", kind))
+                    .span_note(span, "registers must be `$0` to `$63`, `$sp`, or `$fp`").emit();
+
+                // Error recovery: return a default register so we can keep producing errors
+                RegisterKind::Numbered(0)
+            },
+        };
+
+        Self {kind, span}
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegisterKind {
+    /// The `$sp` register
+    StackPointer,
+    /// The `$fp` register
+    FramePointer,
+    /// A numbered register like `$0`, `$1`, `$63`
+    ///
+    /// This value is guaranteed to be between 0 and 63 (inclusive)
+    Numbered(u8),
+}
+
+impl fmt::Display for RegisterKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use RegisterKind::*;
+        match self {
+            StackPointer => write!(f, "sp"),
+            FramePointer => write!(f, "fp"),
+            Numbered(num) => write!(f, "{}", num),
+        }
+    }
+}
+
 /// An immediate value
 pub type Immediate = ast::Immediate;
 pub type Integer = ast::Integer;
