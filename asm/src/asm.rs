@@ -231,23 +231,23 @@ instr! {
         #[name = "sub"]
         Sub(struct Sub {dest: Destination, source: Source}),
 
-        #[name = "mul", cond = |instr: &ast::Instr| instr.args.len() == 2]
-        Mul(struct Mul {dest: Destination, source: Source}),
         #[name = "mul"]
-        MulRem(struct MulRem {dest_hi: Destination, dest: Destination, source: Source}),
-        #[name = "mulu", cond = |instr: &ast::Instr| instr.args.len() == 2]
-        Mulu(struct Mulu {dest: Destination, source: Source}),
+        Mul(struct Mul {dest: Destination, source: Source}),
+        #[name = "mull"]
+        Mull(struct Mull {dest_hi: Destination, dest: Destination, source: Source}),
         #[name = "mulu"]
-        MuluRem(struct MuluRem {dest_hi: Destination, dest: Destination, source: Source}),
+        Mulu(struct Mulu {dest: Destination, source: Source}),
+        #[name = "mullu"]
+        Mullu(struct Mullu {dest_hi: Destination, dest: Destination, source: Source}),
 
-        #[name = "div", cond = |instr: &ast::Instr| instr.args.len() == 2]
-        Div(struct Div {dest: Destination, source: Source}),
         #[name = "div"]
-        DivRem(struct DivRem {dest_hi: Destination, dest: Destination, source: Source}),
-        #[name = "divu", cond = |instr: &ast::Instr| instr.args.len() == 2]
-        Divu(struct Divu {dest: Destination, source: Source}),
+        Div(struct Div {dest: Destination, source: Source}),
+        #[name = "divr"]
+        Divr(struct Divr {dest_rem: Destination, dest: Destination, source: Source}),
         #[name = "divu"]
-        DivuRem(struct DivuRem {dest_hi: Destination, dest: Destination, source: Source}),
+        Divu(struct Divu {dest: Destination, source: Source}),
+        #[name = "divru"]
+        Divru(struct Divru {dest_rem: Destination, dest: Destination, source: Source}),
 
         #[name = "rem"]
         Rem(struct Rem {dest: Destination, source: Source}),
