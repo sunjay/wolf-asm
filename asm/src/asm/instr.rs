@@ -3,7 +3,7 @@ use crate::parser::Span;
 use crate::diagnostics::Diagnostics;
 use crate::label_offsets::LabelOffsets;
 
-use super::{Source, Destination, Location, layout::InstrLayout};
+use super::{Source, Destination, Location, layout::{InstrLayout, LayoutArguments}};
 
 macro_rules! count_tokens {
     ($t:tt $($ts:tt)*) => {
@@ -119,7 +119,12 @@ macro_rules! instr {
                 }
 
                 pub fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> InstrLayout {
-                    todo!()
+                    let Self {$($instr_field,)* span: _} = self;
+
+                    InstrLayout {
+                        base_opcode: Self::OPCODE,
+                        layout: ($($instr_field,)*).layout(diag, labels),
+                    }
                 }
             }
         )*

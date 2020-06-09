@@ -1,5 +1,10 @@
 use std::marker::PhantomData;
 
+use crate::diagnostics::Diagnostics;
+use crate::label_offsets::LabelOffsets;
+
+use super::{Source, Destination, Location};
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct InstrLayout {
     /// The base opcode for this instruction
@@ -45,7 +50,7 @@ macro_rules! layout {
 }
 
 layout! {
-    /// Each supported instruction layout
+    /// Each supported layout for the `arguments` section of an instruction
     #[derive(Debug, Clone, PartialEq)]
     pub enum Layout {
         #[opcode_offset = 0]
@@ -68,6 +73,65 @@ layout! {
         L9(struct L9(Imm<S52>)),
         #[opcode_offset = 9]
         L10(struct L10(Reg, Offset)),
+    }
+}
+
+pub trait LayoutArguments {
+    /// Computes the layout of the `arguments` section of an instruction
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout;
+}
+
+impl LayoutArguments for () {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Destination, Source) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Source, Source) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Destination, Location) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Location, Source) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Destination, Destination, Source) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Source,) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Destination,) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
+    }
+}
+
+impl LayoutArguments for (Location,) {
+    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        todo!()
     }
 }
 
