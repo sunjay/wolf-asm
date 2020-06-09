@@ -45,7 +45,7 @@ layout! {
         #[opcode_offset = 2]
         L3(struct L3(Reg, Reg, Offset)),
         #[opcode_offset = 3]
-        L4(struct L4(Reg, Reg, Imm<S30>)),
+        L4(struct L4(Reg, Offset, Imm<S30>)),
         #[opcode_offset = 4]
         L5(struct L5(Imm<S26>, Imm<S26>)),
         #[opcode_offset = 5]
