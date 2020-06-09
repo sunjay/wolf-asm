@@ -384,6 +384,14 @@ list above. For example, instead of supporting both `register, immediate` and
 `immediate, register`, only one of them is specified and the other is reversed
 to use the same layout.
 
+Any unused bits in an instruction are reserved. Using those bits or relying on
+them to be a particular value will lead to undefined behaviour.
+
+A zero argument instruction uses a single opcode and has a completely
+unspecified layout for the `arguments` section of the instruction. The assembler
+is free to choose what (if anything) to put there. Relying on any particular bit
+pattern will lead to undefined behaviour.
+
 Using an opcode/layout that is not supported by a given instruction results in
 undefined behaviour.
 
