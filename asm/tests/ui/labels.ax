@@ -1,0 +1,18 @@
+section .code
+  add $1, $2
+bar:
+  add $1, $2
+  add $1, $2
+  add $1, $2
+  add $1, $2
+  add $1, $2
+  add $1, $2
+bar2:
+  add $1, $2
+  add $1, $2
+  # Existing labels
+  add $1, bar
+  add $1, bar2
+  # Non-existent label
+  add $1, does_not_exist
+  add $1, $2
