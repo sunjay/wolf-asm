@@ -287,13 +287,13 @@ instr! {
         Loadu8(struct Loadu8 {dest: Destination, loc: Location}),
 
         #[name = "store1"]
-        Store1(struct Store1 {loc: Location, dest: Destination}),
+        Store1(struct Store1 {loc: Location, source: Source}),
         #[name = "store2"]
-        Store2(struct Store2 {loc: Location, dest: Destination}),
+        Store2(struct Store2 {loc: Location, source: Source}),
         #[name = "store4"]
-        Store4(struct Store4 {loc: Location, dest: Destination}),
+        Store4(struct Store4 {loc: Location, source: Source}),
         #[name = "store8"]
-        Store8(struct Store8 {loc: Location, dest: Destination}),
+        Store8(struct Store8 {loc: Location, source: Source}),
 
         #[name = "push"]
         Push(struct Push {source: Source}),
