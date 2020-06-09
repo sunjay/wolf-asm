@@ -95,9 +95,6 @@ impl SizeInBits for Offset {
     }
 }
 
-pub trait ImmSize: SizeInBits {
-}
-
 macro_rules! imm_sizes {
     (
         $(
