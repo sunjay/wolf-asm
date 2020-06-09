@@ -73,12 +73,17 @@ section .code
   load1 123, $1, $2, $3 # immediate as destination and extra arguments
 
   mul $2, $1 # valid
-  mul $3, $2, $1 # valid (extra arg)
-  mul # no arguments
+  mull $3, $2, $1 # valid (extra arg)
   mulu $2, $1 # valid
-  mulu $3, $2, $1 # valid (extra arg)
-  mulu $3, $2, $1, $4 # extra argument
+  mullu $3, $2, $1 # valid (extra arg)
+  mul # no arguments
+  mull # no arguments
   mulu # no arguments
+  mullu # no arguments
+  mul $3, $2, $1 # extra argument
+  mull $3, $2, $1, $4 # extra argument
+  mulu $3, $2, $1 # extra argument
+  mullu $3, $2, $1, $4 # extra argument
 
   nop # valid
   nop $1 # extra argument
