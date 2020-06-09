@@ -2,6 +2,7 @@
 //! validations have been completed.
 
 mod instr;
+pub mod layout;
 
 pub use instr::*;
 
