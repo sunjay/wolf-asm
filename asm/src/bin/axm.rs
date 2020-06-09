@@ -18,6 +18,7 @@ use asm::{
     include_expansion::expand_includes,
     validate::validate_program,
     label_offsets::LabelOffsets,
+    executable::Executable,
 };
 
 /// The maximum number of times we are allowed to recurse when expanding `.include` directives
@@ -135,7 +136,9 @@ fn main() {
     check_errors!(&diag);
 
     let label_offsets = LabelOffsets::new(&validated_program);
-    dbg!(label_offsets);
+    let exec = Executable::layout_executable(validated_program, &diag, &label_offsets);
+    dbg!(exec);
+    check_errors!(&diag);
 
     dbg!(output_path);
 }

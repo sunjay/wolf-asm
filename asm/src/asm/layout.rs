@@ -1,5 +1,15 @@
 use std::marker::PhantomData;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct InstrLayout {
+    /// The base opcode for this instruction
+    ///
+    /// The layout's opcode offset will be added to this value when the binary instruction is
+    /// generated to get the final opcode used in the executable.
+    pub base_opcode: u16,
+    pub layout: Layout,
+}
+
 macro_rules! layout {
     (
         $(#[$m:meta])*

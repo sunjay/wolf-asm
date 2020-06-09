@@ -8,3 +8,4 @@ pub mod asm;
 pub mod const_table;
 pub mod validate;
 pub mod label_offsets;
+pub mod executable;

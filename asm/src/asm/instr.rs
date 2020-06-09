@@ -1,8 +1,9 @@
 use crate::ast;
 use crate::parser::Span;
 use crate::diagnostics::Diagnostics;
+use crate::label_offsets::LabelOffsets;
 
-use super::{Source, Destination, Location};
+use super::{Source, Destination, Location, layout::InstrLayout};
 
 macro_rules! count_tokens {
     ($t:tt $($ts:tt)*) => {
@@ -61,6 +62,13 @@ macro_rules! instr {
                 // All instructions are currently 8 bytes
                 8
             }
+
+            pub fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> InstrLayout {
+                use $instr_enum::*;
+                match self {
+                    $($instr_variant(instr) => instr.layout(diag, labels)),*
+                }
+            }
         }
 
         $(
@@ -105,6 +113,10 @@ macro_rules! instr {
                         $($instr_field,)*
                         span,
                     }
+                }
+
+                pub fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> InstrLayout {
+                    todo!()
                 }
             }
         )*
