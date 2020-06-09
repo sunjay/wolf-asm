@@ -379,13 +379,13 @@ instructions support all layouts.
   * upper 6-bits is used to hold the value of the register
   * next 16-bits is used for `offset`
 
-To save on opcodes, a layout that can be reversed to fit into the list above
-uses the reverse of its order. For example, instead of supporting both
-`register, immediate` and `immediate, register`, only one of them is specified
-and the other is reversed to use the same layout.
+To save on opcodes, a layout that can be reordered to fit into a layout from the
+list above. For example, instead of supporting both `register, immediate` and
+`immediate, register`, only one of them is specified and the other is reversed
+to use the same layout.
 
-All `immediate` values are stored in the instruction using little-endian byte
-order.
+Using an opcode/layout that is not supported by a given instruction results in
+undefined behaviour.
 
 ## Instruction Reference
 
