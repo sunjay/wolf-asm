@@ -331,42 +331,61 @@ TODO
 
 ## Instruction Encoding
 
-Instructions are 64-bits wide and (currently) support up to 4 arguments. The
-arguments may either be registers ($0-$63, $sp, $fp) or immediate (64-bit
-values). Since a 64-bit immediate cannot fit within a 64-bit instruction,
-immediates are encoded in little-endian directly after the instruction they
-belong to, in argument order.
+Instructions are 64-bits in size. The layout of the bits is determined entirely
+by the opcode in the upper 16-bits of the instruction. Instructions may be given
+arguments which can either be registers ($0-$63, $sp, $fp) or immediates (values
+up to 64-bits). Since a 64-bit immediate cannot fit within a 64-bit instruction,
+the actual maximum size of the immediate varies per opcode. Instruction opcodes
+that need to fit more immediates will have less space for each. Immediates are
+always encoded into the instruction using little-endian byte order.
 
-The 64-bits of the instruction are divided up as follows (from MSB to LSB):
+As mentioned, the layout of an instruction is as follows:
 
-* `opcode` (16-bits) - the opcode of the instruction being represented, used to
-  determine which operation will be executed
-* `arguments` (8-bits) - the type of each of the 4 arguments in order (2-bits each)
-  * arguments may be one of the following types:
-    * `00` - off (not used)
-    * `01` - register (inline within encoded instruction)
-    * `10` - immediate (64-bit)
-    * `11` - reserved (do not use)
-  * after the first argument configured as `00`, no further arguments may be any
-    other value other than `00`
-  * the argument types are required to be valid for the particular `opcode` in use
-* `registers` (32-bits) - the register for each argument in order
-  * only to be used if the argument's type is `01`
-  * if the argument's type is anything other than `01`, the slot for that
-    particular argument is to be set to zero
-  * values of `0` to `63` specify registers `$0` to `$63`
-  * a value of `64` corresponds to `$sp`
-  * a value of `65` corresponds to `$fp`
-  * all other values are reserved and should not be used
-* the remaining bits are reserved and should not be used
+```
+==========================================
+| opcode (16-bits) | arguments (48-bits) |
+==========================================
+```
 
-If an argument in the `arguments` section has type `10`, the instruction should
-be followed by the immediate for that instruction. For example, if the 64-bit
-encoding of an instruction specified that arguments 2 and 4 were immediates, the
-instruction should be followed by two 64-bit values for the immediates. The
-order should be the immediate for argument 2 followed by the immediate for
-argument 4. The consequence of this is that decoding an instruction may require
-fetching up to four 64-bit values following that instruction.
+The layout of the `arguments` portion is determined by the opcode. The supported
+layouts are listed below. Each layout uses a different opcode. Not all
+instructions support all layouts.
+
+1. `register, register`
+  * upper 12-bits is divided between the registers, 6-bits each
+2. `register, immediate`
+  * upper 6-bits is used for `register`
+  * remaining 42-bits is for the immediate
+3. `register + offset, register`
+  * upper 12-bits is divided between the registers, 6-bits each
+  * next 16-bits is used for `offset`
+4. `register + offset, immediate`
+  * upper 6-bits is used for `register`
+  * next 16-bits is used for `offset`
+  * remaining 26-bits is for the immediate
+5. `immediate, immediate`
+  * upper 24-bits for the first immediate
+  * lower 24-bits for the second immediate
+6. `register, register, register`
+  * upper 18-bits is divided between the registers, 6-bits each
+7. `register, register, immediate`
+  * upper 12-bits is divided between the registers, 6-bits each
+  * remaining 36-bits is for the immediate
+8. `register`
+  * upper 6-bits is used to hold the value of the register
+9. `immediate`
+  * all 48-bits are used to hold the immediate
+10. `register + offset`
+  * upper 6-bits is used to hold the value of the register
+  * next 16-bits is used for `offset`
+
+To save on opcodes, a layout that can be reversed to fit into the list above
+uses the reverse of its order. For example, instead of supporting both
+`register, immediate` and `immediate, register`, only one of them is specified
+and the other is reversed to use the same layout.
+
+All `immediate` values are stored in the instruction using little-endian byte
+order.
 
 ## Instruction Reference
 
