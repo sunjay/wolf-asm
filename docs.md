@@ -378,26 +378,28 @@ Instruction names are case-insensitive.
 
 * `add dest, source` - add `source` and `dest` and put the result in `dest`
 * `sub dest, source` - subtract `source` and `dest` and put the result in `dest`
-* `mul dest, source` or `mul dest_hi, dest, source` or
-  `mulu dest, source` or `mulu dest_hi, dest, source`
-  * multiply `dest` and `source` and put the lower 64-bits of the result into `dest`
-  * if `dest_hi` is provided, the upper 64-bits of the result will be placed into it
-  * `dest` and `dest_hi` are not allowed to be the same
-  * `mul` treats both operands as signed values
-  * `mulu` treats both operands as unsigned values
-* `div dest, source` or `div dest_rem, dest, source` or
-  `divu dest, source` or `divu dest_rem, dest, source`
-  * divide `dest` by `source` and put the quotient into `dest`
-  * if `dest_rem` is provided, the remainder from the division will be put into it
-  * `dest` and `dest_rem` are not allowed to be the same
-  * `dest = dest / source`
-  * `dest_rem = dest % source`
-  * `div` treats both operands as signed values
-  * `divu` treats both operands as unsigned values
+* `mul dest, source` or `mull dest_hi, dest, source` or
+  `mulu dest, source` or `mullu dest_hi, dest, source`
+  * `mul` - signed multiply `dest * source`, lower 64-bits of result into `dest`
+  * `mulu` - unsigned multiply `dest * source`, lower 64-bits of result into `dest`
+  * `mull` - signed long multiply `dest * source`, lower 64-bits of result into `dest`,
+    upper 64-bits into `dest_hi`
+  * `mullu` - unsigned long multiply `dest * source`, lower 64-bits of result into `dest`,
+    upper 64-bits into `dest_hi`
+  * specifying the same register for `dest` and `dest_hi` yields undefined behaviour
+* `div dest, source` or `divr dest_rem, dest, source` or
+  `divu dest, source` or `divru dest_rem, dest, source`
+  * `div` signed division `dest / source`, lower 64-bits of result into `dest`
+  * `divu` unsigned division `dest / source`, lower 64-bits of result into `dest`
+  * `divr` signed division `dest / source` and remainder `dest % source`,
+    quotient into `dest` and remainder into `dest_rem`
+  * `divru` unsigned division `dest / source` and remainder `dest % source`,
+    quotient into `dest` and remainder into `dest_rem`
+  * specifying the same register for `dest` and `dest_rem` yields undefined behaviour
 * `rem dest, source` or `remu dest, source` - divide `dest` by `source` and put
   the remainder in `dest`
-  * This instruction is equivalent to `div` or `divu` if no `dest` argument was
-    passed in
+  * This instruction is equivalent to `divr` or `divru` if no `dest` argument
+    was passed in
 
 ### Bitwise
 
