@@ -332,7 +332,7 @@ TODO
 ## Instruction Encoding
 
 Instructions are 64-bits in size. The layout of the bits is determined entirely
-by the opcode in the upper 16-bits of the instruction. Instructions may be given
+by the opcode in the upper 12-bits of the instruction. Instructions may be given
 arguments which can either be registers ($0-$63, $sp, $fp) or immediates (values
 up to 64-bits). Since a 64-bit immediate cannot fit within a 64-bit instruction,
 the actual maximum size of the immediate varies per opcode. Instruction opcodes
@@ -343,7 +343,7 @@ As mentioned, the layout of an instruction is as follows:
 
 ```
 ==========================================
-| opcode (16-bits) | arguments (48-bits) |
+| opcode (12-bits) | arguments (52-bits) |
 ==========================================
 ```
 
@@ -355,26 +355,26 @@ instructions support all layouts.
   * upper 12-bits is divided between the registers, 6-bits each
 2. `register, immediate`
   * upper 6-bits is used for `register`
-  * remaining 42-bits is for the immediate
+  * remaining 46-bits is for the immediate
 3. `register + offset, register`
   * upper 12-bits is divided between the registers, 6-bits each
   * next 16-bits is used for `offset`
 4. `register + offset, immediate`
   * upper 6-bits is used for `register`
   * next 16-bits is used for `offset`
-  * remaining 26-bits is for the immediate
+  * remaining 30-bits is for the immediate
 5. `immediate, immediate`
-  * upper 24-bits for the first immediate
-  * lower 24-bits for the second immediate
+  * upper 26-bits for the first immediate
+  * lower 26-bits for the second immediate
 6. `register, register, register`
   * upper 18-bits is divided between the registers, 6-bits each
 7. `register, register, immediate`
   * upper 12-bits is divided between the registers, 6-bits each
-  * remaining 36-bits is for the immediate
+  * remaining 40-bits is for the immediate
 8. `register`
   * upper 6-bits is used to hold the value of the register
 9. `immediate`
-  * all 48-bits are used to hold the immediate
+  * all 52-bits are used to hold the immediate
 10. `register + offset`
   * upper 6-bits is used to hold the value of the register
   * next 16-bits is used for `offset`
