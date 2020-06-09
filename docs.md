@@ -123,6 +123,10 @@ Used in the `.code` section.
     (end of next available slot)
   * frame pointer: `$fp` or `$62` - 64-bit base address of the stack
     (base pointer to the end of the current stack frame)
+* register + offset
+  * specified by the syntax `offset(register)`,
+  * the offset is a signed, 16-bit immediate
+  * e.g. `-8($sp)`, `0($1)`, `12($3)`
 * data directives
   * any of the directives valid in the `.static` section may also be used in the
     `.code` section
@@ -372,7 +376,7 @@ Instruction names are case-insensitive.
 
 * `dest` - destination register
 * `source` - operand immediate, label, or register
-* `loc` - a register, or an address (usually specified using a label)
+* `loc` - a register, register + offset, or an address (label or immediate)
 
 ### Arithmetic
 
