@@ -6,7 +6,7 @@
 ################################################################################
 
 # Memory address which can be written to in order to write characters
-.const STDOUT 0xffff_ffff_000c
+.const STDOUT 0xffff_000c
 
 ################################################################################
 #
