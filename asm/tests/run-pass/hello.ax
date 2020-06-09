@@ -34,6 +34,6 @@ section .static
 
 # Declare a string with the message we want to print
 message:
-  .bytes 'hello, world!'
+  .bytes 'hello, world!\n'
 length:
   .b8 13
