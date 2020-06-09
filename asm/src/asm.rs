@@ -20,6 +20,17 @@ pub struct Program {
     pub static_section: Option<Section>,
 }
 
+impl Program {
+    /// Iterates through all the statements in the program, in order
+    pub fn iter_all_stmts(&self) -> impl Iterator<Item = &Stmt> {
+        let Program {code_section, static_section} = self;
+        code_section.as_ref().map(|section| section.stmts.iter())
+            .into_iter()
+            .chain(static_section.as_ref().map(|section| section.stmts.iter()))
+            .flatten()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Section {
     pub section_header_span: Span,
@@ -35,6 +46,13 @@ pub struct Stmt {
     pub kind: StmtKind,
 }
 
+impl Stmt {
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        self.kind.size_bytes()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum StmtKind {
     StaticData(StaticData),
@@ -47,6 +65,15 @@ impl StmtKind {
         match self {
             StaticData(static_data) => static_data.span(),
             Instr(instr) => instr.span(),
+        }
+    }
+
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        use StmtKind::*;
+        match self {
+            StaticData(data) => data.size_bytes(),
+            Instr(instr) => instr.size_bytes(),
         }
     }
 }
@@ -69,6 +96,17 @@ impl StaticData {
             StaticByteStr(data) => data.span,
         }
     }
+
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        use StaticData::*;
+        match self {
+            StaticBytes(data) => data.size_bytes(),
+            StaticZero(data) => data.size_bytes(),
+            StaticUninit(data) => data.size_bytes(),
+            StaticByteStr(data) => data.size_bytes(),
+        }
+    }
 }
 
 /// The `.b1`, `.b2`, `.b4`, or `.b8` static data directive
@@ -77,6 +115,13 @@ pub struct StaticBytes {
     pub value: StaticBytesValue,
     /// The span of the entire directive
     pub span: Span,
+}
+
+impl StaticBytes {
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        self.value.size_bytes()
+    }
 }
 
 /// Note that each value is in **little-endian** byte order.
@@ -98,6 +143,17 @@ impl StaticBytesValue {
             B8(_, span) => span,
         }
     }
+
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        use StaticBytesValue::*;
+        match self {
+            B1(_, _) => 1,
+            B2(_, _) => 2,
+            B4(_, _) => 4,
+            B8(_, _) => 8,
+        }
+    }
 }
 
 /// The `.zero` directive
@@ -108,6 +164,13 @@ pub struct StaticZero {
     pub span: Span,
 }
 
+impl StaticZero {
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        self.nbytes.value
+    }
+}
+
 /// The `.uninit` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticUninit {
@@ -116,12 +179,26 @@ pub struct StaticUninit {
     pub span: Span,
 }
 
+impl StaticUninit {
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        self.nbytes.value
+    }
+}
+
 /// The `.bytes` directive
 #[derive(Debug, Clone, PartialEq)]
 pub struct StaticByteStr {
     pub bytes: Bytes,
     /// The span of the entire directive
     pub span: Span,
+}
+
+impl StaticByteStr {
+    /// Returns the size in bytes that this will have in the generated executable
+    pub fn size_bytes(&self) -> u64 {
+        self.bytes.value.len() as u64
+    }
 }
 
 /// Represents an argument for an instruction that may be used as a source operand

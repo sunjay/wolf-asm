@@ -55,6 +55,12 @@ macro_rules! instr {
                     $($instr_variant(instr) => instr.span),*
                 }
             }
+
+            /// Returns the size in bytes that this will have in the generated executable
+            pub fn size_bytes(&self) -> u64 {
+                // All instructions are currently 8 bytes
+                8
+            }
         }
 
         $(

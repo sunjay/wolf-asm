@@ -7,3 +7,4 @@ pub mod include_expansion;
 pub mod asm;
 pub mod const_table;
 pub mod validate;
+pub mod label_offsets;

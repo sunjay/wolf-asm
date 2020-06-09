@@ -17,6 +17,7 @@ use asm::{
     parser::{self, SourceFiles},
     include_expansion::expand_includes,
     validate::validate_program,
+    label_offsets::LabelOffsets,
 };
 
 /// The maximum number of times we are allowed to recurse when expanding `.include` directives
@@ -130,12 +131,11 @@ fn main() {
     let expanded_program = expand_includes(&program_path, program, &source_files, &diag, MAX_INCLUDE_DEPTH);
     check_errors!(&diag);
 
-    dbg!(&expanded_program);
-
     let validated_program = validate_program(expanded_program, &diag);
     check_errors!(&diag);
 
-    dbg!(&validated_program);
+    let label_offsets = LabelOffsets::new(&validated_program);
+    dbg!(label_offsets);
 
     dbg!(output_path);
 }
