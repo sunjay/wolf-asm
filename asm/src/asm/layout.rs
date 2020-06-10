@@ -239,8 +239,15 @@ impl SizeInBits for Reg {
 }
 
 impl Reg {
-    pub fn new(reg: asm::Register, diag: &Diagnostics) -> Self {
-        todo!()
+    pub fn new(reg: asm::Register, _diag: &Diagnostics) -> Self {
+        let asm::Register {kind, span: _} = reg;
+
+        match kind {
+            asm::RegisterKind::StackPointer => Reg(63),
+            asm::RegisterKind::FramePointer => Reg(62),
+            // `num` is already guaranteed to be between 0 and 63
+            asm::RegisterKind::Numbered(num) => Reg(num),
+        }
     }
 }
 
