@@ -16,6 +16,13 @@ pub struct InstrLayout {
     pub layout: Layout,
 }
 
+impl InstrLayout {
+    /// Creates the 64-bit binary representation of this instruction
+    pub fn to_binary(&self) -> u64 {
+        self.layout.to_binary(self.base_opcode)
+    }
+}
+
 macro_rules! layout {
     (
         $(#[$m:meta])*
@@ -23,7 +30,7 @@ macro_rules! layout {
             $(
                 #[opcode_offset = $offset:literal]
                 $layout_variant:ident(struct $layout_struct:ident (
-                    $( $layout_field_ty:ident $(<$field_ty_param:ident>)? ),* $(,)?
+                    $( $field_var:ident : $layout_field_ty:ident $(<$field_ty_param:ident>)? ),* $(,)?
                 )),
             )*
         }
@@ -35,6 +42,16 @@ macro_rules! layout {
             ),*
         }
 
+        impl $layout_enum {
+            /// Creates the 64-bit binary representation of this instruction
+            pub fn to_binary(&self, base_opcode: u16) -> u64 {
+                use $layout_enum::*;
+                match self {
+                    $($layout_variant(layout) => layout.to_binary(base_opcode),)*
+                }
+            }
+        }
+
         $(
             #[derive(Debug, Clone, PartialEq)]
             $v struct $layout_struct($($layout_field_ty $(<$field_ty_param>)?),*);
@@ -43,7 +60,27 @@ macro_rules! layout {
                 /// Returns the number of bits of the `argument` section of the instruction used by
                 /// this particular layout
                 pub fn used_arguments_bits() -> u8 {
-                    0 $(+ $layout_field_ty $(::<$field_ty_param>)? :: size_bits())*
+                    0 $(+ $layout_field_ty $(::<$field_ty_param>)? ::size_bits())*
+                }
+
+                /// Creates the 64-bit binary representation of this instruction
+                pub fn to_binary(&self, base_opcode: u16) -> u64 {
+                    let $layout_struct($($field_var),*) = self;
+                    let mut msb_offset = 0;
+                    let mut out = 0u64;
+
+                    let opcode = Opcode(base_opcode + $offset);
+                    opcode.write(msb_offset, &mut out);
+                    msb_offset += Opcode::size_bits();
+
+                    $(
+                        $field_var.write(msb_offset, &mut out);
+                        msb_offset += $layout_field_ty $(::<$field_ty_param>)? ::size_bits();
+                    )*
+
+                    debug_assert!(msb_offset <= 64, "bug: to_binary wrote too many bits");
+
+                    out
                 }
             }
         )*
@@ -55,27 +92,27 @@ layout! {
     #[derive(Debug, Clone, PartialEq)]
     pub enum Layout {
         #[opcode_offset = 0]
-        L1(struct L1(Reg, Reg)),
+        L1(struct L1(r1: Reg, r2: Reg)),
         #[opcode_offset = 1]
-        L2(struct L2(Reg, Imm<S46>)),
+        L2(struct L2(r: Reg, im: Imm<S46>)),
         #[opcode_offset = 2]
-        L3(struct L3(Imm<S46>, Reg)),
+        L3(struct L3(im: Imm<S46>, r: Reg)),
         #[opcode_offset = 3]
-        L4(struct L4(Reg, Reg, Offset)),
+        L4(struct L4(r1: Reg, r2: Reg, off: Offset)),
         #[opcode_offset = 4]
-        L5(struct L5(Reg, Offset, Imm<S30>)),
+        L5(struct L5(r: Reg, off: Offset, im: Imm<S30>)),
         #[opcode_offset = 5]
-        L6(struct L6(Imm<S26>, Imm<S26>)),
+        L6(struct L6(im1: Imm<S26>, im2: Imm<S26>)),
         #[opcode_offset = 6]
-        L7(struct L7(Reg, Reg, Reg)),
+        L7(struct L7(r1: Reg, r2: Reg, r3: Reg)),
         #[opcode_offset = 7]
-        L8(struct L8(Reg, Reg, Imm<S40>)),
+        L8(struct L8(r1: Reg, r2: Reg, im: Imm<S40>)),
         #[opcode_offset = 8]
-        L9(struct L9(Reg)),
+        L9(struct L9(r: Reg)),
         #[opcode_offset = 9]
-        L10(struct L10(Imm<S52>)),
+        L10(struct L10(im: Imm<S52>)),
         #[opcode_offset = 10]
-        L11(struct L11(Reg, Offset)),
+        L11(struct L11(r: Reg, off: Offset)),
     }
 }
 
@@ -321,6 +358,27 @@ pub trait BitPattern {
     fn write(&self, msb_offset: u8, out: &mut u64);
 }
 
+/// The opcode of an instruction, encoded in 12-bits
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct Opcode(u16);
+
+impl BitPattern for Opcode {
+    fn size_bits() -> u8 {
+        12
+    }
+
+    fn write(&self, msb_offset: u8, out: &mut u64) {
+        let bits = Self::size_bits();
+        let value = self.0 as u64;
+        debug_assert!(value < 2u64.pow(bits as u32), "bug: opcode value does not fit in {}-bits", bits);
+
+        // Shift the value to the position specified by msb_offset
+        let value = value << (64 - msb_offset - bits);
+
+        *out |= value;
+    }
+}
+
 /// One of the 64 registers, encoded in 6-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Reg(u8);
@@ -505,5 +563,13 @@ mod tests {
         assert!(L9::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
         assert!(L10::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
         assert!(L11::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
+    }
+
+    #[test]
+    fn encoded_instr() {
+        let base_opcode = 32;
+        let layout = Layout::L5(L5(Reg(61), Offset(-3392), Imm(0x3f3f7ac9, PhantomData)));
+        let expected = 0b_00000010_0100__1111_01__111100_10110000_00__111111_00111111_01111010_11001001_u64;
+        assert_eq!(layout.to_binary(base_opcode), expected);
     }
 }
