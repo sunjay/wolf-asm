@@ -360,7 +360,7 @@ pub trait ImmSize: SizeInBits {
             value
         } else {
             diag.span_error(span, format!("immediate value `{}` (`0x{:x}`) for this instruction must fit in {}-bits", value, value, bits))
-                .span_note(span, format!("that means the value must be between `{}` (`0x{:x}`) and `{}` (`0x{:x}`)", smin, smin, umax, umax))
+                .span_note(span, format!("that means the value must be between `{}` and `{}` (`0x{:x}`)", smin, umax, umax))
                 .emit();
 
             // Error recovery: pick a value that is definitely in the range so we can continue
