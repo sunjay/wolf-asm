@@ -22,5 +22,6 @@ static_byte_string ::= '.bytes' bytes_lit
 
 (* Trailing commas are not allowed *)
 instr ::= ident ((instr_arg ',')* instr_arg)?
-instr_arg ::= register | immediate | ident
+instr_arg ::= offset_register | register | immediate | ident
+offset_register ::= immediate '(' register ')'
 immediate ::= integer_lit

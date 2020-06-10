@@ -189,6 +189,7 @@ impl InstrArg {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Register {
     pub kind: RegisterKind,
+    pub offset: Option<Immediate>,
     pub span: Span,
 }
 

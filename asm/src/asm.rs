@@ -217,7 +217,13 @@ impl Source {
 
     pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Source::Register(Register::validate(reg, diag)),
+            ast::InstrArg::Register(reg) => {
+                let (reg, offset) = Register::validate(reg, diag);
+                if let Some(offset) = offset {
+                    diag.span_error(offset.span, "source registers do not support offsets").emit();
+                }
+                Source::Register(reg)
+            },
             ast::InstrArg::Immediate(imm) => Source::Immediate(imm),
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Source::Label(label),
@@ -247,7 +253,13 @@ impl Destination {
 
     pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Destination::Register(Register::validate(reg, diag)),
+            ast::InstrArg::Register(reg) => {
+                let (reg, offset) = Register::validate(reg, diag);
+                if let Some(offset) = offset {
+                    diag.span_error(offset.span, "destination registers do not support offsets").emit();
+                }
+                Destination::Register(reg)
+            },
             _ => {
                 let span = arg.span();
                 diag.span_error(span, format!("expected a register, found `{}`", arg)).emit();
@@ -270,7 +282,7 @@ impl Destination {
 /// Represents an argument for an instruction that may be used as a location (address) operand
 #[derive(Debug, Clone, PartialEq)]
 pub enum Location {
-    Register(Register),
+    Register(Register, Option<Offset>),
     Immediate(Immediate),
     Label(Ident),
 }
@@ -283,7 +295,10 @@ impl Location {
 
     pub fn validate(arg: ast::InstrArg, diag: &Diagnostics) -> Self {
         match arg {
-            ast::InstrArg::Register(reg) => Location::Register(Register::validate(reg, diag)),
+            ast::InstrArg::Register(reg) => {
+                let (reg, offset) = Register::validate(reg, diag);
+                Location::Register(reg, offset)
+            },
             ast::InstrArg::Immediate(imm) => Location::Immediate(imm),
             // After const expansion, the only names left are labels
             ast::InstrArg::Name(label) => Location::Label(label),
@@ -295,7 +310,7 @@ impl Location {
         Location::Register(Register {
             kind: RegisterKind::Numbered(0),
             span,
-        })
+        }, None)
     }
 }
 
@@ -324,8 +339,8 @@ impl fmt::Display for Register {
 }
 
 impl Register {
-    pub fn validate(reg: ast::Register, diag: &Diagnostics) -> Self {
-        let ast::Register {kind, span} = reg;
+    pub fn validate(reg: ast::Register, diag: &Diagnostics) -> (Self, Option<Offset>) {
+        let ast::Register {kind, offset, span} = reg;
 
         let kind = match kind {
             ast::RegisterKind::Named(name) if &*name == "sp" => {
@@ -349,7 +364,9 @@ impl Register {
             },
         };
 
-        Self {kind, span}
+        let offset = offset.map(|imm| Offset::validate(imm, diag));
+
+        (Self {kind, span}, offset)
     }
 }
 
@@ -373,6 +390,35 @@ impl fmt::Display for RegisterKind {
             FramePointer => write!(f, "fp"),
             Numbered(num) => write!(f, "{}", num),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Offset {
+    pub value: i16,
+    pub span: Span,
+}
+
+impl fmt::Display for Offset {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl Offset {
+    pub fn validate(imm: ast::Immediate, diag: &Diagnostics) -> Self {
+        let ast::Immediate {value, span} = imm;
+
+        let value = if value >= i16::min_value() as i128 && value <= i16::max_value() as i128 {
+            value as i16
+        } else {
+            diag.span_error(span, format!("offset value `{}` must be in the range of a 16-bit signed integer, `{}` to `{}`", value, i16::min_value(), i16::max_value())).emit();
+
+            // Error recovery: return a default value so we can keep producing errors
+            0
+        };
+
+        Self {value, span}
     }
 }
 

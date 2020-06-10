@@ -50,4 +50,19 @@ add, $63, $62
 call $0
 nop
 
+# register + offset syntax (valid)
+load8 $1, -8($2)
+load8 $1, 256($2)
+# mismatches parenthesis
+load8 $1, -12 $2)
+load8 $1, -16($2
+# extra parenthesis
+load8 $1, -24(($2))
+# offset inside, register outside
+load8 $1, $2(-8)
+# both inside
+load8 $1, ($2-8)
+# both inside, no parens
+load8 $1, $2-8
+
 jmp loop

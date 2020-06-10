@@ -387,9 +387,21 @@ fn instr(input: Input) -> ParseResult<ast::Instr> {
 }
 
 fn instr_arg(input: Input) -> ParseResult<ast::InstrArg> {
-    register(input).map_output(ast::InstrArg::Register)
+    offset_register(input).map_output(ast::InstrArg::Register)
+        .or_parse(|| register(input).map_output(ast::InstrArg::Register))
         .or_parse(|| immediate(input).map_output(ast::InstrArg::Immediate))
         .or_parse(|| ident(input).map_output(ast::InstrArg::Name))
+}
+
+fn offset_register(input: Input) -> ParseResult<ast::Register> {
+    immediate(input)
+        .and_parse(|input| tk(input, TokenKind::ParenOpen))
+        .and_parse(|input| register(input))
+        .and_parse(|input| tk(input, TokenKind::ParenClose))
+        .map_output(|(((offset, _), reg), _)| ast::Register {
+            offset: Some(offset),
+            ..reg
+        })
 }
 
 fn immediate(input: Input) -> ParseResult<ast::Immediate> {
@@ -406,6 +418,7 @@ fn ident(input: Input) -> ParseResult<ast::Ident> {
 fn register(input: Input) -> ParseResult<ast::Register> {
     tk(input, TokenKind::Register).map_output(|token| ast::Register {
         kind: token.unwrap_register().into(),
+        offset: None,
         span: token.span,
     })
 }
