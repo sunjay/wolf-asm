@@ -13,3 +13,20 @@ cmp 0x3fffffffffff, $1
 # invalid: more than 46-bits
 cmp 0x7fffffffffff, $1
 cmp 0x1000000000000, $1
+
+store8 -4($2), $3
+store8 -8($2), 32
+store8 -8($2), 0x3fffffff
+store8 0x3ffffff, 0x3ffffff
+# invalid: more than 30-bits
+store8 -8($2), 0x7ffffff
+# invalid: more than 26-bits
+store8 0x7fffffff, 0x7fffffff
+
+divr $3, $2, 0xffffffffff
+# invalid: more than 40-bits
+divr $3, $2, 0x1ffffffffff
+
+push 0xfffffffffffff
+# invalid: more than 52-bits
+push 0x1fffffffffffff
