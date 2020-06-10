@@ -85,6 +85,13 @@ section .code
   load1 $21, $22, $23 # extra argument
   load1 123, $1, $2, $3 # immediate as destination and extra arguments
 
+  load1 $1, -4($2) # valid
+  load1 $1, 48($2) # valid
+  load1 $1, -32768($2) # valid (min offset)
+  load1 $1, 32767($2) # valid (max offset)
+  load1 $1, -32769($2) # offset too large (negative)
+  load1 $1, 32768($2) # offset too large (positive)
+
   mul $2, $1 # valid
   mull $3, $2, $1 # valid (extra arg)
   mulu $2, $1 # valid
