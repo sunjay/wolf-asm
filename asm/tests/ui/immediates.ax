@@ -1,0 +1,15 @@
+section .code
+
+add $1, $2
+add $1, 100
+add $1, 0x3fffffffffff
+# invalid: more than 46-bits
+add $1, 0x7fffffffffff
+add $1, 0x1000000000000
+
+cmp $2, $1
+cmp 100, $1
+cmp 0x3fffffffffff, $1
+# invalid: more than 46-bits
+cmp 0x7fffffffffff, $1
+cmp 0x1000000000000, $1
