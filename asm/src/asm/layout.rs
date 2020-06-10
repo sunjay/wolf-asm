@@ -309,17 +309,36 @@ impl Loc {
     }
 }
 
-pub trait SizeInBits {
+pub trait BitPattern {
+    /// Returns the size of this bit pattern in bits
+    ///
+    /// This is the number of bits that will be used when this is written into a value
     fn size_bits() -> u8;
+
+    /// Writes this pattern of bits into the given number at the given offset from the MSB
+    ///
+    /// Assumes that the region [msb_offset, msb_offset+size_bits] is all zeros in `out`
+    fn write(&self, msb_offset: u8, out: &mut u64);
 }
 
 /// One of the 64 registers, encoded in 6-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Reg(u8);
 
-impl SizeInBits for Reg {
+impl BitPattern for Reg {
     fn size_bits() -> u8 {
         6
+    }
+
+    fn write(&self, msb_offset: u8, out: &mut u64) {
+        let bits = Self::size_bits();
+        let value = self.0 as u64;
+        debug_assert!(value < 2u64.pow(bits as u32), "bug: register value does not fit in {}-bits", bits);
+
+        // Shift the value to the position specified by msb_offset
+        let value = value << (64 - msb_offset - bits);
+
+        *out |= value;
     }
 }
 
@@ -340,13 +359,19 @@ impl Reg {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Imm<S>(i128, PhantomData<S>);
 
-impl<S: SizeInBits> SizeInBits for Imm<S> {
+impl<S: ImmSize> BitPattern for Imm<S> {
     fn size_bits() -> u8 {
         S::size_bits()
     }
+
+    fn write(&self, msb_offset: u8, out: &mut u64) {
+        S::write(self.0, msb_offset, out)
+    }
 }
 
-pub trait ImmSize: SizeInBits {
+pub trait ImmSize {
+    fn size_bits() -> u8;
+
     fn validate_immediate(imm: asm::Immediate, diag: &Diagnostics) -> i128 {
         let bits = Self::size_bits() as u32;
 
@@ -368,6 +393,22 @@ pub trait ImmSize: SizeInBits {
             0
         }
     }
+
+    fn write(value: i128, msb_offset: u8, out: &mut u64) {
+        let bits = Self::size_bits();
+
+        // Get the bits of the value, preserving signedness
+        let value_bits = u128::from_le_bytes(value.to_le_bytes());
+
+        // Truncate to max 64 bits (safe because no bits past that should be set)
+        debug_assert!(value_bits < 2u128.pow(bits as u32), "bug: immediate value does not fit in {}-bits", bits);
+        let value = value_bits as u64;
+
+        // Shift the value to the position specified by msb_offset
+        let value = value << (64 - msb_offset - bits);
+
+        *out |= value;
+    }
 }
 
 impl<S: ImmSize> Imm<S> {
@@ -380,9 +421,22 @@ impl<S: ImmSize> Imm<S> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Offset(i16);
 
-impl SizeInBits for Offset {
+impl BitPattern for Offset {
     fn size_bits() -> u8 {
         16
+    }
+
+    fn write(&self, msb_offset: u8, out: &mut u64) {
+        let bits = Self::size_bits();
+
+        // Get the bits of the value, preserving signedness
+        let value = u16::from_le_bytes(self.0.to_le_bytes());
+        let value = value as u64;
+
+        // Shift the value to the position specified by msb_offset
+        let value = value << (64 - msb_offset - bits);
+
+        *out |= value;
     }
 }
 
@@ -405,13 +459,11 @@ macro_rules! imm_sizes {
             $(#[$m])*
             $v struct $imm_size_struct;
 
-            impl SizeInBits for $imm_size_struct {
+            impl ImmSize for $imm_size_struct {
                 fn size_bits() -> u8 {
                     $imm_size
                 }
             }
-
-            impl ImmSize for $imm_size_struct {}
         )*
     };
 }
