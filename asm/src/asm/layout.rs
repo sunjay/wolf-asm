@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use crate::diagnostics::Diagnostics;
 use crate::label_offsets::LabelOffsets;
+use crate::asm;
 
 use super::{Source, Destination, Location};
 
@@ -92,49 +93,119 @@ impl LayoutArguments for () {
 
 impl LayoutArguments for (Destination, Source) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (dest, src) = self;
+        let dest = Dest::new(dest, diag, labels);
+        let src = Src::new(src, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Source, Source) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (src1, src2) = self;
+        let src1 = Src::new(src1, diag, labels);
+        let src2 = Src::new(src2, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Destination, Location) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (dest, loc) = self;
+        let dest = Dest::new(dest, diag, labels);
+        let loc = Loc::new(loc, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Location, Source) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (loc, src) = self;
+        let loc = Loc::new(loc, diag, labels);
+        let src = Src::new(src, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Destination, Destination, Source) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (dest1, dest2, src) = self;
+        let dest1 = Dest::new(dest1, diag, labels);
+        let dest2 = Dest::new(dest2, diag, labels);
+        let src = Src::new(src, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Source,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (src,) = self;
+        let src = Src::new(src, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Destination,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (dest,) = self;
+        let dest = Dest::new(dest, diag, labels);
         todo!()
     }
 }
 
 impl LayoutArguments for (Location,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
+        let (loc,) = self;
+        let loc = Loc::new(loc, diag, labels);
         todo!()
+    }
+}
+
+/// Like `asm::Source`, but with labels resolved to immediates
+#[derive(Debug, Clone, PartialEq)]
+enum Src {
+    Register(asm::Register),
+    Immediate(asm::Immediate),
+}
+
+impl Src {
+    pub fn new(source: asm::Source, diag: &Diagnostics, labels: &LabelOffsets) -> Self {
+        match source {
+            asm::Source::Register(reg) => Src::Register(reg),
+            asm::Source::Immediate(imm) => Src::Immediate(imm),
+            asm::Source::Label(label) => Src::Immediate(labels.lookup(&label, diag)),
+        }
+    }
+}
+
+/// Like `asm::Destination`, but with labels resolved to immediates
+#[derive(Debug, Clone, PartialEq)]
+enum Dest {
+    Register(asm::Register),
+}
+
+impl Dest {
+    pub fn new(source: asm::Destination, _diag: &Diagnostics, _labels: &LabelOffsets) -> Self {
+        match source {
+            asm::Destination::Register(reg) => Dest::Register(reg),
+        }
+    }
+}
+
+/// Like `Location`, but with labels resolved to immediates
+#[derive(Debug, Clone, PartialEq)]
+enum Loc {
+    Register(asm::Register, Option<asm::Offset>),
+    Immediate(asm::Immediate),
+}
+
+impl Loc {
+    pub fn new(source: asm::Location, diag: &Diagnostics, labels: &LabelOffsets) -> Self {
+        match source {
+            asm::Location::Register(reg, offset) => Loc::Register(reg, offset),
+            asm::Location::Immediate(imm) => Loc::Immediate(imm),
+            asm::Location::Label(label) => Loc::Immediate(labels.lookup(&label, diag)),
+        }
     }
 }
 
