@@ -38,6 +38,10 @@ impl<'a> Lexer<'a> {
         let res = match (current_char, self.scanner.peek()) {
             (b':', _) => Ok(self.byte_token(start, Colon)),
             (b',', _) => Ok(self.byte_token(start, Comma)),
+
+            (b'(', _) => Ok(self.byte_token(start, ParenOpen)),
+            (b')', _) => Ok(self.byte_token(start, ParenClose)),
+
             (b'\n', _) => Ok(self.byte_token(start, Newline)),
 
             (b'"', _) |
@@ -642,6 +646,12 @@ mod tests {
     }
 
     #[test]
+    fn parens() {
+        expect_tokens!(b")((())))", &[t!(ParenClose), t!(ParenOpen), t!(ParenOpen), t!(ParenOpen),
+            t!(ParenClose), t!(ParenClose), t!(ParenClose), t!(ParenClose)]);
+    }
+
+    #[test]
     fn newline() {
         expect_token!(b"\n", t!(Newline));
         expect_tokens!(b"\n\n", &[t!(Newline), t!(Newline)]);
@@ -875,6 +885,12 @@ mod tests {
     fn registers_invalid() {
         // 256 is greater than u8::MAX
         expect_error!(b"$256");
+    }
+
+    #[test]
+    fn offset_register() {
+        expect_tokens!(b"10($2), -128($sp)", &[int!(10), t!(ParenOpen), reg!(2), t!(ParenClose),
+            t!(Comma), int!(-128), t!(ParenOpen), reg!("sp"), t!(ParenClose)]);
     }
 
     #[test]
