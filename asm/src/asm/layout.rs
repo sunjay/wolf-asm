@@ -168,7 +168,35 @@ impl LayoutArguments for (Location, Source) {
         let (loc, src) = self;
         let loc = Loc::new(loc, diag, labels);
         let src = Src::new(src, diag, labels);
-        todo!()
+
+        match (loc, src) {
+            (Loc::Register(loc_reg, None), Src::Register(src_reg)) => Layout::L1(L1(
+                Reg::new(loc_reg, diag),
+                Reg::new(src_reg, diag),
+            )),
+            (Loc::Register(reg, None), Src::Immediate(imm)) => Layout::L2(L2(
+                Reg::new(reg, diag),
+                Imm::new(imm, diag),
+            )),
+            (Loc::Register(loc_reg, Some(offset)), Src::Register(src_reg)) => Layout::L4(L4(
+                Reg::new(loc_reg, diag),
+                Reg::new(src_reg, diag),
+                Offset::new(offset, diag),
+            )),
+            (Loc::Register(reg, Some(offset)), Src::Immediate(imm)) => Layout::L5(L5(
+                Reg::new(reg, diag),
+                Offset::new(offset, diag),
+                Imm::new(imm, diag),
+            )),
+            (Loc::Immediate(imm), Src::Register(reg)) => Layout::L3(L3(
+                Imm::new(imm, diag),
+                Reg::new(reg, diag),
+            )),
+            (Loc::Immediate(loc_imm), Src::Immediate(src_imm)) => Layout::L6(L6(
+                Imm::new(loc_imm, diag),
+                Imm::new(src_imm, diag),
+            )),
+        }
     }
 }
 
@@ -178,7 +206,19 @@ impl LayoutArguments for (Destination, Destination, Source) {
         let dest1 = Dest::new(dest1, diag, labels);
         let dest2 = Dest::new(dest2, diag, labels);
         let src = Src::new(src, diag, labels);
-        todo!()
+
+        match (dest1, dest2, src) {
+            (Dest::Register(dest1_reg), Dest::Register(dest2_reg), Src::Register(src_reg)) => Layout::L7(L7(
+                Reg::new(dest1_reg, diag),
+                Reg::new(dest2_reg, diag),
+                Reg::new(src_reg, diag),
+            )),
+            (Dest::Register(dest1_reg), Dest::Register(dest2_reg), Src::Immediate(src_imm)) => Layout::L8(L8(
+                Reg::new(dest1_reg, diag),
+                Reg::new(dest2_reg, diag),
+                Imm::new(src_imm, diag),
+            )),
+        }
     }
 }
 
