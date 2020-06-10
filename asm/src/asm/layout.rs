@@ -82,8 +82,11 @@ pub trait LayoutArguments {
 }
 
 impl LayoutArguments for () {
-    fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
-        todo!()
+    fn layout(self, _diag: &Diagnostics, _labels: &LabelOffsets) -> Layout {
+        // For zero arguments, layout is unspecified and can be anything
+        // No one should rely on this exact representation
+        // This was chosen because L1 has an opcode offset of 0 so the opcode is not changed
+        Layout::L1(L1(Reg(0), Reg(0)))
     }
 }
 
