@@ -452,5 +452,6 @@ mod tests {
         assert!(L8::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
         assert!(L9::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
         assert!(L10::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
+        assert!(L11::used_arguments_bits() <= ARGUMENTS_SECTION_SIZE);
     }
 }
