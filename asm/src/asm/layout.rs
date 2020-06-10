@@ -346,9 +346,33 @@ impl<S: SizeInBits> SizeInBits for Imm<S> {
     }
 }
 
-impl<S> Imm<S> {
+pub trait ImmSize: SizeInBits {
+    fn validate_immediate(imm: asm::Immediate, diag: &Diagnostics) -> i128 {
+        let bits = Self::size_bits() as u32;
+
+        // minimum value if immediate is interpreted as signed
+        let smin = -2i128.pow(bits-1);
+        // maximum value if immediate is interpreted as unsigned
+        let umax = 2i128.pow(bits)-1;
+
+        let asm::Immediate {value, span} = imm;
+        if value >= smin && value <= umax {
+            value
+        } else {
+            diag.span_error(span, format!("immediate value for this instruction must fit in {}-bits", bits))
+                .span_note(span, format!("that means the value must be between {} and {}", smin, umax))
+                .emit();
+
+            // Error recovery: pick a value that is definitely in the range so we can continue
+            // processing and hopefully pickup more errors
+            0
+        }
+    }
+}
+
+impl<S: ImmSize> Imm<S> {
     pub fn new(imm: asm::Immediate, diag: &Diagnostics) -> Self {
-        todo!()
+        Imm(S::validate_immediate(imm, diag), PhantomData)
     }
 }
 
@@ -386,6 +410,8 @@ macro_rules! imm_sizes {
                     $imm_size
                 }
             }
+
+            impl ImmSize for $imm_size_struct {}
         )*
     };
 }
