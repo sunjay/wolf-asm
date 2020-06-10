@@ -7,6 +7,7 @@ use std::process;
 use std::sync::Arc;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::fs::File;
 
 use parking_lot::RwLock;
 use termcolor::ColorChoice;
@@ -137,8 +138,10 @@ fn main() {
 
     let label_offsets = LabelOffsets::new(&validated_program);
     let exec = Executable::layout_executable(validated_program, &diag, &label_offsets);
-    dbg!(exec);
     check_errors!(&diag);
 
-    dbg!(output_path);
+    let output_file = File::create(&output_path)
+        .unwrap_or_else(|err| quit!(&diag, "Could not open output path `{}`: {}", output_path.display(), err));
+    exec.write(output_file)
+        .unwrap_or_else(|err| quit!(&diag, "Unable to write executable `{}`: {}", output_path.display(), err));
 }
