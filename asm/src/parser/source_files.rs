@@ -87,11 +87,16 @@ impl LineNumbers {
         // correct to 1
         if line == 0 {
             (1, 1)
+
+        // Edge case: very first line will have an off-by-one error on all offsets
+        } else if line == 1 {
+            let offset = index - self.offsets[line - 1];
+            (line, offset+1)
+
         } else {
             let offset = index - self.offsets[line - 1];
             (line, offset)
         }
-
     }
 }
 
