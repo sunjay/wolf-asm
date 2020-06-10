@@ -70,7 +70,11 @@ impl<'a, O> TryParse<'a, Input<'a>> for ParseResult<'a, O> {
         match self {
             Ok((input, output)) => Ok((input, output)),
             Err((input1, err1)) => match f() {
-                Ok((input, output)) => Ok((input, output)),
+                Ok((input2, output)) => match relative_position_to(input2, input1) {
+                    // Propagate the error if we haven't advanced farther
+                    Behind => Err((input1, err1)),
+                    Same | Ahead => Ok((input2, output)),
+                },
                 Err((input2, err2)) => match relative_position_to(input2, input1) {
                     Behind => Err((input1, err1)),
                     Same => Err((input1, err1.merge(err2))),
