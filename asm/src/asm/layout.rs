@@ -59,21 +59,23 @@ layout! {
         #[opcode_offset = 1]
         L2(struct L2(Reg, Imm<S46>)),
         #[opcode_offset = 2]
-        L3(struct L3(Reg, Reg, Offset)),
+        L3(struct L3(Imm<S46>, Reg)),
         #[opcode_offset = 3]
-        L4(struct L4(Reg, Offset, Imm<S30>)),
+        L4(struct L4(Reg, Reg, Offset)),
         #[opcode_offset = 4]
-        L5(struct L5(Imm<S26>, Imm<S26>)),
+        L5(struct L5(Reg, Offset, Imm<S30>)),
         #[opcode_offset = 5]
-        L6(struct L6(Reg, Reg, Reg)),
+        L6(struct L6(Imm<S26>, Imm<S26>)),
         #[opcode_offset = 6]
-        L7(struct L7(Reg, Reg, Imm<S40>)),
+        L7(struct L7(Reg, Reg, Reg)),
         #[opcode_offset = 7]
-        L8(struct L8(Reg)),
+        L8(struct L8(Reg, Reg, Imm<S40>)),
         #[opcode_offset = 8]
-        L9(struct L9(Imm<S52>)),
+        L9(struct L9(Reg)),
         #[opcode_offset = 9]
-        L10(struct L10(Reg, Offset)),
+        L10(struct L10(Imm<S52>)),
+        #[opcode_offset = 10]
+        L11(struct L11(Reg, Offset)),
     }
 }
 
@@ -121,12 +123,15 @@ impl LayoutArguments for (Source, Source) {
                 Reg::new(src1_reg, diag),
                 Reg::new(src2_reg, diag),
             )),
-            (Src::Register(reg), Src::Immediate(imm)) |
-            (Src::Immediate(imm), Src::Register(reg)) => Layout::L2(L2(
+            (Src::Register(reg), Src::Immediate(imm)) => Layout::L2(L2(
                 Reg::new(reg, diag),
                 Imm::new(imm, diag),
             )),
-            (Src::Immediate(src1_imm), Src::Immediate(src2_imm)) => Layout::L5(L5(
+            (Src::Immediate(imm), Src::Register(reg)) => Layout::L3(L3(
+                Imm::new(imm, diag),
+                Reg::new(reg, diag),
+            )),
+            (Src::Immediate(src1_imm), Src::Immediate(src2_imm)) => Layout::L6(L6(
                 Imm::new(src1_imm, diag),
                 Imm::new(src2_imm, diag),
             )),
@@ -145,7 +150,7 @@ impl LayoutArguments for (Destination, Location) {
                 Reg::new(dest_reg, diag),
                 Reg::new(loc_reg, diag),
             )),
-            (Dest::Register(dest_reg), Loc::Register(loc_reg, Some(offset))) => Layout::L3(L3(
+            (Dest::Register(dest_reg), Loc::Register(loc_reg, Some(offset))) => Layout::L4(L4(
                 Reg::new(dest_reg, diag),
                 Reg::new(loc_reg, diag),
                 Offset::new(offset, diag),
@@ -183,8 +188,8 @@ impl LayoutArguments for (Source,) {
         let src = Src::new(src, diag, labels);
 
         match src {
-            Src::Register(reg) => Layout::L8(L8(Reg::new(reg, diag))),
-            Src::Immediate(imm) => Layout::L9(L9(Imm::new(imm, diag))),
+            Src::Register(reg) => Layout::L9(L9(Reg::new(reg, diag))),
+            Src::Immediate(imm) => Layout::L10(L10(Imm::new(imm, diag))),
         }
     }
 }
@@ -195,7 +200,7 @@ impl LayoutArguments for (Destination,) {
         let dest = Dest::new(dest, diag, labels);
 
         match dest {
-            Dest::Register(reg) => Layout::L8(L8(Reg::new(reg, diag))),
+            Dest::Register(reg) => Layout::L9(L9(Reg::new(reg, diag))),
         }
     }
 }
@@ -206,12 +211,12 @@ impl LayoutArguments for (Location,) {
         let loc = Loc::new(loc, diag, labels);
 
         match loc {
-            Loc::Register(reg, None) => Layout::L8(L8(Reg::new(reg, diag))),
-            Loc::Register(reg, Some(offset)) => Layout::L10(L10(
+            Loc::Register(reg, None) => Layout::L9(L9(Reg::new(reg, diag))),
+            Loc::Register(reg, Some(offset)) => Layout::L11(L11(
                 Reg::new(reg, diag),
                 Offset::new(offset, diag),
             )),
-            Loc::Immediate(imm) => Layout::L9(L9(Imm::new(imm, diag))),
+            Loc::Immediate(imm) => Layout::L10(L10(Imm::new(imm, diag))),
         }
     }
 }

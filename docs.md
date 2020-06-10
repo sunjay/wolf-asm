@@ -355,34 +355,32 @@ instructions support all layouts.
   * upper 12-bits is divided between the registers, 6-bits each
 2. `register, immediate`
   * upper 6-bits is used for `register`
-  * remaining 46-bits is for the immediate
-3. `register + offset, register`
+  * remaining 46-bits is for `immediate`
+3. `immediate, register`
+  * lower 6-bits is used for `register`
+  * remaining 46-bits is for `immediate`
+4. `register + offset, register`
   * upper 12-bits is divided between the registers, 6-bits each
   * next 16-bits is used for `offset`
-4. `register + offset, immediate`
+5. `register + offset, immediate`
   * upper 6-bits is used for `register`
   * next 16-bits is used for `offset`
-  * remaining 30-bits is for the immediate
-5. `immediate, immediate`
-  * upper 26-bits for the first immediate
-  * lower 26-bits for the second immediate
-6. `register, register, register`
+  * remaining 30-bits is for `immediate`
+6. `immediate, immediate`
+  * upper 26-bits for the first `immediate`
+  * lower 26-bits for the second `immediate`
+7. `register, register, register`
   * upper 18-bits is divided between the registers, 6-bits each
-7. `register, register, immediate`
+8. `register, register, immediate`
   * upper 12-bits is divided between the registers, 6-bits each
-  * remaining 40-bits is for the immediate
-8. `register`
+  * remaining 40-bits is for `immediate`
+9. `register`
   * upper 6-bits is used to hold the value of the register
-9. `immediate`
-  * all 52-bits are used to hold the immediate
-10. `register + offset`
+10. `immediate`
+  * all 52-bits are used to hold `immediate`
+11. `register + offset`
   * upper 6-bits is used to hold the value of the register
   * next 16-bits is used for `offset`
-
-To save on opcodes, a layout that can be reordered to fit into a layout from the
-list above. For example, instead of supporting both `register, immediate` and
-`immediate, register`, only one of them is specified and the other is reversed
-to use the same layout.
 
 Any unused bits in an instruction are reserved. Using those bits or relying on
 them to be a particular value will lead to undefined behaviour.
