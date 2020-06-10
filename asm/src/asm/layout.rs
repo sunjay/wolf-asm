@@ -141,7 +141,11 @@ impl LayoutArguments for (Source,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
         let (src,) = self;
         let src = Src::new(src, diag, labels);
-        todo!()
+
+        match src {
+            Src::Register(reg) => Layout::L8(L8(Reg::new(reg, diag))),
+            Src::Immediate(imm) => Layout::L9(L9(Imm::new(imm, diag))),
+        }
     }
 }
 
@@ -149,7 +153,10 @@ impl LayoutArguments for (Destination,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
         let (dest,) = self;
         let dest = Dest::new(dest, diag, labels);
-        todo!()
+
+        match dest {
+            Dest::Register(reg) => Layout::L8(L8(Reg::new(reg, diag))),
+        }
     }
 }
 
@@ -157,7 +164,15 @@ impl LayoutArguments for (Location,) {
     fn layout(self, diag: &Diagnostics, labels: &LabelOffsets) -> Layout {
         let (loc,) = self;
         let loc = Loc::new(loc, diag, labels);
-        todo!()
+
+        match loc {
+            Loc::Register(reg, None) => Layout::L8(L8(Reg::new(reg, diag))),
+            Loc::Register(reg, Some(offset)) => Layout::L10(L10(
+                Reg::new(reg, diag),
+                Offset::new(offset, diag),
+            )),
+            Loc::Immediate(imm) => Layout::L9(L9(Imm::new(imm, diag))),
+        }
     }
 }
 
@@ -223,6 +238,12 @@ impl SizeInBits for Reg {
     }
 }
 
+impl Reg {
+    pub fn new(reg: asm::Register, diag: &Diagnostics) -> Self {
+        todo!()
+    }
+}
+
 /// An immediate value, encoded with the given size
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Imm<S>(i128, PhantomData<S>);
@@ -233,6 +254,12 @@ impl<S: SizeInBits> SizeInBits for Imm<S> {
     }
 }
 
+impl<S> Imm<S> {
+    pub fn new(imm: asm::Immediate, diag: &Diagnostics) -> Self {
+        todo!()
+    }
+}
+
 /// A 16-bit signed offset, encoded in 16-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Offset(i16);
@@ -240,6 +267,14 @@ pub struct Offset(i16);
 impl SizeInBits for Offset {
     fn size_bits() -> u8 {
         16
+    }
+}
+
+impl Offset {
+    pub fn new(offset: asm::Offset, _diag: &Diagnostics) -> Self {
+        let asm::Offset {value, span: _} = offset;
+
+        Offset(value)
     }
 }
 
