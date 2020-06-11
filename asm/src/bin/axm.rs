@@ -2,6 +2,8 @@
 //!
 //! Takes assembly code and generates machine code for the ax virtual machine
 
+#![deny(unused_must_use)]
+
 use std::env;
 use std::process;
 use std::sync::Arc;
@@ -62,7 +64,7 @@ impl Into<ColorChoice> for ColorArg {
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "axm", about)]
-struct CompilerOptions {
+struct AssemblerOptions {
     /// The assembly language file (`.ax`) to generate an executable for
     #[structopt(name = "input", parse(from_os_str))]
     program_path: PathBuf,
@@ -96,7 +98,7 @@ macro_rules! check_errors {
 }
 
 fn main() {
-    let CompilerOptions {program_path, output_path, color} = CompilerOptions::from_args();
+    let AssemblerOptions {program_path, output_path, color} = AssemblerOptions::from_args();
 
     let source_files = Arc::new(RwLock::new(SourceFiles::default()));
     let diag = Diagnostics::new(source_files.clone(), color.into());
