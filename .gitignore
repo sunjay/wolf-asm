@@ -1,2 +1,7 @@
+# Executables from example asm programs
+hello
+cat
+calc
+
 /target
 **/*.rs.bk
