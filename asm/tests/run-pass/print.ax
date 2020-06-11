@@ -19,8 +19,14 @@ print_newline:
   push $fp
   mov $fp, $sp
 
+  push $1
+
+  mov $1, STDOUT
+
   # ASCII 10 = newline `\n`
-  store1 STDOUT, 10
+  store1 $1, 10
+
+  pop $1
 
   pop $fp
   ret
@@ -40,9 +46,13 @@ print_int:
   mov $fp, $sp
 
   # Save registers used in this procedure
+  push $0
   push $1
   push $2
   push $3
+
+  # Store address of STDOUT
+  mov $0, STDOUT
 
   # Check if value is negative
   cmp $1, 0
@@ -51,7 +61,7 @@ print_int:
   # Number is negative
 
   # Print negative sign (ASCII 45 = negative sign `-`)
-  store1 STDOUT, 45
+  store1 $0, 45
   # Negate the number so it is now positive
   mov $2, 0
   # 0 - $1 = -$1
@@ -68,7 +78,7 @@ positive:
 
   # After this, $1 = $1 / 10 = the next number to process
   #             $2 = $1 % 10 = the last digit of the current number
-  divu $2, $1, 10
+  divru $2, $1, 10
 
   # Push the digit
   push $2
@@ -86,7 +96,7 @@ printdigits:
   # Add to the digit so it becomes the right ASCII code (ASCII 48 = zero `0`)
   add $2, 48
   # Print the digit
-  store1 STDOUT, $2
+  store1 $0, $2
 
   # Decrement the digit counter
   sub $3, 1
@@ -97,6 +107,7 @@ printdigits:
   pop $3
   pop $2
   pop $1
+  pop $0
 
   pop $fp
   ret
