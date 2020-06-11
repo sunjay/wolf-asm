@@ -2,7 +2,6 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::ops::Range;
-use std::iter::once;
 
 use super::span::Span;
 
@@ -59,21 +58,29 @@ impl<'a> FileSource<'a> {
 
 #[derive(Debug)]
 pub struct LineNumbers {
-    /// The index in `SourceFiles::source` of the start of each line
+    /// The index in `SourceFiles::source` of the first byte in each line
     ///
-    /// An index into this field is 1 less than the line number of
-    /// the offset contained at that index.
+    /// The first byte of a line is defined as either the first byte in the file or a byte
+    /// immediately after a b`\n`.
     offsets: Vec<usize>,
 }
 
 impl LineNumbers {
     pub fn new(source: FileSource) -> Self {
         // There is always at least one line, starting at offset 0
-        let offsets = once(source.start_index()).chain(source.iter_bytes().filter_map(|(offset, ch)| match ch {
-            // Each line starts right *after* each newline
-            b'\n' => Some(offset),
-            _ => None,
-        })).collect();
+        let mut offsets = vec![source.start_index()];
+
+        for (offset, ch) in source.iter_bytes() {
+            if ch == b'\n' {
+                // Each line starts right *after* each newline
+                offsets.push(offset+1);
+            }
+        }
+
+        // Push the offset for one past the end of the file. This allows us to index into `offsets`
+        // without worrying about panicking since any result of `binary_search` for a valid index
+        // into the file will have a corresponding value in `offsets`. (this simplifies some code)
+        offsets.push(source.start_index() + source.len());
 
         Self {offsets}
     }
@@ -82,21 +89,26 @@ impl LineNumbers {
     ///
     /// Both the line number and offset are 1-based
     pub fn number_offset(&self, index: usize) -> (usize, usize) {
-        let line = self.offsets.binary_search(&index).unwrap_or_else(|index| index);
-        // Edge case: very first offset in the file will give you a line number of zero, which we
-        // correct to 1
-        if line == 0 {
-            (1, 1)
+        let line;
+        let offset;
 
-        // Edge case: very first line will have an off-by-one error on all offsets
-        } else if line == 1 {
-            let offset = index - self.offsets[line - 1];
-            (line, offset+1)
+        match self.offsets.binary_search(&index) {
+            // `index` corresponds to the first byte of a line
+            Ok(i) => {
+                line = i+1;
+                offset = 1;
+            },
 
-        } else {
-            let offset = index - self.offsets[line - 1];
-            (line, offset)
+            // `index` is on the line `i`
+            Err(i) => {
+                line = i;
+                // the offset of the first byte of this line is at i-1 because `binary_search`
+                // always finds the index *after* the first byte when `Err(_)` is returned
+                offset = index - self.offsets[i-1] + 1;
+            }
         }
+
+        (line, offset)
     }
 }
 
@@ -172,7 +184,8 @@ impl SourceFiles {
     pub fn pos(&self, span: Span) -> FilePos {
         let File {path, line_numbers, ..} = self.file(span.start);
         let (start_line, start_offset) = line_numbers.number_offset(span.start);
-        let (end_line, end_offset) = line_numbers.number_offset(span.end);
+        // Subtract 1 because end actually represents one past the end of the span
+        let (end_line, end_offset) = line_numbers.number_offset(span.end - 1);
 
         FilePos {path, start_line, start_offset, end_line, end_offset}
     }

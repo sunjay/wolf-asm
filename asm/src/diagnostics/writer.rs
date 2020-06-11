@@ -47,11 +47,11 @@ fn write_message(
     message: &str,
 ) -> io::Result<()> {
     if let Some(FilePos {path, start_line, start_offset, end_line, end_offset}) = pos {
-        if start_line == end_line && start_offset == end_offset-1 {
+        if start_line == end_line && start_offset == end_offset {
             write!(out, "[{}:{}:{}] ", path.display(), start_line, start_offset)?;
         } else {
             // end offset is always one past the end
-            write!(out, "[{}:{}:{}-{}:{}] ", path.display(), start_line, start_offset, end_line, end_offset-1)?;
+            write!(out, "[{}:{}:{}-{}:{}] ", path.display(), start_line, start_offset, end_line, end_offset)?;
         }
     }
 
