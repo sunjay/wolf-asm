@@ -86,10 +86,6 @@ pub enum StaticData {
     StaticByteStr(StaticByteStr),
 }
 
-/// The size in bytes of the additional data needed to determine which `StaticBytes` variant is
-/// being stored in the executable
-pub const STATIC_DATA_TAG_BYTES: usize = 1;
-
 impl StaticData {
     pub fn span(&self) -> Span {
         use StaticData::*;
@@ -104,14 +100,12 @@ impl StaticData {
     /// Returns the size in bytes that this will have in the generated executable
     pub fn size_bytes(&self) -> u64 {
         use StaticData::*;
-        let payload = match self {
+        match self {
             StaticBytes(data) => data.size_bytes(),
             StaticZero(data) => data.size_bytes(),
             StaticUninit(data) => data.size_bytes(),
             StaticByteStr(data) => data.size_bytes(),
-        };
-
-        STATIC_DATA_TAG_BYTES + payload
+        }
     }
 }
 
@@ -139,10 +133,6 @@ pub enum StaticBytesValue {
     B8([u8; 8], Span),
 }
 
-/// The size in bytes of the additional data needed to determine which `StaticBytesValue` variant
-/// is being stored in the executable
-pub const STATIC_BYTES_TAG_BYTES: usize = 1;
-
 impl StaticBytesValue {
     pub fn span(&self) -> Span {
         use StaticBytesValue::*;
@@ -157,14 +147,12 @@ impl StaticBytesValue {
     /// Returns the size in bytes that this will have in the generated executable
     pub fn size_bytes(&self) -> u64 {
         use StaticBytesValue::*;
-        let payload = match self {
+        match self {
             B1(_, _) => 1,
             B2(_, _) => 2,
             B4(_, _) => 4,
             B8(_, _) => 8,
-        };
-
-        STATIC_BYTES_TAG_BYTES + payload
+        }
     }
 }
 
