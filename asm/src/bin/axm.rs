@@ -142,6 +142,6 @@ fn main() {
 
     let output_file = File::create(&output_path)
         .unwrap_or_else(|err| quit!(&diag, "Could not open output path `{}`: {}", output_path.display(), err));
-    exec.write(output_file)
+    bincode::serialize_into(output_file, &exec)
         .unwrap_or_else(|err| quit!(&diag, "Unable to write executable `{}`: {}", output_path.display(), err));
 }

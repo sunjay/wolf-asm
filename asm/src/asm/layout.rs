@@ -1,12 +1,14 @@
 use std::marker::PhantomData;
 
+use serde::{Serialize, Deserialize};
+
 use crate::diagnostics::Diagnostics;
 use crate::label_offsets::LabelOffsets;
 use crate::asm;
 
 use super::{Source, Destination, Location};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct InstrLayout {
     /// The base opcode for this instruction
     ///
@@ -53,7 +55,7 @@ macro_rules! layout {
         }
 
         $(
-            #[derive(Debug, Clone, PartialEq)]
+            #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
             $v struct $layout_struct($($layout_field_ty $(<$field_ty_param>)?),*);
 
             impl $layout_struct {
@@ -89,7 +91,7 @@ macro_rules! layout {
 
 layout! {
     /// Each supported layout for the `arguments` section of an instruction
-    #[derive(Debug, Clone, PartialEq)]
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub enum Layout {
         #[opcode_offset = 0]
         L1(struct L1(r1: Reg, r2: Reg)),
@@ -380,7 +382,7 @@ impl BitPattern for Opcode {
 }
 
 /// One of the 64 registers, encoded in 6-bits
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Reg(u8);
 
 impl BitPattern for Reg {
@@ -414,7 +416,7 @@ impl Reg {
 }
 
 /// An immediate value, encoded with the given size
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Imm<S>(i128, PhantomData<S>);
 
 impl<S: ImmSize> BitPattern for Imm<S> {
@@ -476,7 +478,7 @@ impl<S: ImmSize> Imm<S> {
 }
 
 /// A 16-bit signed offset, encoded in 16-bits
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Offset(i16);
 
 impl BitPattern for Offset {
@@ -528,19 +530,19 @@ macro_rules! imm_sizes {
 
 imm_sizes! {
     /// A 52-bit size
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
     pub struct S52(52);
     /// A 46-bit size
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
     pub struct S46(46);
     /// A 40-bit size
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
     pub struct S40(40);
     /// A 30-bit size
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
     pub struct S30(30);
     /// A 26-bit size
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
     pub struct S26(26);
 }
 
