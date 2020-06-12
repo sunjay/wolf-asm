@@ -10,6 +10,9 @@ use std::fs::File;
 use anyhow::Context;
 use structopt::StructOpt;
 use asm::executable::Executable;
+use vm::memory::Memory;
+
+const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "axrun", about)]
@@ -27,7 +30,7 @@ fn main() -> anyhow::Result<()> {
     let exec: Executable = bincode::deserialize_from(executable_file)
         .with_context(|| format!("Failed to deserialize executable: `{}`", executable_path.display()))?;
 
-    dbg!(exec);
+    let mut mem = Memory::new(MACHINE_MEMORY);
 
     Ok(())
 }

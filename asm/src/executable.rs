@@ -1,17 +1,17 @@
 mod binary_format;
 
+pub use binary_format::*;
+
 use serde::{Serialize, Deserialize};
 
 use crate::asm;
 use crate::label_offsets::LabelOffsets;
 use crate::diagnostics::Diagnostics;
 
-use binary_format::Stmt;
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Executable {
-    code_section: Vec<Stmt>,
-    static_section: Vec<Stmt>,
+    pub code_section: Vec<Stmt>,
+    pub static_section: Vec<Stmt>,
 }
 
 impl Executable {
