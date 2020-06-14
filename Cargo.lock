@@ -25,10 +25,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "asm-dev-2220"
-version = "0.1.0"
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
