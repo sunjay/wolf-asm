@@ -136,16 +136,16 @@ A status register contains the current state of the processor.
 | Bit # | Mask   | Abbreviation | Description                  | Category | =1                    | =0                      |
 |-------|--------|--------------|------------------------------|----------|-----------------------|-------------------------|
 | 0     | 0x0001 | CF           | Carry flag                   | Status   | CY (Carry)            | NC (No Carry)           |
-| 1     | 0x0002 |              | Reserved, always 1 in EFLAGS |          |                       |                         |
-| 2     | 0x0004 | PF           | Parity flag                  | Status   | PE (Parity Even)      | PO (Parity Odd)         |
+| 1     | 0x0002 |              | Reserved                     |          |                       |                         |
+| 2     | 0x0004 |              | Reserved                     |          |                       |                         |
 | 3     | 0x0008 |              | Reserved                     |          |                       |                         |
-| 4     | 0x0010 | AF           | Adjust flag                  | Status   | AC (Auxiliary Carry)  | NA (No Auxiliary Carry) |
+| 4     | 0x0010 |              | Reserved                     |          |                       |                         |
 | 5     | 0x0020 |              | Reserved                     |          |                       |                         |
 | 6     | 0x0040 | ZF           | Zero flag                    | Status   | ZR (Zero)             | NZ (Not Zero)           |
 | 7     | 0x0080 | SF           | Sign flag                    | Status   | NG (Negative)         | PL (Positive)           |
 | 8     | 0x0100 | TF           | Trap flag (single step)      | Control  |                       |                         |
 | 9     | 0x0200 | IF           | Interrupt enable flag        | Control  | EI (Enable Interrupt) | DI (Disable Interrupt)  |
-| 10    | 0x0400 | DF           | Direction flag               | Control  | DN (Down)             | UP (Up)                 |
+| 10    | 0x0400 |              | Reserved                     |          |                       |                         |
 | 11    | 0x0800 | OF           | Overflow flag                | Status   | OV (Overflow)         | NV (Not Overflow)       |
 
 ## Calling Convention
