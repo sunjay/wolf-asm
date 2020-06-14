@@ -1,6 +1,6 @@
 ################################################################################
 #
-# A file of useful printing procedures. Use `.include 'print.ax'` in the code
+# A file of useful printing procedures. Use `.include 'print.wa'` in the code
 # `.code` section of your program to add these procedures.
 #
 ################################################################################

@@ -92,7 +92,7 @@ fn expand_includes_impl(
 
         // Included paths are resolved relative to the file they are included in
         let included_path = if included_path.is_relative() {
-            // Even `Path::new("foo.ax").parent()` will return `Some(Path::new(""))`
+            // Even `Path::new("foo.wa").parent()` will return `Some(Path::new(""))`
             let parent_dir = prog_path.parent()
                 .expect("bug: if a source file has been read, it must have a parent directory");
             Cow::Owned(parent_dir.join(included_path))

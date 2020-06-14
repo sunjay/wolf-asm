@@ -24,4 +24,4 @@ main:
   pop $fp
   ret
 
-.include 'print.ax'
+.include 'print.wa'
