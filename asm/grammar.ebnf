@@ -1,4 +1,4 @@
-(* The grammar of the ax assembly language.
+(* The grammar of the wolf assembly language.
  *
  * This file is not guaranteed to be fully up to date with the parser. The code
  * should be treated as the source of truth for what the actual grammar is.

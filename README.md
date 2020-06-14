@@ -78,11 +78,14 @@ Make sure you have [Rust](https://rustup.rs) installed.
 Run the assembler using the command:
 
 ```bash
-cargo run -p asm -- asm/tests/run-pass/hello.wa
+cargo run -p wolf-asm -- asm/tests/run-pass/hello.wa
 ```
+
+This will generate an executable `hello` in the current directory. Note: this
+executable is for the Wolf VM, not for your machine.
 
 Run the generated machine code using the command:
 
 ```bash
-cargo run -p vm -- hello
+cargo run -p wolf-vm -- hello
 ```

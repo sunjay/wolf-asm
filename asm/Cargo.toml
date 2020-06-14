@@ -1,6 +1,6 @@
 [package]
-name = "asm"
-description = "Assembler for the ax assembly language"
+name = "wolf-asm"
+description = "Assembler for The Wolf Assembly Language"
 version = "0.1.0"
 authors = ["Sunjay Varma <varma.sunjay@gmail.com>"]
 edition = "2018"

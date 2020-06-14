@@ -1,6 +1,6 @@
-//! axm - the ax assembly language assembler
+//! wolf-asm - The Wolf Assembly Language assembler
 //!
-//! Takes assembly code and generates machine code for the ax virtual machine
+//! Takes assembly code and generates machine code for the wolf virtual machine
 
 #![deny(unused_must_use)]
 
@@ -15,7 +15,7 @@ use parking_lot::RwLock;
 use termcolor::ColorChoice;
 use structopt::StructOpt;
 
-use asm::{
+use wolf_asm::{
     diagnostics::Diagnostics,
     parser::{self, SourceFiles},
     include_expansion::expand_includes,
@@ -63,9 +63,9 @@ impl Into<ColorChoice> for ColorArg {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "axm", about)]
+#[structopt(name = "wolf-asm", about)]
 struct AssemblerOptions {
-    /// The assembly language file (`.ax`) to generate an executable for
+    /// The assembly language file (`.wa`) to generate an executable for
     #[structopt(name = "input", parse(from_os_str))]
     program_path: PathBuf,
     /// Write output to <file>
@@ -105,8 +105,8 @@ fn main() {
 
     // Check that the path and stem are valid
     let program_stem = match (program_path.file_stem(), program_path.extension()) {
-        (Some(stem), Some(ext)) if !stem.is_empty() && ext == "ax" => stem,
-        _ => quit!(&diag, "Invalid input path. Must use extension `ax`"),
+        (Some(stem), Some(ext)) if !stem.is_empty() && ext == "wa" => stem,
+        _ => quit!(&diag, "Invalid input path. Must use extension `wa`"),
     };
 
     // Default output path is the input path without its extension
