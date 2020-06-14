@@ -1,41 +1,28 @@
-# Machine Language
+# Wolf Assembly Language
 
-The assembly language you can compile and run on the machine.
+The Wolf Assembly Language is designed for an non-existent machine and is
+loosely based on conventions from x86, ARM, and MIPS assembly.
 
-Taking inspiration from RISC-V, the machine language instruction set is very
-limited. It can be extended by adding various modules in the form of additional
-hardware or extra CPUs.
+## File Layout
 
-## Considerations
-
-* Register machine or stack language? Or something else?
-* Turing complete?
-* Limited memory
-* Limited registers (if register machine)
-* System calls or memory mapped IO
-* Flags: Carry, Zero, Overflow, etc.
-* Sign extension
-
-## File layout
-
-* file extension: `.ax` (assembly language extended)
+* file extension: `.wa` (for "Wolf Assembly")
+* `section .code` (case-insensitive) on its own line
+  * contains source code (instructions)
+  * executes from top to bottom
 * `section .static` (case-insensitive) on its own line
   * contains static data declarations
   * the data is laid out exactly as specified, in the order specified, with no
     additional padding inserted between items of different sizes
-* `section .code` (case-insensitive) on its own line
-  * contains source code (instructions)
-  * executes from top to bottom
-* The sections are ordered: `.static`, `.code`
+* The sections are ordered: `.code`, `.static`
 
 ## Assembler Directives
 
 Available for use in any section.
 
-* `.include "path/to/file.ax"` - equivalent to copying/pasting the contents of
+* `.include "path/to/file.wa"` - equivalent to copying/pasting the contents of
   the specified file directly at the location of the `.include` statement.
   Relative paths are resolved relative to the directory of the file in which the
-  `.include` directive is parsed. That is, if `a/b/c.ax` contains an `.include`
+  `.include` directive is parsed. That is, if `a/b/c.wa` contains an `.include`
   directive, that directive path will be resolved relative to `a/b`.
 * `.const NAME immediate` - declares a named constant that can be used in place
   of an immediate value. The immediate value will be substituted as-is for each
@@ -163,7 +150,7 @@ A status register contains the current state of the processor.
 
 ## Calling Convention
 
-* return address is stored in register `$?` (TODO)
+* TODO <!--return address is stored in register `$?` (TODO) -->
 * pop calls should be in the opposite order to push calls
 
 ## Memory Mapped IO
@@ -180,7 +167,7 @@ Before syscalls become available, IO is done through memory-mapped IO.
 
 ### Example Programs
 
-This implements a hello world program: (filename: `hello.ax`)
+This implements a hello world program: (filename: `hello.wa`)
 
 ```asm
 section .code
@@ -224,7 +211,7 @@ length:
   .b8 13
 ```
 
-This implements the `cat` command: (filename: `cat.ax`)
+This implements the `cat` command: (filename: `cat.wa`)
 
 ```asm
 section .code
@@ -248,85 +235,6 @@ loop:
 end:
   pop $fp
   ret
-```
-
-## Syscalls
-
-To make a syscall, place the syscall number in `$0` and use the `syscall`
-instruction. Some syscalls take arguments in other registers. See the
-documentation below for more details.
-
-* `open`: `$0 = 0`
-  * Arguments:
-    * `$1` - address of file path bytes
-    * `$2` - length of file path (in bytes)
-  * Returns:
-    * `$0` - file descriptor
-  * On Error:
-    * `$0` is set to -1
-  * Notes:
-    * Special file descriptors: `0` is stdin, `1` is stdout, `2` is stderr
-* `read`: `$0 = 1`
-  * Arguments:
-    * `$1` - file descriptor
-    * `$2` - address of buffer to read bytes into
-    * `$3` - size of buffer (number of bytes to read)
-  * Returns:
-    * `$0` - the number of bytes that were read
-  * On Error:
-    * `$0` is set to -1
-* `write`: `$0 = 2`
-  * Arguments:
-    * `$1` - file descriptor
-    * `$2` - address of buffer to write bytes from
-    * `$3` - size of buffer (number of bytes to write)
-  * Returns:
-    * `$0` - the number of bytes that were written
-  * On Error:
-    * `$0` is set to -1
-
-### Example Programs
-
-This implements a hello world program: (filename: `hello.ax`)
-
-```asm
-section .code
-
-main:
-  push $fp
-  mov $fp, $sp
-
-  # Populate arguments for write syscall
-
-  # File descriptor 1 is stdout
-  mov $1, 1
-  # Set $2 to the address of the message
-  mov $2, message
-  # Load the value at address `length` into $3
-  load8 $3, length
-
-  # Set syscall register to value for write syscall
-  mov $0, 2
-  # Run the syscall
-  syscall
-  # Technically, we should check $0 to see if all the bytes were written
-
-  pop $fp
-  ret
-
-section .static
-
-# Declare a string with the message we want to print
-message:
-  .bytes 'hello, world!'
-length:
-  .b8 13
-```
-
-This implements the `cat` command: (filename: `cat.ax`)
-
-```asm
-TODO
 ```
 
 ## Instruction Encoding
