@@ -5,4 +5,4 @@ pub mod write_memory;
 pub mod reinterpret;
 pub mod registers;
 pub mod flags;
-pub mod cpu;
+pub mod machine;

@@ -15,7 +15,7 @@ use wolf_vm::{
     write_memory::WriteMemory,
     registers::Registers,
     flags::Flags,
-    cpu::Cpu,
+    machine::Machine,
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
@@ -39,16 +39,21 @@ fn main() -> anyhow::Result<()> {
     let exec: Executable = bincode::deserialize_from(executable_file)
         .with_context(|| format!("Failed to deserialize executable: `{}`", executable_path.display()))?;
 
-    let mut mem = Memory::new(MACHINE_MEMORY);
+    let mut memory = Memory::new(MACHINE_MEMORY);
     // Write the executable at the starting address
-    exec.write_into(&mut mem, START_ADDR)
+    exec.write_into(&mut memory, START_ADDR)
         .context("Failed to load executable into memory")?;
 
     // Start with the stack pointer pointing just past the end of the stack
-    let mut regs = Registers::new(MACHINE_MEMORY);
+    let mut registers = Registers::new(MACHINE_MEMORY);
     let mut flags = Flags::default();
 
-    let mut cpu = Cpu::new(START_ADDR);
+    let mut cpu = Machine {
+        program_counter: START_ADDR,
+        memory,
+        registers,
+        flags,
+    };
 
     Ok(())
 }
