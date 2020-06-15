@@ -14,6 +14,7 @@ use wolf_vm::{
     memory::Memory,
     write_memory::WriteMemory,
     registers::Registers,
+    flags::Flags,
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
@@ -43,6 +44,7 @@ fn main() -> anyhow::Result<()> {
         .context("Failed to load executable into memory")?;
 
     let mut regs = Registers::default();
+    let mut flags = Flags::default();
 
     Ok(())
 }
