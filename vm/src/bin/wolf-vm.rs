@@ -15,6 +15,7 @@ use wolf_vm::{
     write_memory::WriteMemory,
     registers::Registers,
     flags::Flags,
+    cpu::Cpu;
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
@@ -43,7 +44,8 @@ fn main() -> anyhow::Result<()> {
     exec.write_into(&mut mem, START_ADDR)
         .context("Failed to load executable into memory")?;
 
-    let mut regs = Registers::default();
+    // Start with the stack pointer pointing just past the end of the stack
+    let mut regs = Registers::new(MACHINE_MEMORY);
     let mut flags = Flags::default();
 
     let mut cpu = Cpu::new(START_ADDR);

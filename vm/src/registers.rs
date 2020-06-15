@@ -30,7 +30,7 @@ impl PartialEq for Registers {
     fn eq(&self, other: &Self) -> bool {
         let Self {registers} = self;
         let Self {registers: other_registers} = other;
-        
+
         if registers.len() != other_registers.len() {
             unreachable!("bug: should always have the same number of registers");
         } else {
@@ -40,6 +40,19 @@ impl PartialEq for Registers {
 }
 
 impl Registers {
+    /// Creates a new set of registers with the stack pointer and frame pointer
+    /// initialized to the given value
+    pub fn new(stack_end_addr: usize) -> Self {
+        let mut regs = Self::default();
+
+        let stack_pointer = stack_end_addr as u64;
+        regs.store(asm::RegisterKind::StackPointer.into(), stack_pointer);
+        // The initial stack frame starts at the end of the stack
+        regs.store(asm::RegisterKind::FramePointer.into(), stack_pointer);
+
+        regs
+    }
+
     /// Loads the given register value
     pub fn load<R: Reinterpret<u64>>(&self, reg: Reg) -> R {
         let index = reg.into_value() as usize;

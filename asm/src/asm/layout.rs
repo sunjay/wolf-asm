@@ -410,10 +410,8 @@ impl BitPattern for Reg {
     }
 }
 
-impl Reg {
-    pub fn new(reg: asm::Register, _diag: &Diagnostics) -> Self {
-        let asm::Register {kind, span: _} = reg;
-
+impl From<asm::RegisterKind> for Reg {
+    fn from(kind: asm::RegisterKind) -> Self {
         match kind {
             asm::RegisterKind::StackPointer => Reg(asm::REGISTERS-1),
             asm::RegisterKind::FramePointer => Reg(asm::REGISTERS-2),
@@ -424,6 +422,14 @@ impl Reg {
                 Reg(reg)
             },
         }
+    }
+}
+
+impl Reg {
+    pub fn new(reg: asm::Register, _diag: &Diagnostics) -> Self {
+        let asm::Register {kind, span: _} = reg;
+
+        kind.into()
     }
 
     /// Returns the register number, guaranteed to be between 0 and 63 (inclusive)
