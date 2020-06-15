@@ -15,7 +15,7 @@ use wolf_vm::{
     write_memory::WriteMemory,
     registers::Registers,
     flags::Flags,
-    cpu::Cpu;
+    cpu::Cpu,
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
