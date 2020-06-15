@@ -136,17 +136,11 @@ A status register contains the current state of the processor.
 | Bit # | Mask   | Abbreviation | Description                  | Category | =1                    | =0                      |
 |-------|--------|--------------|------------------------------|----------|-----------------------|-------------------------|
 | 0     | 0x0001 | CF           | Carry flag                   | Status   | CY (Carry)            | NC (No Carry)           |
-| 1     | 0x0002 |              | Reserved                     |          |                       |                         |
-| 2     | 0x0004 |              | Reserved                     |          |                       |                         |
-| 3     | 0x0008 |              | Reserved                     |          |                       |                         |
-| 4     | 0x0010 |              | Reserved                     |          |                       |                         |
-| 5     | 0x0020 |              | Reserved                     |          |                       |                         |
-| 6     | 0x0040 | ZF           | Zero flag                    | Status   | ZR (Zero)             | NZ (Not Zero)           |
-| 7     | 0x0080 | SF           | Sign flag                    | Status   | NG (Negative)         | PL (Positive)           |
-| 8     | 0x0100 | TF           | Trap flag (single step)      | Control  |                       |                         |
-| 9     | 0x0200 | IF           | Interrupt enable flag        | Control  | EI (Enable Interrupt) | DI (Disable Interrupt)  |
-| 10    | 0x0400 |              | Reserved                     |          |                       |                         |
-| 11    | 0x0800 | OF           | Overflow flag                | Status   | OV (Overflow)         | NV (Not Overflow)       |
+| 1     | 0x0002 | ZF           | Zero flag                    | Status   | ZR (Zero)             | NZ (Not Zero)           |
+| 2     | 0x0004 | SF           | Sign flag                    | Status   | NG (Negative)         | PL (Positive)           |
+| 3     | 0x0008 | OF           | Overflow flag                | Status   | OV (Overflow)         | NV (Not Overflow)       |
+
+The remaining unspecified bits are reserved and must not be used.
 
 ## Calling Convention
 
@@ -360,10 +354,10 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
 ### Comparison
 
 * `test source1 source2` - bitwise logical and that throws away its result but
-  sets the ZF (zero), SF (sign), and PF (parity) bits
+  sets the ZF (zero), and SF (sign) bits
 * `cmp source1 source2` - comparison performed as a (signed) subtraction that
-  throws away its result but sets the ZF (zero), SF (sign), PF (parity),
-  CF (carry), and OF (overflow), bits
+  throws away its result but sets the ZF (zero), SF (sign), CF (carry), and
+  OF (overflow) bits
 
 ### Memory
 
