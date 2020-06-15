@@ -46,5 +46,7 @@ fn main() -> anyhow::Result<()> {
     let mut regs = Registers::default();
     let mut flags = Flags::default();
 
+    let mut cpu = Cpu::new(START_ADDR);
+
     Ok(())
 }
