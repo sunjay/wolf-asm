@@ -10,7 +10,10 @@ use std::fs::File;
 use anyhow::Context;
 use structopt::StructOpt;
 use wolf_asm::executable::Executable;
-use wolf_vm::memory::Memory;
+use wolf_vm::{
+    memory::Memory,
+    registers::Registers,
+};
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
 
@@ -31,6 +34,7 @@ fn main() -> anyhow::Result<()> {
         .with_context(|| format!("Failed to deserialize executable: `{}`", executable_path.display()))?;
 
     let mut mem = Memory::new(MACHINE_MEMORY);
+    let mut regs = Registers::default();
 
     Ok(())
 }

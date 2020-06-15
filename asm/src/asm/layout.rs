@@ -425,6 +425,11 @@ impl Reg {
             },
         }
     }
+
+    /// Returns the register number, guaranteed to be between 0 and 63 (inclusive)
+    pub fn into_value(self) -> u8 {
+        self.0
+    }
 }
 
 /// An immediate value, encoded with the given size
