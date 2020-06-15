@@ -351,13 +351,22 @@ impl Loc {
 pub trait BitPattern {
     /// Returns the size of this bit pattern in bits
     ///
-    /// This is the number of bits that will be used when this is written into a value
+    /// This is the number of bits that will be used when this is written into a
+    /// value
     fn size_bits() -> u8;
 
-    /// Writes this pattern of bits into the given number at the given offset from the MSB
+    /// Writes this pattern of bits into the given number at the given offset
+    /// from the MSB
     ///
-    /// Assumes that the region [msb_offset, msb_offset+size_bits] is all zeros in `out`
+    /// Assumes that the region [msb_offset, msb_offset+size_bits] is all zeros
+    /// in `out`
     fn write(&self, msb_offset: u8, out: &mut u64);
+
+    /// Reads this pattern of bits from the given number starting from the given
+    /// offset from the MSB
+    ///
+    /// Assumes that the region [msb_offset, msb_offset+size_bits] is valid
+    fn read(value: u64, msb_offset: u8) -> Self;
 }
 
 /// The opcode of an instruction, encoded in 12-bits
@@ -378,6 +387,20 @@ impl BitPattern for Opcode {
         let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
+    }
+
+    fn read(value: u64, msb_offset: u8) -> Self {
+        let bits = Self::size_bits();
+
+        // Shift the input value so that the bits we want are aligned with the
+        // least-significant bit
+        let value = value >> (asm::REGISTERS - msb_offset - bits);
+
+        // Zero all other bits
+        let mask = !0u64 >> (asm::REGISTERS - bits);
+        let value = value & mask;
+
+        Opcode(value as u16)
     }
 }
 
@@ -413,6 +436,20 @@ impl BitPattern for Reg {
         let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
+    }
+
+    fn read(value: u64, msb_offset: u8) -> Self {
+        let bits = Self::size_bits();
+
+        // Shift the input value so that the bits we want are aligned with the
+        // least-significant bit
+        let value = value >> (asm::REGISTERS - msb_offset - bits);
+
+        // Zero all other bits
+        let mask = !0u64 >> (asm::REGISTERS - bits);
+        let value = value & mask;
+
+        Reg(value as u8)
     }
 }
 
@@ -469,6 +506,22 @@ impl<S: ImmSize> BitPattern for Imm<S> {
 
         *out |= value;
     }
+
+    fn read(value: u64, msb_offset: u8) -> Self {
+        let bits = Self::size_bits();
+
+        // Shift the input value so that the bits we want are aligned with the
+        // least-significant bit
+        let value = value >> (asm::REGISTERS - msb_offset - bits);
+
+        // Zero all other bits
+        let mask = !0u64 >> (asm::REGISTERS - bits);
+        let value = value & mask;
+
+        // TODO: It's currently impossible to tell whether the original
+        // immediate value was signed or not. `write` discards that info.
+        Imm(value as i128, PhantomData)
+    }
 }
 
 pub trait ImmSize {
@@ -523,6 +576,27 @@ impl BitPattern for Offset {
         let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
+    }
+
+    fn read(value: u64, msb_offset: u8) -> Self {
+        let bits = Self::size_bits();
+
+        // Shift the input value so that the bits we want are aligned with the
+        // least-significant bit
+        let value = value >> (asm::REGISTERS - msb_offset - bits);
+
+        // Zero all other bits
+        let mask = !0u64 >> (asm::REGISTERS - bits);
+        let value = value & mask;
+
+        // Take the least significant bytes and reinterpret them as i16
+        let value_bytes = &value.to_le_bytes()[..2];
+        // Safety: u64 has 8 bytes, which is more than 2 bytes
+        let value_bytes = unsafe { *(value_bytes.as_ptr() as *const [u8; 2]) };
+
+        let value = i16::from_le_bytes(value_bytes);
+
+        Offset(value)
     }
 }
 
