@@ -454,7 +454,20 @@ impl<S: ImmSize> BitPattern for Imm<S> {
     }
 
     fn write(&self, msb_offset: u8, out: &mut u64) {
-        S::write(self.0, msb_offset, out)
+        let bits = Self::size_bits();
+        let value = self.0;
+
+        // Get the bits of the value, preserving signedness
+        let value_bits = u128::from_le_bytes(value.to_le_bytes());
+
+        // Truncate to max 64 bits (safe because no bits past that should be set)
+        debug_assert!(value_bits < 2u128.pow(bits as u32), "bug: immediate value does not fit in {}-bits", bits);
+        let value = value_bits as u64;
+
+        // Shift the value to the position specified by msb_offset
+        let value = value << (asm::REGISTERS - msb_offset - bits);
+
+        *out |= value;
     }
 }
 
@@ -481,22 +494,6 @@ pub trait ImmSize {
             // processing and hopefully pickup more errors
             0
         }
-    }
-
-    fn write(value: i128, msb_offset: u8, out: &mut u64) {
-        let bits = Self::size_bits();
-
-        // Get the bits of the value, preserving signedness
-        let value_bits = u128::from_le_bytes(value.to_le_bytes());
-
-        // Truncate to max 64 bits (safe because no bits past that should be set)
-        debug_assert!(value_bits < 2u128.pow(bits as u32), "bug: immediate value does not fit in {}-bits", bits);
-        let value = value_bits as u64;
-
-        // Shift the value to the position specified by msb_offset
-        let value = value << (asm::REGISTERS - msb_offset - bits);
-
-        *out |= value;
     }
 }
 
