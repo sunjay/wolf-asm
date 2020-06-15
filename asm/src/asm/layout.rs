@@ -362,7 +362,7 @@ pub trait BitPattern {
 
 /// The opcode of an instruction, encoded in 12-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Opcode(u16);
+pub struct Opcode(u16);
 
 impl BitPattern for Opcode {
     fn size_bits() -> u8 {
@@ -378,6 +378,12 @@ impl BitPattern for Opcode {
         let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
+    }
+}
+
+impl Opcode {
+    pub fn into_value(self) -> u16 {
+        self.0
     }
 }
 

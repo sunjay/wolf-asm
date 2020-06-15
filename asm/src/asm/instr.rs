@@ -3,7 +3,12 @@ use crate::parser::Span;
 use crate::diagnostics::Diagnostics;
 use crate::label_offsets::LabelOffsets;
 
-use super::{Source, Destination, Location, layout::{InstrLayout, LayoutArguments}};
+use super::{
+    Source,
+    Destination,
+    Location,
+    layout::{InstrLayout, LayoutArguments, Opcode},
+};
 
 macro_rules! count_tokens {
     ($t:tt $($ts:tt)*) => {
@@ -17,7 +22,7 @@ macro_rules! count_tokens {
 macro_rules! instr {
     (
         $(#[$m:meta])*
-        $v:vis enum $instr_enum:ident {
+        $v:vis enum $instr_enum:ident / $instr_kind_enum:ident {
             $(
                 #[opcode = $opcode:literal, name = $instr_name:literal $(, cond = $cond:expr)?]
                 $instr_variant:ident(struct $instr_struct:ident {
@@ -68,6 +73,25 @@ macro_rules! instr {
                 match self {
                     $($instr_variant(instr) => instr.layout(diag, labels)),*
                 }
+            }
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        $v enum $instr_kind_enum {
+            $($instr_variant),*
+        }
+
+        impl $instr_kind_enum {
+            /// Returns the instruction kind and opcode offset for the given
+            /// opcode
+            pub fn from_opcode(opcode: Opcode) -> (Self, u16) {
+                let opcode = opcode.into_value();
+                let opcodes = [$(($opcode, $instr_kind_enum::$instr_variant)),*];
+                // index-1 works because the first opcode is 0 and u16::MIN == 0
+                let op_index = opcodes.binary_search_by_key(&opcode, |&(opcode, _)| opcode)
+                    .unwrap_or_else(|index| index.wrapping_sub(1));
+                let (instr_opcode, kind) = unsafe { *opcodes.get_unchecked(op_index) };
+                (kind, opcode - instr_opcode)
             }
         }
 
@@ -133,7 +157,7 @@ macro_rules! instr {
 
 instr! {
     #[derive(Debug, Clone, PartialEq)]
-    pub enum Instr {
+    pub enum Instr/InstrKind {
         #[opcode = 0, name = "nop"]
         Nop(struct Nop {}),
 
