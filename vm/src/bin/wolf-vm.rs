@@ -12,10 +12,14 @@ use structopt::StructOpt;
 use wolf_asm::executable::Executable;
 use wolf_vm::{
     memory::Memory,
+    write_memory::WriteMemory,
     registers::Registers,
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
+
+/// The address where program execution should start
+const START_ADDR: usize = 0;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "wolf-vm", about)]
@@ -34,6 +38,10 @@ fn main() -> anyhow::Result<()> {
         .with_context(|| format!("Failed to deserialize executable: `{}`", executable_path.display()))?;
 
     let mut mem = Memory::new(MACHINE_MEMORY);
+    // Write the executable at the starting address
+    exec.write_into(&mut mem, START_ADDR)
+        .context("Failed to load executable into memory")?;
+
     let mut regs = Registers::default();
 
     Ok(())
