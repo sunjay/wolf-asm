@@ -12,6 +12,9 @@ use crate::ast;
 use crate::parser::Span;
 use crate::diagnostics::Diagnostics;
 
+/// The number of registers supported by the machine
+pub const REGISTERS: u8 = 64;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     /// The statements in the `.code` section

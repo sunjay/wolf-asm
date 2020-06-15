@@ -80,7 +80,7 @@ macro_rules! layout {
                         msb_offset += $layout_field_ty $(::<$field_ty_param>)? ::size_bits();
                     )*
 
-                    debug_assert!(msb_offset <= 64, "bug: to_binary wrote too many bits");
+                    debug_assert!(msb_offset <= asm::REGISTERS, "bug: to_binary wrote too many bits");
 
                     out
                 }
@@ -375,7 +375,7 @@ impl BitPattern for Opcode {
         debug_assert!(value < 2u64.pow(bits as u32), "bug: opcode value does not fit in {}-bits", bits);
 
         // Shift the value to the position specified by msb_offset
-        let value = value << (64 - msb_offset - bits);
+        let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
     }
@@ -383,7 +383,15 @@ impl BitPattern for Opcode {
 
 /// One of the 64 registers, encoded in 6-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Reg(u8);
+pub struct Reg(#[serde(deserialize_with = "validate_reg")] u8);
+
+fn validate_reg<'de, D: serde::de::Deserializer<'de>>(d: D) -> Result<u8, D::Error> {
+    let reg = u8::deserialize(d)?;
+    assert!(reg < asm::REGISTERS,
+        "bug: register must be between $0 and ${}", asm::REGISTERS);
+
+    Ok(reg)
+}
 
 impl BitPattern for Reg {
     fn size_bits() -> u8 {
@@ -396,7 +404,7 @@ impl BitPattern for Reg {
         debug_assert!(value < 2u64.pow(bits as u32), "bug: register value does not fit in {}-bits", bits);
 
         // Shift the value to the position specified by msb_offset
-        let value = value << (64 - msb_offset - bits);
+        let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
     }
@@ -407,10 +415,14 @@ impl Reg {
         let asm::Register {kind, span: _} = reg;
 
         match kind {
-            asm::RegisterKind::StackPointer => Reg(63),
-            asm::RegisterKind::FramePointer => Reg(62),
-            // `num` is already guaranteed to be between 0 and 63
-            asm::RegisterKind::Numbered(num) => Reg(num),
+            asm::RegisterKind::StackPointer => Reg(asm::REGISTERS-1),
+            asm::RegisterKind::FramePointer => Reg(asm::REGISTERS-2),
+            // `reg` is already guaranteed to be between 0 and 63
+            asm::RegisterKind::Numbered(reg) => {
+                debug_assert!(reg < asm::REGISTERS,
+                    "bug: register must be between $0 and ${}", asm::REGISTERS);
+                Reg(reg)
+            },
         }
     }
 }
@@ -465,7 +477,7 @@ pub trait ImmSize {
         let value = value_bits as u64;
 
         // Shift the value to the position specified by msb_offset
-        let value = value << (64 - msb_offset - bits);
+        let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
     }
@@ -494,7 +506,7 @@ impl BitPattern for Offset {
         let value = value as u64;
 
         // Shift the value to the position specified by msb_offset
-        let value = value << (64 - msb_offset - bits);
+        let value = value << (asm::REGISTERS - msb_offset - bits);
 
         *out |= value;
     }
