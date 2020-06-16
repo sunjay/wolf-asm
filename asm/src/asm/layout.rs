@@ -532,14 +532,15 @@ pub trait ImmSize {
 
         // minimum value if immediate is interpreted as signed
         let smin = -2i128.pow(bits-1);
-        // maximum value if immediate is interpreted as unsigned
-        let umax = 2i128.pow(bits)-1;
+        // maximum value if immediate is interpreted as unsigned (bits-1)
+        // Note: we always need a sign bit to determine signedness in decoding
+        let umax = 2i128.pow(bits-1)-1;
 
         let asm::Immediate {value, span} = imm;
         if value >= smin && value <= umax {
             value
         } else {
-            diag.span_error(span, format!("immediate value `{}` (`0x{:x}`) for this instruction must fit in {}-bits", value, value, bits))
+            diag.span_error(span, format!("immediate value `{}` (`0x{:x}`) for this instruction must fit in a {}-bit signed number", value, value, bits))
                 .span_note(span, format!("that means the value must be between `{}` and `{}` (`0x{:x}`)", smin, umax, umax))
                 .emit();
 
