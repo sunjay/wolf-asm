@@ -72,7 +72,7 @@ macro_rules! layout {
 
         $(
             #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-            $v struct $layout_struct($($layout_field_ty $(<$field_ty_param>)?),*);
+            $v struct $layout_struct($(pub $layout_field_ty $(<$field_ty_param>)?),*);
 
             impl $layout_struct {
                 /// Returns the number of bits of the `argument` section of the instruction used by

@@ -1,6 +1,6 @@
 use wolf_asm::asm::{
     InstrKind,
-    layout::Layout,
+    layout::{Layout, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11},
 };
 use thiserror::Error;
 
@@ -14,6 +14,21 @@ use crate::{
 /// The address used to indicate that the program should quit
 const QUIT_ADDR: usize = u64::MAX as usize;
 
+macro_rules! match_layout {
+    (
+        $sel:ident, ($layout:expr) {
+            $($p:pat => $v:expr),* $(,)?
+        }
+    ) => (
+        match $layout {
+            $($p => $v,)*
+            _ => return Err(ExecutionError::UnsupportedInstructionLayout {
+                pc: $sel.program_counter,
+            }),
+        }
+    );
+}
+
 /// Whether the program should continue running
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ProgramStatus {
@@ -26,6 +41,8 @@ pub enum ProgramStatus {
 pub enum ExecutionError {
     OutOfBounds(#[from] OutOfBounds),
     DecodeError(#[from] DecodeError),
+    #[error("Unsupported instruction layout ($pc = `0x{pc:x}`)")]
+    UnsupportedInstructionLayout {pc: usize},
 }
 
 #[derive(Debug, PartialEq)]
@@ -120,7 +137,9 @@ impl Machine {
     }
 
     fn execute_add(&mut self, args: Layout) -> Result<(), ExecutionError> {
-        todo!();
+        match_layout!(self, (args) {
+            Layout::L1(L1(reg1, reg2)) => self.add_registers(reg1, reg2),
+        })
     }
 
     fn execute_sub(&mut self, args: Layout) -> Result<(), ExecutionError> {
