@@ -22,6 +22,9 @@ use wolf_asm::asm::{
 };
 use thiserror::Error;
 
+use crate::machine::Machine;
+use crate::execute::{Execute, ExecuteError};
+
 pub type Immediate = i128;
 pub type Offset = i16;
 
@@ -105,7 +108,6 @@ macro_rules! instr {
             $($instr_variant($instr_struct)),*
         }
 
-
         impl $instr_enum {
             pub fn decode(instr: u64) -> Result<Self, DecodeError> {
                 let opcode = Opcode::read(instr, 0);
@@ -124,6 +126,15 @@ macro_rules! instr {
             pub fn size_bytes(&self) -> u64 {
                 // All instructions are currently 8 bytes
                 8
+            }
+        }
+
+        impl Execute for $instr_enum {
+            fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
+                use $instr_enum::*;
+                match self {
+                    $($instr_variant(instr) => instr.execute(vm)),*
+                }
             }
         }
 

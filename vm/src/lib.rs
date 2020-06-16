@@ -7,3 +7,4 @@ pub mod registers;
 pub mod flags;
 pub mod decode;
 pub mod machine;
+pub mod execute;

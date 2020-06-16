@@ -5,6 +5,7 @@ use crate::{
     registers::Registers,
     flags::Flags,
     decode::{Instr, DecodeError},
+    execute::{Execute, ExecuteError},
 };
 
 /// The address used to indicate that the program should quit
@@ -22,6 +23,7 @@ pub enum ProgramStatus {
 pub enum ExecutionError {
     OutOfBounds(#[from] OutOfBounds),
     DecodeError(#[from] DecodeError),
+    ExecuteError(#[from] ExecuteError),
 }
 
 #[derive(Debug, PartialEq)]
@@ -43,7 +45,7 @@ impl Machine {
         let instr = Instr::decode(instr)?;
         self.program_counter += instr.size_bytes() as usize;
 
-        //TODO: self.execute(instr)?;
+        instr.execute(self)?;
 
         if self.program_counter == QUIT_ADDR {
             Ok(ProgramStatus::Quit)

@@ -48,17 +48,17 @@ fn main() -> anyhow::Result<()> {
     let registers = Registers::new(MACHINE_MEMORY);
     let flags = Flags::default();
 
-    let mut cpu = Machine {
+    let mut vm = Machine {
         program_counter: START_ADDR,
         memory,
         registers,
         flags,
     };
-    cpu.push_quit_addr()
+    vm.push_quit_addr()
         .expect("bug: should always be able to push quit address");
 
     loop {
-        let status = cpu.step()
+        let status = vm.step()
             .context("Failed to execute instruction")?;
 
         match status {
