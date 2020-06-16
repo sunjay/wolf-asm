@@ -81,7 +81,8 @@ macro_rules! instr {
 
             impl $instr_struct {
                 pub fn args_from_layout(layout: Layout) -> Result<Self, DecodeError> {
-                    todo!()
+                    let ($($instr_field,)*) = ArgumentsLayout::from_layout(layout)?;
+                    Ok(Self {$($instr_field),*})
                 }
             }
         )*
@@ -155,5 +156,63 @@ instr! {
 
         Call(struct Call {loc: Location}),
         Ret(struct Ret {}),
+    }
+}
+
+pub trait ArgumentsLayout: Sized {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError>;
+}
+
+impl ArgumentsLayout for () {
+    fn from_layout(_layout: Layout) -> Result<Self, DecodeError> {
+        Ok(())
+    }
+}
+
+impl ArgumentsLayout for (Destination, Source) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Source, Source) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Destination, Location) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Location, Source) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Destination, Destination, Source) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Source,) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Destination,) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
+    }
+}
+
+impl ArgumentsLayout for (Location,) {
+    fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
+        todo!()
     }
 }
