@@ -46,8 +46,7 @@ impl Reinterpret<u64> for u32 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 4 bytes as u32
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 4 bytes
-        let bytes = unsafe { slice_as_4_bytes(bytes.get_unchecked(..4)) };
+        let bytes = slice_as_4_bytes(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -57,8 +56,7 @@ impl Reinterpret<u64> for i32 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 4 bytes as i32
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 4 bytes
-        let bytes = unsafe { slice_as_4_bytes(bytes.get_unchecked(..4)) };
+        let bytes = slice_as_4_bytes(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -68,8 +66,7 @@ impl Reinterpret<u64> for u16 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 2 bytes as u16
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 2 bytes
-        let bytes = unsafe { slice_as_2_bytes(bytes.get_unchecked(..2)) };
+        let bytes = slice_as_2_bytes(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -79,8 +76,7 @@ impl Reinterpret<u64> for i16 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 2 bytes as i16
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 2 bytes
-        let bytes = unsafe { slice_as_2_bytes(bytes.get_unchecked(..2)) };
+        let bytes = slice_as_2_bytes(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -90,8 +86,7 @@ impl Reinterpret<u64> for u8 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 1 byte as u8
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 1 byte
-        let bytes = unsafe { slice_as_1_byte(bytes.get_unchecked(..1)) };
+        let bytes = slice_as_1_byte(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -101,8 +96,7 @@ impl Reinterpret<u64> for i8 {
     fn reinterpret(value: u64) -> Self {
         // Reinterpret the lowest 1 byte as i8
         let bytes = value.to_le_bytes();
-        // Safety: u64 is at least 8 bytes, which is more than 1 byte
-        let bytes = unsafe { slice_as_1_byte(bytes.get_unchecked(..1)) };
+        let bytes = slice_as_1_byte(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
@@ -167,52 +161,39 @@ impl Reinterpret<i128> for u64 {
     fn reinterpret(value: i128) -> Self {
         // Reinterpret the lowest 8 bytes as u64
         let bytes = value.to_le_bytes();
-        // Safety: i128 is at least 16 bytes, which is more than 8 bytes
-        let bytes = unsafe { slice_as_8_bytes(bytes.get_unchecked(..8)) };
+        let bytes = slice_as_8_bytes(&bytes);
         Self::from_le_bytes(*bytes)
     }
 }
 
-/// Reinterprets a slice as a slice of a specific size
-///
-/// # Safety
-///
-/// The input slice must be the exact length of the output slice.
+/// Reinterprets a slice as a smaller slice
 #[inline(always)]
-unsafe fn slice_as_8_bytes(bytes: &[u8]) -> &[u8; 8] {
+fn slice_as_8_bytes(bytes: &[u8; 16]) -> &[u8; 8] {
+    // Safety: 16 > 8, so we can definitely expect this to be a valid cast/slice
     let ptr = bytes.as_ptr() as *const [u8; 8];
-    &*ptr
+    unsafe { &*ptr }
 }
 
-/// Reinterprets a slice as a slice of a specific size
-///
-/// # Safety
-///
-/// The input slice must be the exact length of the output slice.
+/// Reinterprets a slice as a smaller slice
 #[inline(always)]
-unsafe fn slice_as_4_bytes(bytes: &[u8]) -> &[u8; 4] {
+fn slice_as_4_bytes(bytes: &[u8; 8]) -> &[u8; 4] {
+    // Safety: 8 > 4, so we can definitely expect this to be a valid cast/slice
     let ptr = bytes.as_ptr() as *const [u8; 4];
-    &*ptr
+    unsafe { &*ptr }
 }
 
-/// Reinterprets a slice as a slice of a specific size
-///
-/// # Safety
-///
-/// The input slice must be the exact length of the output slice.
+/// Reinterprets a slice as a smaller slice
 #[inline(always)]
-unsafe fn slice_as_2_bytes(bytes: &[u8]) -> &[u8; 2] {
+fn slice_as_2_bytes(bytes: &[u8; 8]) -> &[u8; 2] {
+    // Safety: 8 > 2, so we can definitely expect this to be a valid cast/slice
     let ptr = bytes.as_ptr() as *const [u8; 2];
-    &*ptr
+    unsafe { &*ptr }
 }
 
-/// Reinterprets a slice as a slice of a specific size
-///
-/// # Safety
-///
-/// The input slice must be the exact length of the output slice.
+/// Reinterprets a slice as a smaller slice
 #[inline(always)]
-unsafe fn slice_as_1_byte(bytes: &[u8]) -> &[u8; 1] {
+fn slice_as_1_byte(bytes: &[u8; 8]) -> &[u8; 1] {
+    // Safety: 8 > 1, so we can definitely expect this to be a valid cast/slice
     let ptr = bytes.as_ptr() as *const [u8; 1];
-    &*ptr
+    unsafe { &*ptr }
 }
