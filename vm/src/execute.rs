@@ -1,7 +1,51 @@
 use thiserror::Error;
 
+use crate::reinterpret::Reinterpret;
 use crate::machine::Machine;
+use crate::registers::Registers;
 use crate::decode::*;
+
+pub trait Operand {
+    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R;
+}
+
+impl Operand for Source {
+    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+        match self {
+            Source::Register(reg) => regs.load(reg),
+            Source::Immediate(imm) => {
+                let imm = u64::reinterpret(imm);
+                R::reinterpret(imm)
+            },
+        }
+    }
+}
+
+impl Operand for Destination {
+    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+        match self {
+            Destination::Register(reg) => regs.load(reg),
+        }
+    }
+}
+
+impl Operand for Location {
+    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+        match self {
+            Location::Register(reg, offset) => {
+                let value = regs.load(reg);
+                R::reinterpret(match offset {
+                    Some(offset) => value + u64::reinterpret(offset),
+                    None => value,
+                })
+            },
+            Location::Immediate(imm) => {
+                let imm = u64::reinterpret(imm);
+                R::reinterpret(imm)
+            },
+        }
+    }
+}
 
 #[derive(Debug, Clone, Error)]
 pub enum ExecuteError {

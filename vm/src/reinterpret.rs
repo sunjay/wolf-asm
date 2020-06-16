@@ -162,6 +162,28 @@ impl Reinterpret<u8> for u64 {
     }
 }
 
+impl Reinterpret<i128> for u64 {
+    #[inline(always)]
+    fn reinterpret(value: i128) -> Self {
+        // Reinterpret the lowest 8 bytes as u64
+        let bytes = value.to_le_bytes();
+        // Safety: i128 is at least 16 bytes, which is more than 8 bytes
+        let bytes = unsafe { slice_as_8_bytes(bytes.get_unchecked(..8)) };
+        Self::from_le_bytes(*bytes)
+    }
+}
+
+/// Reinterprets a slice as a slice of a specific size
+///
+/// # Safety
+///
+/// The input slice must be the exact length of the output slice.
+#[inline(always)]
+unsafe fn slice_as_8_bytes(bytes: &[u8]) -> &[u8; 8] {
+    let ptr = bytes.as_ptr() as *const [u8; 8];
+    &*ptr
+}
+
 /// Reinterprets a slice as a slice of a specific size
 ///
 /// # Safety
