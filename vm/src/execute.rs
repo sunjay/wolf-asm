@@ -3,7 +3,12 @@ use thiserror::Error;
 use crate::reinterpret::Reinterpret;
 use crate::machine::Machine;
 use crate::registers::Registers;
+use crate::memory::OutOfBounds;
 use crate::decode::*;
+
+fn size_bytes_of<T>() -> u64 {
+    std::mem::size_of::<T>() as u64
+}
 
 pub trait Operand {
     fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R;
@@ -49,6 +54,8 @@ impl Operand for Location {
 
 #[derive(Debug, Clone, Error)]
 pub enum ExecuteError {
+    #[error(transparent)]
+    OutOfBounds(#[from] OutOfBounds),
 }
 
 pub trait Execute {
@@ -275,7 +282,17 @@ impl Execute for Store8 {
 impl Execute for Push {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Push {source} = self;
-        todo!()
+
+        // Decrement the stack pointer
+        let sp: u64 = vm.registers.load_sp();
+        let stack_top = sp - size_bytes_of::<u64>();
+        vm.registers.store_sp(stack_top);
+
+        // Store the value at the top of the stack
+        let value: u64 = source.into_value(&mut vm.registers);
+        vm.memory.write_u64(stack_top as usize, value)?;
+
+        Ok(())
     }
 }
 

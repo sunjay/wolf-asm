@@ -381,7 +381,8 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
     aligned with the least-significant bit of the register
   * That is, the lower bytes will always be copied in cases where less than 8
     bytes are requested
-* `push source`
+* `push source` - decrements the stack pointer and then stores `source` at the
+  top of the stack
 * `pop dest`
 
 ### Control Flow

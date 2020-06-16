@@ -46,9 +46,9 @@ impl Registers {
         let mut regs = Self::default();
 
         let stack_pointer = stack_end_addr as u64;
-        regs.store(asm::RegisterKind::StackPointer.into(), stack_pointer);
+        regs.store_sp(stack_pointer);
         // The initial stack frame starts at the end of the stack
-        regs.store(asm::RegisterKind::FramePointer.into(), stack_pointer);
+        regs.store_fp(stack_pointer);
 
         regs
     }
@@ -69,5 +69,29 @@ impl Registers {
         // Safety: `Reg` is guaranteed to contain a value between 0 and 63
         let value = unsafe { self.registers.get_unchecked_mut(index) };
         *value = u64::reinterpret(new_value);
+    }
+
+    /// Loads the value of the stack pointer
+    pub fn load_sp<R: Reinterpret<u64>>(&self) -> R {
+        self.load(asm::RegisterKind::StackPointer.into())
+    }
+
+    /// Stores the given value into the stack pointer
+    pub fn store_sp<R>(&mut self, new_value: R)
+        where u64: Reinterpret<R>,
+    {
+        self.store(asm::RegisterKind::StackPointer.into(), new_value)
+    }
+
+    /// Loads the value of the frame pointer
+    pub fn load_fp<R: Reinterpret<u64>>(&self) -> R {
+        self.load(asm::RegisterKind::FramePointer.into())
+    }
+
+    /// Stores the given value into the frame pointer
+    pub fn store_fp<R>(&mut self, new_value: R)
+        where u64: Reinterpret<R>,
+    {
+        self.store(asm::RegisterKind::FramePointer.into(), new_value)
     }
 }
