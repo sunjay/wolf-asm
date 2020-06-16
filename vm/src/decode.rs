@@ -37,7 +37,7 @@ pub enum DecodeError {
 }
 
 /// Represents an argument for an instruction that may be used as a source operand
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Source {
     Register(Reg),
     Immediate(Immediate),
@@ -56,7 +56,7 @@ impl<S> From<Imm<S>> for Source {
 }
 
 /// Represents an argument for an instruction that may be used as a destination operand
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Destination {
     Register(Reg),
 }
@@ -68,7 +68,7 @@ impl From<Reg> for Destination {
 }
 
 /// Represents an argument for an instruction that may be used as a location (address) operand
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Location {
     Register(Reg, Option<Offset>),
     Immediate(Immediate),
