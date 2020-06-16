@@ -262,7 +262,12 @@ impl Execute for Loadu4 {
 impl Execute for Load8 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Load8 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(&vm.registers);
+        let value = vm.memory.read_u64(addr)?;
+        vm.registers.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
