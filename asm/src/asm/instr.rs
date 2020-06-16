@@ -93,6 +93,12 @@ macro_rules! instr {
                 let (instr_opcode, kind) = unsafe { *opcodes.get_unchecked(op_index) };
                 (kind, opcode - instr_opcode)
             }
+
+            /// Returns the size in bytes that this will have in the generated executable
+            pub fn size_bytes(&self) -> usize {
+                // All instructions are currently 8 bytes
+                8
+            }
         }
 
         $(

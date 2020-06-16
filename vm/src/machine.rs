@@ -4,6 +4,7 @@ use crate::{
     memory::{Memory, OutOfBounds},
     registers::Registers,
     flags::Flags,
+    decode::{Instr, DecodeError},
 };
 
 /// The address used to indicate that the program should quit
@@ -20,7 +21,7 @@ pub enum ProgramStatus {
 #[error(transparent)]
 pub enum ExecutionError {
     OutOfBounds(#[from] OutOfBounds),
-    //TODO: DecodeError(),
+    DecodeError(#[from] DecodeError),
 }
 
 #[derive(Debug, PartialEq)]
@@ -38,7 +39,9 @@ pub struct Machine {
 impl Machine {
     /// Decode and run the instruction at the program counter
     pub fn step(&mut self) -> Result<ProgramStatus, ExecutionError> {
-        //TODO: Decode and run the instruction
+        let instr = self.memory.read_u64(self.program_counter)?;
+        let instr = Instr::decode(instr)?;
+        self.program_counter += instr.kind.size_bytes();
 
         if self.program_counter == QUIT_ADDR {
             Ok(ProgramStatus::Quit)
