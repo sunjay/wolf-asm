@@ -12,9 +12,9 @@ pub trait Execute {
 }
 
 impl Execute for Nop {
-    fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
+    fn execute(self, _vm: &mut Machine) -> Result<(), ExecuteError> {
         let Nop {} = self;
-        todo!()
+        Ok(())
     }
 }
 impl Execute for Add {
