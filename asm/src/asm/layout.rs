@@ -518,8 +518,10 @@ impl<S: ImmSize> BitPattern for Imm<S> {
         let mask = !0u64 >> (asm::REGISTERS - bits);
         let value = value & mask;
 
-        // TODO: It's currently impossible to tell whether the original
-        // immediate value was signed or not. `write` discards that info.
+        // Sign-extend the number: http://graphics.stanford.edu/~seander/bithacks.html#VariableSignExtend
+        let mask = 1u64 << (bits - 1);
+        let value = (value ^ mask) - mask;
+
         Imm(value as i128, PhantomData)
     }
 }
