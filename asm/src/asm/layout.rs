@@ -52,6 +52,22 @@ macro_rules! layout {
                     $($layout_variant(layout) => layout.to_binary(base_opcode),)*
                 }
             }
+
+            /// Decodes the given binary representation of an instruction using
+            /// the provided opcode offset to determine which layout to use
+            ///
+            /// The opcode offset is the offset from the instruction base opcode
+            ///
+            /// Returns `None` if the opcode offset is invalid.
+            pub fn from_binary(instr: u64, opcode_offset: u16) -> Option<Self> {
+                match opcode_offset {
+                    $($offset => {
+                        let layout = $layout_struct::from_binary(instr);
+                        Some($layout_enum::$layout_variant(layout))
+                    },)*
+                    _ => None,
+                }
+            }
         }
 
         $(
@@ -83,6 +99,21 @@ macro_rules! layout {
                     debug_assert!(msb_offset <= asm::REGISTERS, "bug: to_binary wrote too many bits");
 
                     out
+                }
+
+                /// Decodes the 64-bit binary representation of this instruction
+                pub fn from_binary(instr: u64) -> Self {
+                    // Start right after opcode
+                    let mut msb_offset = Opcode::size_bits();
+
+                    $(
+                        let $field_var = BitPattern::read(instr, msb_offset);
+                        msb_offset += $layout_field_ty $(::<$field_ty_param>)? ::size_bits();
+                    )*
+
+                    debug_assert!(msb_offset <= asm::REGISTERS, "bug: to_binary wrote too many bits");
+
+                    $layout_struct($($field_var),*)
                 }
             }
         )*
