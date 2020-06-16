@@ -206,7 +206,11 @@ impl Execute for Cmp {
 impl Execute for Mov {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mov {dest, source} = self;
-        todo!()
+
+        let value: u64 = source.into_value(&vm.registers);
+        vm.registers.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
