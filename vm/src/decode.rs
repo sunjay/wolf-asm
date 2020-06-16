@@ -199,7 +199,7 @@ instr! {
         Store8(struct Store8 {loc: Location, source: Source}),
 
         Push(struct Push {source: Source}),
-        Pop(struct Pop {source: Destination}),
+        Pop(struct Pop {dest: Destination}),
 
         Jmp(struct Jmp {loc: Location}),
         Je(struct Je {loc: Location}),

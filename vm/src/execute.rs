@@ -10,6 +10,22 @@ fn size_bytes_of<T>() -> u64 {
     std::mem::size_of::<T>() as u64
 }
 
+pub trait StoreDestination {
+    fn store_dest<R>(&mut self, dest: Destination, value: R)
+        where u64: Reinterpret<R>;
+}
+
+impl StoreDestination for Registers {
+    fn store_dest<R>(&mut self, dest: Destination, value: R)
+        where u64: Reinterpret<R>
+    {
+        let value = u64::reinterpret(value);
+        match dest {
+            Destination::Register(reg) => self.store(reg, value),
+        }
+    }
+}
+
 pub trait Operand {
     fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R;
 }
@@ -298,8 +314,18 @@ impl Execute for Push {
 
 impl Execute for Pop {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
-        let Pop {source} = self;
-        todo!()
+        let Pop {dest} = self;
+
+        // Load the top of the stack into the destination
+        let stack_top: u64 = vm.registers.load_sp();
+        let value = vm.memory.read_u64(stack_top as usize)?;
+        vm.registers.store_dest(dest, value);
+
+        // Increment the stack pointer
+        let sp = stack_top + size_bytes_of::<u64>();
+        vm.registers.store_sp(sp);
+
+        Ok(())
     }
 }
 

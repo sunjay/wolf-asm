@@ -239,7 +239,7 @@ instr! {
         #[opcode = 372, name = "push"]
         Push(struct Push {source: Source}),
         #[opcode = 384, name = "pop"]
-        Pop(struct Pop {source: Destination}),
+        Pop(struct Pop {dest: Destination}),
 
         #[opcode = 396, name = "jmp"]
         Jmp(struct Jmp {loc: Location}),

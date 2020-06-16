@@ -383,7 +383,8 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
     bytes are requested
 * `push source` - decrements the stack pointer and then stores `source` at the
   top of the stack
-* `pop dest`
+* `pop dest` - loads the value from the top of the stack to the specified
+  destination and then increments the stack pointer
 
 ### Control Flow
 
