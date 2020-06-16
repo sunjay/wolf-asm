@@ -19,7 +19,6 @@ impl StoreDestination for Registers {
     fn store_dest<R>(&mut self, dest: Destination, value: R)
         where u64: Reinterpret<R>
     {
-        let value = u64::reinterpret(value);
         match dest {
             Destination::Register(reg) => self.store(reg, value),
         }
@@ -306,7 +305,7 @@ impl Execute for Push {
 
         // Store the value at the top of the stack
         let value: u64 = source.into_value(&mut vm.registers);
-        vm.memory.write_u64(stack_top as usize, value)?;
+        vm.memory.write_u64(stack_top, value)?;
 
         Ok(())
     }
@@ -318,7 +317,7 @@ impl Execute for Pop {
 
         // Load the top of the stack into the destination
         let stack_top: u64 = vm.registers.load_sp();
-        let value = vm.memory.read_u64(stack_top as usize)?;
+        let value = vm.memory.read_u64(stack_top)?;
         vm.registers.store_dest(dest, value);
 
         // Increment the stack pointer

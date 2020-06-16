@@ -21,7 +21,7 @@ use wolf_vm::{
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
 
 /// The address where program execution should start
-const START_ADDR: usize = 0;
+const START_ADDR: u64 = 0;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "wolf-vm", about)]

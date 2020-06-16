@@ -9,7 +9,7 @@ use crate::{
 };
 
 /// The address used to indicate that the program should quit
-const QUIT_ADDR: usize = u64::MAX as usize;
+const QUIT_ADDR: u64 = u64::MAX;
 
 /// Whether the program should continue running
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -29,7 +29,7 @@ pub enum ExecutionError {
 #[derive(Debug, PartialEq)]
 pub struct Machine {
     /// Holds the address of the next instruction to execute
-    pub program_counter: usize,
+    pub program_counter: u64,
     /// The machine memory unit
     pub memory: Memory,
     /// The machine registers
@@ -43,7 +43,7 @@ impl Machine {
     pub fn step(&mut self) -> Result<ProgramStatus, ExecutionError> {
         let instr = self.memory.read_u64(self.program_counter)?;
         let instr = Instr::decode(instr)?;
-        self.program_counter += instr.size_bytes() as usize;
+        self.program_counter += instr.size_bytes();
 
         instr.execute(self)?;
 
