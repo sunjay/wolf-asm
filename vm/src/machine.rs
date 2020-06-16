@@ -4,12 +4,9 @@ use crate::{
     memory::{Memory, OutOfBounds},
     registers::Registers,
     flags::Flags,
-    decode::{Instr, DecodeError},
-    execute::{Execute, ExecuteError},
+    decode::{Instr, DecodeError, Push, Source},
+    execute::{QUIT_ADDR, Execute, ExecuteError},
 };
-
-/// The address used to indicate that the program should quit
-const QUIT_ADDR: u64 = u64::MAX;
 
 /// Whether the program should continue running
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -59,6 +56,8 @@ impl Machine {
     }
 
     pub fn push_immediate(&mut self, imm: i128) -> Result<(), ExecutionError> {
-        todo!()
+        let push = Push {source: Source::Immediate(imm)};
+        push.execute(self)?;
+        Ok(())
     }
 }

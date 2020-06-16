@@ -6,6 +6,9 @@ use crate::registers::Registers;
 use crate::memory::OutOfBounds;
 use crate::decode::*;
 
+/// The address used to indicate that the program should quit
+pub const QUIT_ADDR: u64 = u64::MAX;
+
 fn size_bytes_of<T>() -> u64 {
     std::mem::size_of::<T>() as u64
 }
