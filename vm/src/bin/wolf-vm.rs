@@ -15,7 +15,7 @@ use wolf_vm::{
     write_memory::WriteMemory,
     registers::Registers,
     flags::Flags,
-    machine::Machine,
+    machine::{Machine, ProgramStatus},
 };
 
 const MACHINE_MEMORY: usize = 4 * 1024; // 4 kb
@@ -56,6 +56,16 @@ fn main() -> anyhow::Result<()> {
     };
     cpu.push_quit_addr()
         .expect("bug: should always be able to push quit address");
+
+    loop {
+        let status = cpu.step()
+            .context("Failed to execute instruction")?;
+
+        match status {
+            ProgramStatus::Continue => {},
+            ProgramStatus::Quit => break,
+        }
+    }
 
     Ok(())
 }
