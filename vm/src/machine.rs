@@ -115,8 +115,8 @@ impl Machine {
         }
     }
 
-    fn execute_nop(&mut self, args: Layout) -> Result<(), ExecutionError> {
-        todo!();
+    fn execute_nop(&mut self, _args: Layout) -> Result<(), ExecutionError> {
+        Ok(())
     }
 
     fn execute_add(&mut self, args: Layout) -> Result<(), ExecutionError> {
