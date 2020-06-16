@@ -1,5 +1,8 @@
 # wolf-asm
 
+[![Build Status](https://dev.azure.com/sunjayv/wolf-asm/_apis/build/status/sunjay.wolf-asm?branchName=master)](https://dev.azure.com/sunjayv/wolf-asm/_build/latest?definitionId=5&branchName=master)
+[![Line Count](https://tokei.rs/b1/github/sunjay/wolf-asm)](https://github.com/sunjay/wolf-asm)
+
 The Wolf Assembly Language is a made up assembly language for a non-existent
 machine. This language was originally invented for an assembly-based puzzle game
 that I was planning to create. I don't know if I'll get the chance to finish
