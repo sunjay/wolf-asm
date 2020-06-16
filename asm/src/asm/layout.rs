@@ -521,6 +521,8 @@ impl<S: ImmSize> BitPattern for Imm<S> {
         // Sign-extend the number: http://graphics.stanford.edu/~seander/bithacks.html#VariableSignExtend
         let mask = 1u64 << (bits - 1);
         let value = (value ^ mask) - mask;
+        // Reinterpret the value as signed
+        let value = i64::from_le_bytes(value.to_le_bytes());
 
         Imm(value as i128, PhantomData)
     }
