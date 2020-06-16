@@ -54,6 +54,8 @@ fn main() -> anyhow::Result<()> {
         registers,
         flags,
     };
+    cpu.push_quit_addr()
+        .expect("bug: should always be able to push quit address");
 
     Ok(())
 }
