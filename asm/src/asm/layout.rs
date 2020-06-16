@@ -193,13 +193,13 @@ impl LayoutArguments for (Source, Source) {
                 Reg::new(src1_reg, diag),
                 Reg::new(src2_reg, diag),
             )),
-            (Src::Register(reg), Src::Immediate(imm)) => Layout::L2(L2(
-                Reg::new(reg, diag),
-                Imm::new(imm, diag),
+            (Src::Register(src1_reg), Src::Immediate(src2_imm)) => Layout::L2(L2(
+                Reg::new(src1_reg, diag),
+                Imm::new(src2_imm, diag),
             )),
-            (Src::Immediate(imm), Src::Register(reg)) => Layout::L3(L3(
-                Imm::new(imm, diag),
-                Reg::new(reg, diag),
+            (Src::Immediate(src1_imm), Src::Register(src2_reg)) => Layout::L3(L3(
+                Imm::new(src1_imm, diag),
+                Reg::new(src2_reg, diag),
             )),
             (Src::Immediate(src1_imm), Src::Immediate(src2_imm)) => Layout::L6(L6(
                 Imm::new(src1_imm, diag),
@@ -244,23 +244,23 @@ impl LayoutArguments for (Location, Source) {
                 Reg::new(loc_reg, diag),
                 Reg::new(src_reg, diag),
             )),
-            (Loc::Register(reg, None), Src::Immediate(imm)) => Layout::L2(L2(
-                Reg::new(reg, diag),
-                Imm::new(imm, diag),
+            (Loc::Register(loc_reg, None), Src::Immediate(src_imm)) => Layout::L2(L2(
+                Reg::new(loc_reg, diag),
+                Imm::new(src_imm, diag),
             )),
-            (Loc::Register(loc_reg, Some(offset)), Src::Register(src_reg)) => Layout::L4(L4(
+            (Loc::Register(loc_reg, Some(loc_offset)), Src::Register(src_reg)) => Layout::L4(L4(
                 Reg::new(loc_reg, diag),
                 Reg::new(src_reg, diag),
-                Offset::new(offset, diag),
+                Offset::new(loc_offset, diag),
             )),
-            (Loc::Register(reg, Some(offset)), Src::Immediate(imm)) => Layout::L5(L5(
-                Reg::new(reg, diag),
-                Offset::new(offset, diag),
-                Imm::new(imm, diag),
+            (Loc::Register(loc_reg, Some(loc_offset)), Src::Immediate(src_imm)) => Layout::L5(L5(
+                Reg::new(loc_reg, diag),
+                Offset::new(loc_offset, diag),
+                Imm::new(src_imm, diag),
             )),
-            (Loc::Immediate(imm), Src::Register(reg)) => Layout::L3(L3(
-                Imm::new(imm, diag),
-                Reg::new(reg, diag),
+            (Loc::Immediate(loc_imm), Src::Register(src_reg)) => Layout::L3(L3(
+                Imm::new(loc_imm, diag),
+                Reg::new(src_reg, diag),
             )),
             (Loc::Immediate(loc_imm), Src::Immediate(src_imm)) => Layout::L6(L6(
                 Imm::new(loc_imm, diag),
@@ -592,6 +592,12 @@ impl<S: ImmSize> Imm<S> {
     }
 }
 
+impl<S> Imm<S> {
+    pub fn into_value(self) -> i128 {
+        self.0
+    }
+}
+
 /// A 16-bit signed offset, encoded in 16-bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Offset(i16);
@@ -641,6 +647,10 @@ impl Offset {
         let asm::Offset {value, span: _} = offset;
 
         Offset(value)
+    }
+
+    pub fn into_value(self) -> i16 {
+        self.0
     }
 }
 

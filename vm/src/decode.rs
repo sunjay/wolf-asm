@@ -1,6 +1,24 @@
 use wolf_asm::asm::{
     InstrKind,
-    layout::{Opcode, Layout, BitPattern, Reg},
+    layout::{
+        Opcode,
+        Layout,
+        BitPattern,
+        Reg,
+        Imm,
+        Offset as LayoutOffset,
+        L1,
+        L2,
+        L3,
+        L4,
+        L5,
+        L6,
+        L7,
+        L8,
+        L9,
+        L10,
+        L11,
+    },
 };
 use thiserror::Error;
 
@@ -22,6 +40,30 @@ pub enum Source {
     Immediate(Immediate),
 }
 
+impl From<Reg> for Source {
+    fn from(reg: Reg) -> Self {
+        Source::Register(reg)
+    }
+}
+
+impl<S> From<Imm<S>> for Source {
+    fn from(imm: Imm<S>) -> Self {
+        Source::Immediate(imm.into_value())
+    }
+}
+
+/// Represents an argument for an instruction that may be used as a destination operand
+#[derive(Debug, Clone, PartialEq)]
+pub enum Destination {
+    Register(Reg),
+}
+
+impl From<Reg> for Destination {
+    fn from(reg: Reg) -> Self {
+        Destination::Register(reg)
+    }
+}
+
 /// Represents an argument for an instruction that may be used as a location (address) operand
 #[derive(Debug, Clone, PartialEq)]
 pub enum Location {
@@ -29,10 +71,22 @@ pub enum Location {
     Immediate(Immediate),
 }
 
-/// Represents an argument for an instruction that may be used as a destination operand
-#[derive(Debug, Clone, PartialEq)]
-pub enum Destination {
-    Register(Reg),
+impl From<Reg> for Location {
+    fn from(reg: Reg) -> Self {
+        Location::Register(reg, None)
+    }
+}
+
+impl From<(Reg, LayoutOffset)> for Location {
+    fn from((reg, offset): (Reg, LayoutOffset)) -> Self {
+        Location::Register(reg, Some(offset.into_value()))
+    }
+}
+
+impl<S> From<Imm<S>> for Location {
+    fn from(imm: Imm<S>) -> Self {
+        Location::Immediate(imm.into_value())
+    }
 }
 
 macro_rules! instr {
@@ -159,6 +213,19 @@ instr! {
     }
 }
 
+macro_rules! match_layout {
+    (
+        ($layout:expr) {
+            $($p:pat => $v:expr),* $(,)?
+        }
+    ) => (
+        match $layout {
+            $($p => $v,)*
+            _ => return Err(DecodeError::UnsupportedInstructionLayout),
+        }
+    );
+}
+
 pub trait ArgumentsLayout: Sized {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError>;
 }
@@ -171,48 +238,79 @@ impl ArgumentsLayout for () {
 
 impl ArgumentsLayout for (Destination, Source) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L1(L1(dest, src)) => Ok((dest.into(), src.into())),
+            Layout::L2(L2(dest, src)) => Ok((dest.into(), src.into())),
+        })
     }
 }
 
 impl ArgumentsLayout for (Source, Source) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L1(L1(src1, src2)) => Ok((src1.into(), src2.into())),
+            Layout::L2(L2(src1, src2)) => Ok((src1.into(), src2.into())),
+            Layout::L3(L3(src1, src2)) => Ok((src1.into(), src2.into())),
+            Layout::L6(L6(src1, src2)) => Ok((src1.into(), src2.into())),
+        })
     }
 }
 
 impl ArgumentsLayout for (Destination, Location) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L1(L1(dest, loc)) => Ok((dest.into(), loc.into())),
+            Layout::L2(L2(dest, loc)) => Ok((dest.into(), loc.into())),
+            Layout::L4(L4(dest, loc, offset)) => Ok((dest.into(), (loc, offset).into())),
+        })
     }
 }
 
 impl ArgumentsLayout for (Location, Source) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L1(L1(loc, src)) => Ok((loc.into(), src.into())),
+            Layout::L2(L2(loc, src)) => Ok((loc.into(), src.into())),
+            Layout::L3(L3(loc, src)) => Ok((loc.into(), src.into())),
+            Layout::L4(L4(loc, src, offset)) => Ok(((loc, offset).into(), src.into())),
+            Layout::L5(L5(loc, offset, src)) => Ok(((loc, offset).into(), src.into())),
+            Layout::L6(L6(loc, src)) => Ok((loc.into(), src.into())),
+        })
     }
 }
 
 impl ArgumentsLayout for (Destination, Destination, Source) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L7(L7(dest1, dest2, src)) => Ok((dest1.into(), dest2.into(), src.into())),
+            Layout::L8(L8(dest1, dest2, src)) => Ok((dest1.into(), dest2.into(), src.into())),
+        })
     }
 }
 
 impl ArgumentsLayout for (Source,) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L9(L9(src)) => Ok((src.into(),)),
+            Layout::L10(L10(src)) => Ok((src.into(),)),
+        })
     }
 }
 
 impl ArgumentsLayout for (Destination,) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L9(L9(dest)) => Ok((dest.into(),)),
+        })
     }
 }
 
 impl ArgumentsLayout for (Location,) {
     fn from_layout(layout: Layout) -> Result<Self, DecodeError> {
-        todo!()
+        match_layout!((layout) {
+            Layout::L9(L9(loc)) => Ok((loc.into(),)),
+            Layout::L10(L10(loc)) => Ok((loc.into(),)),
+            Layout::L11(L11(loc, offset)) => Ok(((loc, offset).into(),)),
+        })
     }
 }
