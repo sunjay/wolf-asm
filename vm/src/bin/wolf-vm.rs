@@ -45,8 +45,8 @@ fn main() -> anyhow::Result<()> {
         .context("Failed to load executable into memory")?;
 
     // Start with the stack pointer pointing just past the end of the stack
-    let mut registers = Registers::new(MACHINE_MEMORY);
-    let mut flags = Flags::default();
+    let registers = Registers::new(MACHINE_MEMORY);
+    let flags = Flags::default();
 
     let mut cpu = Machine {
         program_counter: START_ADDR,
