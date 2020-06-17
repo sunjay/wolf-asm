@@ -61,6 +61,18 @@ impl From<Immediate> for Source {
     }
 }
 
+impl From<u64> for Source {
+    fn from(imm: u64) -> Self {
+        Source::Immediate(imm as i128)
+    }
+}
+
+impl From<i64> for Source {
+    fn from(imm: i64) -> Self {
+        Source::Immediate(imm as i128)
+    }
+}
+
 /// Represents an argument for an instruction that may be used as a destination operand
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Destination {
