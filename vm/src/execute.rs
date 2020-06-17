@@ -273,7 +273,41 @@ impl Execute for Test {
 impl Execute for Cmp {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Cmp {source1, source2} = self;
-        todo!()
+        let lhs: u64 = source1.into_value(&vm.registers);
+        let rhs: u64 = source2.into_value(&vm.registers);
+
+        let carry = if lhs.checked_sub(rhs).is_none() {
+            CF::Carry
+        } else {
+            CF::NoCarry
+        };
+
+        let signed_lhs = i64::from_le_bytes(lhs.to_le_bytes());
+        let signed_rhs = i64::from_le_bytes(rhs.to_le_bytes());
+
+        let overflow = if signed_lhs.checked_sub(signed_rhs).is_none() {
+            OF::Overflow
+        } else {
+            OF::NoOverflow
+        };
+
+        let result = lhs.wrapping_sub(rhs);
+
+        let zero = if result == 0 {
+            ZF::Zero
+        } else {
+            ZF::NonZero
+        };
+
+        let sign = if (1u64 << 63) & result > 0 {
+            SF::NegativeSign
+        } else {
+            SF::PositiveSign
+        };
+
+        vm.flags = Flags {carry, zero, sign, overflow};
+
+        Ok(())
     }
 }
 

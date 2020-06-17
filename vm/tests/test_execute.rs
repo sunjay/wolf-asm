@@ -141,3 +141,40 @@ fn sub_flags() -> Result<(), ExecutionError> {
 
     Ok(())
 }
+
+#[test]
+fn cmp_flags() -> Result<(), ExecutionError> {
+    macro_rules! cmp {
+        (
+            ($aty:ty) $a:literal < $b:literal,
+            {$carry:ident, $zero:ident, $sign:ident, $overflow:ident$(,)?}
+        ) => (
+            execute! {
+                program: [
+                    Mov {dest: r(0), source: $a},
+                    Cmp {source1: r(0), source2: $b},
+                ],
+                postconditions: [
+                    // register shouldn't change
+                    reg r(0) => ($aty) $a,
+                ],
+                flags: {
+                    carry: $carry,
+                    zero: $zero,
+                    sign: $sign,
+                    overflow: $overflow,
+                },
+            }
+        );
+    }
+
+    cmp!((u64) 32u64 < 32u64, {NoCarry, Zero, PositiveSign, NoOverflow});
+    cmp!((u64) 32u64 < 34u64, {Carry, NonZero, NegativeSign, NoOverflow});
+    cmp!((u64) 33u64 < -27i64, {Carry, NonZero, PositiveSign, NoOverflow});
+    // 0xffffffffffffffff == u64::MAX
+    cmp!((u64) 0xffffffffffffffffu64 < -1i64, {NoCarry, Zero, PositiveSign, NoOverflow});
+    // 0x7fffffffffffffff == i64::MAX
+    cmp!((i64) 0x7fffffffffffffffi64 < -1i64, {Carry, NonZero, NegativeSign, Overflow});
+
+    Ok(())
+}
