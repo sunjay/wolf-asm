@@ -203,9 +203,9 @@ instr! {
         Xor(struct Xor {dest: Destination, source: Source}),
 
         #[opcode = 192, name = "test"]
-        Test(struct Test {dest: Source, source: Source}),
+        Test(struct Test {source1: Source, source2: Source}),
         #[opcode = 204, name = "cmp"]
-        Cmp(struct Cmp {dest: Source, source: Source}),
+        Cmp(struct Cmp {source1: Source, source2: Source}),
 
         #[opcode = 216, name = "mov"]
         Mov(struct Mov {dest: Destination, source: Source}),

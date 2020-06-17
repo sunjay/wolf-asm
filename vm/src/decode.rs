@@ -203,8 +203,8 @@ instr! {
         Or(struct Or {dest: Destination, source: Source}),
         Xor(struct Xor {dest: Destination, source: Source}),
 
-        Test(struct Test {dest: Source, source: Source}),
-        Cmp(struct Cmp {dest: Source, source: Source}),
+        Test(struct Test {source1: Source, source2: Source}),
+        Cmp(struct Cmp {source1: Source, source2: Source}),
 
         Mov(struct Mov {dest: Destination, source: Source}),
 

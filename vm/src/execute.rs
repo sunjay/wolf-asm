@@ -265,14 +265,14 @@ impl Execute for Xor {
 
 impl Execute for Test {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
-        let Test {dest, source} = self;
+        let Test {source1, source2} = self;
         todo!()
     }
 }
 
 impl Execute for Cmp {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
-        let Cmp {dest, source} = self;
+        let Cmp {source1, source2} = self;
         todo!()
     }
 }
