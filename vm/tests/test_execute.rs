@@ -105,3 +105,39 @@ fn add_flags() -> Result<(), ExecutionError> {
 
     Ok(())
 }
+
+#[test]
+fn sub_flags() -> Result<(), ExecutionError> {
+    macro_rules! sub {
+        (
+            $a:literal - $b:literal == ($cty:ty) $c:expr,
+            {$carry:ident, $zero:ident, $sign:ident, $overflow:ident$(,)?}
+        ) => (
+            execute! {
+                program: [
+                    Mov {dest: r(0), source: $a},
+                    Sub {dest: r(0), source: $b},
+                ],
+                postconditions: [
+                    reg r(0) => ($cty) $c,
+                ],
+                flags: {
+                    carry: $carry,
+                    zero: $zero,
+                    sign: $sign,
+                    overflow: $overflow,
+                },
+            }
+        );
+    }
+
+    sub!(32u64 - 32u64 == (u64) 0, {NoCarry, Zero, PositiveSign, NoOverflow});
+    sub!(32u64 - 34u64 == (i64) -2, {Carry, NonZero, NegativeSign, NoOverflow});
+    sub!(33u64 - -27i64 == (u64) 60, {Carry, NonZero, PositiveSign, NoOverflow});
+    // 0xffffffffffffffff == u64::MAX
+    sub!(0xffffffffffffffffu64 - -1i64 == (u64) 0, {NoCarry, Zero, PositiveSign, NoOverflow});
+    // 0x7fffffffffffffff == i64::MAX
+    sub!(0x7fffffffffffffffi64 - -1i64 == (i64) i64::MIN, {Carry, NonZero, NegativeSign, Overflow});
+
+    Ok(())
+}
