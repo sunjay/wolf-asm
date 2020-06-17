@@ -22,7 +22,7 @@ pub enum SF {
 /// The overflow flag
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OF {
-    NotOverflow = 0,
+    NoOverflow = 0,
     Overflow = 1,
 }
 
@@ -41,7 +41,7 @@ impl Default for Flags {
             carry: CF::NoCarry,
             zero: ZF::Zero,
             sign: SF::PositiveSign,
-            overflow: OF::NotOverflow,
+            overflow: OF::NoOverflow,
         }
     }
 }

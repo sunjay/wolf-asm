@@ -55,6 +55,12 @@ impl<S> From<Imm<S>> for Source {
     }
 }
 
+impl From<Immediate> for Source {
+    fn from(imm: Immediate) -> Self {
+        Source::Immediate(imm)
+    }
+}
+
 /// Represents an argument for an instruction that may be used as a destination operand
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Destination {
@@ -89,6 +95,12 @@ impl From<(Reg, LayoutOffset)> for Location {
 impl<S> From<Imm<S>> for Location {
     fn from(imm: Imm<S>) -> Self {
         Location::Immediate(imm.into_value())
+    }
+}
+
+impl From<Immediate> for Location {
+    fn from(imm: Immediate) -> Self {
+        Location::Immediate(imm)
     }
 }
 
