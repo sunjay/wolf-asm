@@ -325,14 +325,29 @@ impl Execute for Mov {
 impl Execute for Load1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Load1 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(&vm.registers);
+        // load1 loads only 1 byte
+        let value = vm.memory.get(addr)?;
+        // load (unlike loadu) must sign-extend (hence i8)
+        let value = i8::reinterpret(value);
+        vm.registers.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
 impl Execute for Loadu1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Loadu1 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(&vm.registers);
+        // loadu1 loads only 1 byte
+        let value = vm.memory.get(addr)?;
+        // loadu (unlike load) must NOT sign-extend (hence u8 is fine)
+        vm.registers.store_dest(dest, value);
+
+        Ok(())
     }
 }
 

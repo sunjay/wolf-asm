@@ -166,6 +166,13 @@ impl Reinterpret<i128> for u64 {
     }
 }
 
+impl Reinterpret<u8> for i8 {
+    #[inline(always)]
+    fn reinterpret(value: u8) -> Self {
+        Self::from_le_bytes(value.to_le_bytes())
+    }
+}
+
 /// Reinterprets a slice as a smaller slice
 #[inline(always)]
 fn slice_as_8_bytes(bytes: &[u8; 16]) -> &[u8; 8] {
