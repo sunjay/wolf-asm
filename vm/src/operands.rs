@@ -1,3 +1,5 @@
+use std::fmt;
+
 use wolf_asm::asm::layout::{Reg, Imm, Offset as LayoutOffset};
 
 use crate::reinterpret::Reinterpret;
@@ -74,6 +76,16 @@ impl Operand for Source {
     }
 }
 
+impl fmt::Display for Source {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Source::*;
+        match self {
+            Register(reg) => write!(f, "${}", reg.into_value()),
+            Immediate(imm) => write!(f, "{}", imm),
+        }
+    }
+}
+
 /// Represents an argument for an instruction that may be used as a destination operand
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Destination {
@@ -90,6 +102,15 @@ impl Operand for Destination {
     fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
         match self {
             Destination::Register(reg) => vm.registers.load(reg),
+        }
+    }
+}
+
+impl fmt::Display for Destination {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Destination::*;
+        match self {
+            Register(reg) => write!(f, "${}", reg.into_value()),
         }
     }
 }
@@ -139,6 +160,17 @@ impl Operand for Location {
                 let imm = u64::reinterpret(imm);
                 R::reinterpret(imm)
             },
+        }
+    }
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Location::*;
+        match self {
+            Register(reg, None) => write!(f, "${}", reg.into_value()),
+            Register(reg, Some(offset)) => write!(f, "{}(${})", offset, reg.into_value()),
+            Immediate(imm) => write!(f, "{}", imm),
         }
     }
 }
