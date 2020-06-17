@@ -86,6 +86,8 @@ impl Operand for Location {
 pub enum ExecuteError {
     #[error(transparent)]
     OutOfBounds(#[from] OutOfBounds),
+    #[error("Divided a number by zero")]
+    DivideByZero,
 }
 
 pub trait Execute {
@@ -235,7 +237,22 @@ impl Execute for Divu {
 impl Execute for Divru {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Divru {dest_rem, dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(&vm.registers);
+        let rhs: u64 = source.into_value(&vm.registers);
+
+        let quotient = lhs.checked_div_euclid(rhs);
+        let remainder = lhs.checked_rem_euclid(rhs);
+        let (quotient, remainder) = match (quotient, remainder) {
+            (Some(quotient), Some(remainder)) => (quotient, remainder),
+            (Some(_), None) |
+            (None, Some(_)) |
+            (None, None) => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.registers.store_dest(dest, quotient);
+        vm.registers.store_dest(dest_rem, remainder);
+
+        Ok(())
     }
 }
 
