@@ -4,7 +4,8 @@ use crate::{
     memory::{Memory, OutOfBounds},
     registers::Registers,
     flags::Flags,
-    decode::{Instr, DecodeError, Push, Source},
+    decode::{Instr, DecodeError, Push},
+    operands::Source,
     execute::{QUIT_ADDR, Execute, ExecuteError},
 };
 

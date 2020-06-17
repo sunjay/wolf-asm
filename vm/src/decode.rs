@@ -4,9 +4,6 @@ use wolf_asm::asm::{
         Opcode,
         Layout,
         BitPattern,
-        Reg,
-        Imm,
-        Offset as LayoutOffset,
         L1,
         L2,
         L3,
@@ -24,9 +21,7 @@ use thiserror::Error;
 
 use crate::machine::Machine;
 use crate::execute::{Execute, ExecuteError};
-
-pub type Immediate = i128;
-pub type Offset = i16;
+use crate::operands::{Source, Destination, Location};
 
 #[derive(Debug, Error, Clone)]
 pub enum DecodeError {
@@ -34,86 +29,6 @@ pub enum DecodeError {
     InvalidOpcode(u16),
     #[error("Invalid instruction: unsupported layout")]
     UnsupportedInstructionLayout,
-}
-
-/// Represents an argument for an instruction that may be used as a source operand
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Source {
-    Register(Reg),
-    Immediate(Immediate),
-}
-
-impl From<Reg> for Source {
-    fn from(reg: Reg) -> Self {
-        Source::Register(reg)
-    }
-}
-
-impl<S> From<Imm<S>> for Source {
-    fn from(imm: Imm<S>) -> Self {
-        Source::Immediate(imm.into_value())
-    }
-}
-
-impl From<Immediate> for Source {
-    fn from(imm: Immediate) -> Self {
-        Source::Immediate(imm)
-    }
-}
-
-impl From<u64> for Source {
-    fn from(imm: u64) -> Self {
-        Source::Immediate(imm as i128)
-    }
-}
-
-impl From<i64> for Source {
-    fn from(imm: i64) -> Self {
-        Source::Immediate(imm as i128)
-    }
-}
-
-/// Represents an argument for an instruction that may be used as a destination operand
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Destination {
-    Register(Reg),
-}
-
-impl From<Reg> for Destination {
-    fn from(reg: Reg) -> Self {
-        Destination::Register(reg)
-    }
-}
-
-/// Represents an argument for an instruction that may be used as a location (address) operand
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Location {
-    Register(Reg, Option<Offset>),
-    Immediate(Immediate),
-}
-
-impl From<Reg> for Location {
-    fn from(reg: Reg) -> Self {
-        Location::Register(reg, None)
-    }
-}
-
-impl From<(Reg, LayoutOffset)> for Location {
-    fn from((reg, offset): (Reg, LayoutOffset)) -> Self {
-        Location::Register(reg, Some(offset.into_value()))
-    }
-}
-
-impl<S> From<Imm<S>> for Location {
-    fn from(imm: Imm<S>) -> Self {
-        Location::Immediate(imm.into_value())
-    }
-}
-
-impl From<Immediate> for Location {
-    fn from(imm: Immediate) -> Self {
-        Location::Immediate(imm)
-    }
 }
 
 macro_rules! instr {

@@ -4,9 +4,9 @@ use thiserror::Error;
 
 use crate::reinterpret::Reinterpret;
 use crate::machine::Machine;
-use crate::registers::Registers;
 use crate::memory::OutOfBounds;
 use crate::flags::{Flags, CF, ZF, SF, OF};
+use crate::operands::{StoreDestination, Operand};
 use crate::decode::*;
 
 /// The address used to indicate that the program should quit
@@ -23,63 +23,6 @@ fn write_stdout(value: u32) {
 
 fn size_bytes_of<T>() -> u64 {
     std::mem::size_of::<T>() as u64
-}
-
-pub trait StoreDestination {
-    fn store_dest<R>(&mut self, dest: Destination, value: R)
-        where u64: Reinterpret<R>;
-}
-
-impl StoreDestination for Machine {
-    fn store_dest<R>(&mut self, dest: Destination, value: R)
-        where u64: Reinterpret<R>
-    {
-        match dest {
-            Destination::Register(reg) => self.registers.store(reg, value),
-        }
-    }
-}
-
-pub trait Operand {
-    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R;
-}
-
-impl Operand for Source {
-    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
-        match self {
-            Source::Register(reg) => vm.registers.load(reg),
-            Source::Immediate(imm) => {
-                let imm = u64::reinterpret(imm);
-                R::reinterpret(imm)
-            },
-        }
-    }
-}
-
-impl Operand for Destination {
-    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
-        match self {
-            Destination::Register(reg) => vm.registers.load(reg),
-        }
-    }
-}
-
-impl Operand for Location {
-    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
-        match self {
-            Location::Register(reg, offset) => {
-                let value = vm.registers.load(reg);
-                R::reinterpret(match offset {
-                    Some(offset) => value + u64::reinterpret(offset),
-                    None => value,
-                })
-            },
-            Location::Immediate(imm) => {
-                let imm = u64::reinterpret(imm);
-                R::reinterpret(imm)
-            },
-        }
-    }
 }
 
 #[derive(Debug, Clone, Error)]
