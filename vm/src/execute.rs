@@ -392,9 +392,12 @@ impl Execute for Loadu4 {
 
 impl Execute for Load8 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
+        // Note: load8 and loadu8 have the same behaviour
         let Load8 {dest, loc} = self;
 
         let addr: u64 = loc.into_value(&vm.registers);
+        // Since the value is already 8 bytes, we don't need to worry about
+        // sign-extension
         let value = vm.memory.read_u64(addr)?;
         vm.registers.store_dest(dest, value);
 
@@ -404,8 +407,16 @@ impl Execute for Load8 {
 
 impl Execute for Loadu8 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
+        // Note: load8 and loadu8 have the same behaviour
         let Loadu8 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(&vm.registers);
+        // Since the value is already 8 bytes, we don't need to worry about
+        // sign-extension
+        let value = vm.memory.read_u64(addr)?;
+        vm.registers.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
