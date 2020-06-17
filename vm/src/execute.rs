@@ -632,7 +632,20 @@ impl Execute for Jns {
 impl Execute for Call {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Call {loc} = self;
-        todo!()
+
+        // Decrement the stack pointer
+        let sp: u64 = vm.registers.load_sp();
+        let stack_top = sp - size_bytes_of::<u64>();
+        vm.registers.store_sp(stack_top);
+
+        // Store the program counter at the top of the stack
+        vm.memory.write_u64(stack_top, vm.program_counter)?;
+
+        // Jump to the given location
+        let addr: u64 = loc.into_value(&vm.registers);
+        vm.program_counter = addr;
+
+        Ok(())
     }
 }
 
