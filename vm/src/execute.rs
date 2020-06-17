@@ -646,7 +646,15 @@ impl Execute for Jz {
 impl Execute for Jnz {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jnz {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        if vm.flags.zero == ZF::NonZero {
+            // Not zero if ZF = 0
+            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Zero
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
