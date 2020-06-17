@@ -1,3 +1,5 @@
+use std::char;
+
 use thiserror::Error;
 
 use crate::reinterpret::Reinterpret;
@@ -9,6 +11,15 @@ use crate::decode::*;
 
 /// The address used to indicate that the program should quit
 pub const QUIT_ADDR: u64 = u64::MAX;
+/// The address used for stdout
+pub const STDOUT_ADDR: u64 = 0xffff_000c;
+/// The address used for stdin
+pub const STDIN_ADDR: u64 = 0xffff_0004;
+
+fn write_stdout(value: u32) {
+    let ch = char::from_u32(value).unwrap_or(char::REPLACEMENT_CHARACTER);
+    print!("{}", ch);
+}
 
 fn size_bytes_of<T>() -> u64 {
     std::mem::size_of::<T>() as u64
@@ -422,7 +433,17 @@ impl Execute for Store4 {
 impl Execute for Store8 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store8 {loc, source} = self;
-        todo!()
+        let addr: u64 = loc.into_value(&vm.registers);
+
+        let value: u64 = source.into_value(&vm.registers);
+
+        if addr == STDOUT_ADDR {
+            write_stdout(u32::reinterpret(value));
+        } else {
+            vm.memory.write_u64(addr, value)?;
+        }
+
+        Ok(())
     }
 }
 
