@@ -484,7 +484,9 @@ impl Execute for Pop {
 impl Execute for Jmp {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jmp {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(&vm.registers);
+        vm.program_counter = addr;
+        Ok(())
     }
 }
 
