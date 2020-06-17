@@ -72,10 +72,10 @@ macro_rules! execute {
 
 #[test]
 fn add_flags() -> Result<(), ExecutionError> {
-    macro_rules! test_add {
+    macro_rules! add {
         (
-            $a:literal + $b:literal == ($cty:ty) $c:literal,
-            {$($flag_name:ident : $flag_value:expr),* $(,)?}
+            $a:literal + $b:literal == ($cty:ty) $c:expr,
+            {$carry:ident, $zero:ident, $sign:ident, $overflow:ident$(,)?}
         ) => (
             execute! {
                 program: [
@@ -86,18 +86,22 @@ fn add_flags() -> Result<(), ExecutionError> {
                     reg r(0) => ($cty) $c,
                 ],
                 flags: {
-                    $($flag_name : $flag_value),*
+                    carry: $carry,
+                    zero: $zero,
+                    sign: $sign,
+                    overflow: $overflow,
                 },
             }
         );
     }
 
-    test_add!(32u64 + -32i64 == (i64) 0, {
-        carry: Carry,
-        zero: Zero,
-        sign: PositiveSign,
-        overflow: NoOverflow,
-    });
+    add!(32u64 + -32i64 == (u64) 0, {Carry, Zero, PositiveSign, NoOverflow});
+    add!(32u64 + -34i64 == (i64) -2, {NoCarry, NonZero, NegativeSign, NoOverflow});
+    add!(33u64 + 27u64 == (u64) 60, {NoCarry, NonZero, PositiveSign, NoOverflow});
+    // 0xffffffffffffffff == u64::MAX
+    add!(0xffffffffffffffffu64 + 1u64 == (u64) 0, {Carry, Zero, PositiveSign, NoOverflow});
+    // 0x7fffffffffffffff == i64::MAX
+    add!(0x7fffffffffffffffi64 + 1u64 == (i64) i64::MIN, {NoCarry, NonZero, NegativeSign, Overflow});
 
     Ok(())
 }
