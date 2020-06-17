@@ -423,7 +423,17 @@ impl Execute for Loadu8 {
 impl Execute for Store1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store1 {loc, source} = self;
-        todo!()
+        let addr: u64 = loc.into_value(&vm.registers);
+
+        let value: u8 = source.into_value(&vm.registers);
+
+        if addr == STDOUT_ADDR {
+            write_stdout(u32::reinterpret(value));
+        } else {
+            vm.memory.set(addr, value)?;
+        }
+
+        Ok(())
     }
 }
 

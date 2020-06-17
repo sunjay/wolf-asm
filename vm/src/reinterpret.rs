@@ -173,6 +173,14 @@ impl Reinterpret<u8> for i8 {
     }
 }
 
+impl Reinterpret<u8> for u32 {
+    #[inline(always)]
+    fn reinterpret(value: u8) -> Self {
+        // Widen with zero-extension
+        value as u32
+    }
+}
+
 /// Reinterprets a slice as a smaller slice
 #[inline(always)]
 fn slice_as_8_bytes(bytes: &[u8; 16]) -> &[u8; 8] {
