@@ -628,6 +628,16 @@ impl Execute for Call {
 impl Execute for Ret {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Ret {} = self;
-        todo!()
+
+        // Load the top of the stack into the program counter
+        let stack_top: u64 = vm.registers.load_sp();
+        let value = vm.memory.read_u64(stack_top)?;
+        vm.program_counter = value;
+
+        // Increment the stack pointer
+        let sp = stack_top + size_bytes_of::<u64>();
+        vm.registers.store_sp(sp);
+
+        Ok(())
     }
 }
