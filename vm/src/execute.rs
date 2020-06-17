@@ -30,24 +30,24 @@ pub trait StoreDestination {
         where u64: Reinterpret<R>;
 }
 
-impl StoreDestination for Registers {
+impl StoreDestination for Machine {
     fn store_dest<R>(&mut self, dest: Destination, value: R)
         where u64: Reinterpret<R>
     {
         match dest {
-            Destination::Register(reg) => self.store(reg, value),
+            Destination::Register(reg) => self.registers.store(reg, value),
         }
     }
 }
 
 pub trait Operand {
-    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R;
+    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R;
 }
 
 impl Operand for Source {
-    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
         match self {
-            Source::Register(reg) => regs.load(reg),
+            Source::Register(reg) => vm.registers.load(reg),
             Source::Immediate(imm) => {
                 let imm = u64::reinterpret(imm);
                 R::reinterpret(imm)
@@ -57,18 +57,18 @@ impl Operand for Source {
 }
 
 impl Operand for Destination {
-    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
         match self {
-            Destination::Register(reg) => regs.load(reg),
+            Destination::Register(reg) => vm.registers.load(reg),
         }
     }
 }
 
 impl Operand for Location {
-    fn into_value<R: Reinterpret<u64>>(self, regs: &Registers) -> R {
+    fn into_value<R: Reinterpret<u64>>(self, vm: &Machine) -> R {
         match self {
             Location::Register(reg, offset) => {
-                let value = regs.load(reg);
+                let value = vm.registers.load(reg);
                 R::reinterpret(match offset {
                     Some(offset) => value + u64::reinterpret(offset),
                     None => value,
@@ -104,8 +104,8 @@ impl Execute for Nop {
 impl Execute for Add {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Add {dest, source} = self;
-        let lhs: u64 = dest.into_value(&vm.registers);
-        let rhs: u64 = source.into_value(&vm.registers);
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
 
         let carry = if lhs.checked_add(rhs).is_none() {
             CF::Carry
@@ -136,7 +136,7 @@ impl Execute for Add {
             SF::PositiveSign
         };
 
-        vm.registers.store_dest(dest, result);
+        vm.store_dest(dest, result);
         vm.flags = Flags {carry, zero, sign, overflow};
 
         Ok(())
@@ -146,8 +146,8 @@ impl Execute for Add {
 impl Execute for Sub {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Sub {dest, source} = self;
-        let lhs: u64 = dest.into_value(&vm.registers);
-        let rhs: u64 = source.into_value(&vm.registers);
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
 
         let carry = if lhs.checked_sub(rhs).is_none() {
             CF::Carry
@@ -178,7 +178,7 @@ impl Execute for Sub {
             SF::PositiveSign
         };
 
-        vm.registers.store_dest(dest, result);
+        vm.store_dest(dest, result);
         vm.flags = Flags {carry, zero, sign, overflow};
 
         Ok(())
@@ -237,8 +237,8 @@ impl Execute for Divu {
 impl Execute for Divru {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Divru {dest_rem, dest, source} = self;
-        let lhs: u64 = dest.into_value(&vm.registers);
-        let rhs: u64 = source.into_value(&vm.registers);
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
 
         let quotient = lhs.checked_div_euclid(rhs);
         let remainder = lhs.checked_rem_euclid(rhs);
@@ -249,8 +249,8 @@ impl Execute for Divru {
             (None, None) => return Err(ExecuteError::DivideByZero),
         };
 
-        vm.registers.store_dest(dest, quotient);
-        vm.registers.store_dest(dest_rem, remainder);
+        vm.store_dest(dest, quotient);
+        vm.store_dest(dest_rem, remainder);
 
         Ok(())
     }
@@ -301,8 +301,8 @@ impl Execute for Test {
 impl Execute for Cmp {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Cmp {source1, source2} = self;
-        let lhs: u64 = source1.into_value(&vm.registers);
-        let rhs: u64 = source2.into_value(&vm.registers);
+        let lhs: u64 = source1.into_value(vm);
+        let rhs: u64 = source2.into_value(vm);
 
         let carry = if lhs.checked_sub(rhs).is_none() {
             CF::Carry
@@ -343,8 +343,8 @@ impl Execute for Mov {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mov {dest, source} = self;
 
-        let value: u64 = source.into_value(&vm.registers);
-        vm.registers.store_dest(dest, value);
+        let value: u64 = source.into_value(vm);
+        vm.store_dest(dest, value);
 
         Ok(())
     }
@@ -354,12 +354,12 @@ impl Execute for Load1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Load1 {dest, loc} = self;
 
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         // load1 loads only 1 byte
         let value = vm.memory.get(addr)?;
         // load (unlike loadu) must sign-extend (hence i8)
         let value = i8::reinterpret(value);
-        vm.registers.store_dest(dest, value);
+        vm.store_dest(dest, value);
 
         Ok(())
     }
@@ -369,11 +369,11 @@ impl Execute for Loadu1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Loadu1 {dest, loc} = self;
 
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         // loadu1 loads only 1 byte
         let value = vm.memory.get(addr)?;
         // loadu (unlike load) must NOT sign-extend (hence u8 is fine)
-        vm.registers.store_dest(dest, value);
+        vm.store_dest(dest, value);
 
         Ok(())
     }
@@ -412,11 +412,11 @@ impl Execute for Load8 {
         // Note: load8 and loadu8 have the same behaviour
         let Load8 {dest, loc} = self;
 
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         // Since the value is already 8 bytes, we don't need to worry about
         // sign-extension
         let value = vm.memory.read_u64(addr)?;
-        vm.registers.store_dest(dest, value);
+        vm.store_dest(dest, value);
 
         Ok(())
     }
@@ -427,11 +427,11 @@ impl Execute for Loadu8 {
         // Note: load8 and loadu8 have the same behaviour
         let Loadu8 {dest, loc} = self;
 
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         // Since the value is already 8 bytes, we don't need to worry about
         // sign-extension
         let value = vm.memory.read_u64(addr)?;
-        vm.registers.store_dest(dest, value);
+        vm.store_dest(dest, value);
 
         Ok(())
     }
@@ -440,9 +440,9 @@ impl Execute for Loadu8 {
 impl Execute for Store1 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store1 {loc, source} = self;
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
 
-        let value: u8 = source.into_value(&vm.registers);
+        let value: u8 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
             write_stdout(u32::reinterpret(value));
@@ -471,9 +471,9 @@ impl Execute for Store4 {
 impl Execute for Store8 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store8 {loc, source} = self;
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
 
-        let value: u64 = source.into_value(&vm.registers);
+        let value: u64 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
             write_stdout(u32::reinterpret(value));
@@ -495,7 +495,7 @@ impl Execute for Push {
         vm.registers.store_sp(stack_top);
 
         // Store the value at the top of the stack
-        let value: u64 = source.into_value(&mut vm.registers);
+        let value: u64 = source.into_value(vm);
         vm.memory.write_u64(stack_top, value)?;
 
         Ok(())
@@ -509,7 +509,7 @@ impl Execute for Pop {
         // Load the top of the stack into the destination
         let stack_top: u64 = vm.registers.load_sp();
         let value = vm.memory.read_u64(stack_top)?;
-        vm.registers.store_dest(dest, value);
+        vm.store_dest(dest, value);
 
         // Increment the stack pointer
         let sp = stack_top + size_bytes_of::<u64>();
@@ -522,7 +522,7 @@ impl Execute for Pop {
 impl Execute for Jmp {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jmp {loc} = self;
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         vm.program_counter = addr;
         Ok(())
     }
@@ -552,7 +552,7 @@ impl Execute for Jg {
 impl Execute for Jge {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jge {loc} = self;
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
 
         // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Greater_or_Equal
         let flags = &vm.flags;
@@ -669,7 +669,7 @@ impl Execute for Call {
         vm.memory.write_u64(stack_top, vm.program_counter)?;
 
         // Jump to the given location
-        let addr: u64 = loc.into_value(&vm.registers);
+        let addr: u64 = loc.into_value(vm);
         vm.program_counter = addr;
 
         Ok(())
