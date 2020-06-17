@@ -476,7 +476,23 @@ impl Execute for Jg {
 impl Execute for Jge {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jge {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(&vm.registers);
+
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Greater_or_Equal
+        let flags = &vm.flags;
+        match (flags.sign, flags.overflow, flags.zero) {
+            // Greater than or equal if SF = OF or ZF = 1
+            (_, _, ZF::Zero) |
+            (SF::NegativeSign, OF::Overflow, _) |
+            (SF::PositiveSign, OF::NoOverflow, _) => {
+                vm.program_counter = addr;
+            },
+
+            // Not greater than or equal
+            _ => {},
+        }
+
+        Ok(())
     }
 }
 
