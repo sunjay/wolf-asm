@@ -58,8 +58,9 @@ fn main() -> anyhow::Result<()> {
         .expect("bug: should always be able to push quit address");
 
     loop {
+        let pc = vm.program_counter;
         let status = vm.step()
-            .context("Failed to execute instruction")?;
+            .with_context(|| format!("Failed to execute instruction at `0x{:x}`", pc))?;
 
         match status {
             ProgramStatus::Continue => {},
