@@ -54,6 +54,9 @@ print_int:
   # Store address of STDOUT
   mov $0, STDOUT
 
+  # $3 = The number of digits pushed onto the stack
+  mov $3, 0
+
   # Check if value is negative
   cmp $1, 0
   jge positive
@@ -72,9 +75,6 @@ print_int:
 positive:
   # The digits are stored onto the stack in backwards order and then printed
   # back-to-front
-
-  # $3 = The number of digits pushed onto the stack
-  mov $3, 0
 
   # After this, $1 = $1 / 10 = the next number to process
   #             $2 = $1 % 10 = the last digit of the current number
