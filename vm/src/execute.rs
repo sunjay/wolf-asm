@@ -400,14 +400,34 @@ impl Execute for Store1 {
 impl Execute for Store2 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store2 {loc, source} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        let value: u16 = source.into_value(vm);
+
+        if addr == STDOUT_ADDR {
+            write_stdout(u32::reinterpret(value));
+        } else {
+            vm.memory.write_u16(addr, value)?;
+        }
+
+        Ok(())
     }
 }
 
 impl Execute for Store4 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Store4 {loc, source} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        let value: u32 = source.into_value(vm);
+
+        if addr == STDOUT_ADDR {
+            write_stdout(u32::reinterpret(value));
+        } else {
+            vm.memory.write_u32(addr, value)?;
+        }
+
+        Ok(())
     }
 }
 
