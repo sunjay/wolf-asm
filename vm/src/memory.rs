@@ -80,6 +80,42 @@ impl Memory {
     }
 
     /// Writes the given value at the given address
+    pub fn write_u16(&mut self, addr: u64, value: u16) -> Result<(), OutOfBounds> {
+        let value_bytes = value.to_le_bytes();
+        let bytes = self.slice_mut(addr..addr+value_bytes.len() as u64)?;
+        bytes.copy_from_slice(&value_bytes);
+
+        Ok(())
+    }
+
+    /// Reads the value at the given address
+    pub fn read_u16(&self, addr: u64) -> Result<u16, OutOfBounds> {
+        let mut value_bytes = [0u8; 2];
+        let bytes = self.slice(addr..addr+value_bytes.len() as u64)?;
+        value_bytes.copy_from_slice(bytes);
+
+        Ok(u16::from_le_bytes(value_bytes))
+    }
+
+    /// Writes the given value at the given address
+    pub fn write_u32(&mut self, addr: u64, value: u32) -> Result<(), OutOfBounds> {
+        let value_bytes = value.to_le_bytes();
+        let bytes = self.slice_mut(addr..addr+value_bytes.len() as u64)?;
+        bytes.copy_from_slice(&value_bytes);
+
+        Ok(())
+    }
+
+    /// Reads the value at the given address
+    pub fn read_u32(&self, addr: u64) -> Result<u32, OutOfBounds> {
+        let mut value_bytes = [0u8; 4];
+        let bytes = self.slice(addr..addr+value_bytes.len() as u64)?;
+        value_bytes.copy_from_slice(bytes);
+
+        Ok(u32::from_le_bytes(value_bytes))
+    }
+
+    /// Writes the given value at the given address
     pub fn write_u64(&mut self, addr: u64, value: u64) -> Result<(), OutOfBounds> {
         let value_bytes = value.to_le_bytes();
         let bytes = self.slice_mut(addr..addr+value_bytes.len() as u64)?;
@@ -88,7 +124,7 @@ impl Memory {
         Ok(())
     }
 
-    /// Reads the given value at the given address
+    /// Reads the value at the given address
     pub fn read_u64(&self, addr: u64) -> Result<u64, OutOfBounds> {
         let mut value_bytes = [0u8; 8];
         let bytes = self.slice(addr..addr+value_bytes.len() as u64)?;
