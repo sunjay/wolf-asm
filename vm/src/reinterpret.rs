@@ -173,6 +173,22 @@ impl Reinterpret<u8> for i8 {
     }
 }
 
+impl Reinterpret<u8> for u16 {
+    #[inline(always)]
+    fn reinterpret(value: u8) -> Self {
+        // Widen with zero-extension
+        value as u16
+    }
+}
+
+impl Reinterpret<u8> for i16 {
+    #[inline(always)]
+    fn reinterpret(value: u8) -> Self {
+        // Widen with zero-extension (since value is always non-negative)
+        value as i16
+    }
+}
+
 impl Reinterpret<u8> for u32 {
     #[inline(always)]
     fn reinterpret(value: u8) -> Self {
@@ -186,6 +202,20 @@ impl Reinterpret<u16> for u32 {
     fn reinterpret(value: u16) -> Self {
         // Widen with zero-extension
         value as u32
+    }
+}
+
+impl Reinterpret<u16> for i16 {
+    #[inline(always)]
+    fn reinterpret(value: u16) -> Self {
+        Self::from_le_bytes(value.to_le_bytes())
+    }
+}
+
+impl Reinterpret<u32> for i32 {
+    #[inline(always)]
+    fn reinterpret(value: u32) -> Self {
+        Self::from_le_bytes(value.to_le_bytes())
     }
 }
 

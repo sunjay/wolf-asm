@@ -332,28 +332,74 @@ impl Execute for Loadu1 {
 impl Execute for Load2 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Load2 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(vm);
+        // load2 loads 2 bytes
+        let value = if addr == STDIN_ADDR {
+            u16::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.read_u16(addr)?
+        };
+        // load (unlike loadu) must sign-extend (hence i16)
+        let value = i16::reinterpret(value);
+        vm.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
 impl Execute for Loadu2 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Loadu2 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(vm);
+        // load2 loads 2 bytes
+        let value = if addr == STDIN_ADDR {
+            u16::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.read_u16(addr)?
+        };
+        // loadu (unlike load) must NOT sign-extend (hence u16 is fine)
+        vm.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
 impl Execute for Load4 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Load4 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(vm);
+        // load4 loads 4 bytes
+        let value = if addr == STDIN_ADDR {
+            u32::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.read_u32(addr)?
+        };
+        // load (unlike loadu) must sign-extend (hence i32)
+        let value = i32::reinterpret(value);
+        vm.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
 impl Execute for Loadu4 {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Loadu4 {dest, loc} = self;
-        todo!()
+
+        let addr: u64 = loc.into_value(vm);
+        // load4 loads 4 bytes
+        let value = if addr == STDIN_ADDR {
+            u32::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.read_u32(addr)?
+        };
+        // loadu (unlike load) must NOT sign-extend (hence u32 is fine)
+        vm.store_dest(dest, value);
+
+        Ok(())
     }
 }
 
