@@ -72,6 +72,9 @@ macro_rules! reinterpret_slice {
 
 reinterpret_slice! {
     fn slice_16_as_8(&[T; 16]) -> &[T; 8];
+    fn slice_16_as_4(&[T; 16]) -> &[T; 4];
+    fn slice_16_as_2(&[T; 16]) -> &[T; 2];
+    fn slice_16_as_1(&[T; 16]) -> &[T; 1];
     fn slice_8_as_4(&[T; 8]) -> &[T; 4];
     fn slice_8_as_2(&[T; 8]) -> &[T; 2];
     fn slice_8_as_1(&[T; 8]) -> &[T; 1];
