@@ -1,5 +1,8 @@
+use std::io;
+#[cfg(not(test))]
+use std::io::{BufRead, Write};
+#[cfg(not(test))]
 use std::char;
-use std::io::{self, BufRead, Write};
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Stdio {
