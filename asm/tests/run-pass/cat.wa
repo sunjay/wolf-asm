@@ -7,7 +7,9 @@ main:
 loop:
   # Loop through and write each received byte
   load1 $0, 0xffff_0004
+
   # Quit at EOF
+  cmp $0, 0
   jz end
 
   # Write the character
