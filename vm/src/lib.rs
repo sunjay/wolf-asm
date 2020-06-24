@@ -7,5 +7,6 @@ pub mod registers;
 pub mod flags;
 pub mod operands;
 pub mod decode;
+pub mod io;
 pub mod machine;
 pub mod execute;

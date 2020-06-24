@@ -1,4 +1,4 @@
-use std::char;
+use std::io;
 
 use thiserror::Error;
 
@@ -15,18 +15,17 @@ pub const QUIT_ADDR: u64 = u64::MAX;
 pub const STDOUT_ADDR: u64 = 0xffff_000c;
 /// The address used for stdin
 pub const STDIN_ADDR: u64 = 0xffff_0004;
-
-fn write_stdout(value: u32) {
-    let ch = char::from_u32(value).unwrap_or(char::REPLACEMENT_CHARACTER);
-    print!("{}", ch);
-}
+/// The byte used to indicate EOF
+pub const EOF_BYTE: u8 = b'\0';
 
 fn size_bytes_of<T>() -> u64 {
     std::mem::size_of::<T>() as u64
 }
 
-#[derive(Debug, Clone, Error)]
+#[derive(Debug, Error)]
 pub enum ExecuteError {
+    #[error(transparent)]
+    IOError(#[from] io::Error),
     #[error(transparent)]
     OutOfBounds(#[from] OutOfBounds),
     #[error("Divided a number by zero")]
@@ -299,7 +298,11 @@ impl Execute for Load1 {
 
         let addr: u64 = loc.into_value(vm);
         // load1 loads only 1 byte
-        let value = vm.memory.get(addr)?;
+        let value = if addr == STDIN_ADDR {
+            u8::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.get(addr)?
+        };
         // load (unlike loadu) must sign-extend (hence i8)
         let value = i8::reinterpret(value);
         vm.store_dest(dest, value);
@@ -314,7 +317,11 @@ impl Execute for Loadu1 {
 
         let addr: u64 = loc.into_value(vm);
         // loadu1 loads only 1 byte
-        let value = vm.memory.get(addr)?;
+        let value = if addr == STDIN_ADDR {
+            u8::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            vm.memory.get(addr)?
+        };
         // loadu (unlike load) must NOT sign-extend (hence u8 is fine)
         vm.store_dest(dest, value);
 
@@ -356,9 +363,13 @@ impl Execute for Load8 {
         let Load8 {dest, loc} = self;
 
         let addr: u64 = loc.into_value(vm);
-        // Since the value is already 8 bytes, we don't need to worry about
-        // sign-extension
-        let value = vm.memory.read_u64(addr)?;
+        let value = if addr == STDIN_ADDR {
+            u64::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            // Since the value is already 8 bytes, we don't need to worry about
+            // sign-extension
+            vm.memory.read_u64(addr)?
+        };
         vm.store_dest(dest, value);
 
         Ok(())
@@ -371,9 +382,13 @@ impl Execute for Loadu8 {
         let Loadu8 {dest, loc} = self;
 
         let addr: u64 = loc.into_value(vm);
-        // Since the value is already 8 bytes, we don't need to worry about
-        // sign-extension
-        let value = vm.memory.read_u64(addr)?;
+        let value = if addr == STDIN_ADDR {
+            u64::reinterpret(vm.io.read_byte()?.unwrap_or(EOF_BYTE))
+        } else {
+            // Since the value is already 8 bytes, we don't need to worry about
+            // zero-extension
+            vm.memory.read_u64(addr)?
+        };
         vm.store_dest(dest, value);
 
         Ok(())
@@ -388,7 +403,7 @@ impl Execute for Store1 {
         let value: u8 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
-            write_stdout(u32::reinterpret(value));
+            vm.io.write_bytes(u32::reinterpret(value))?;
         } else {
             vm.memory.set(addr, value)?;
         }
@@ -405,7 +420,7 @@ impl Execute for Store2 {
         let value: u16 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
-            write_stdout(u32::reinterpret(value));
+            vm.io.write_bytes(u32::reinterpret(value))?;
         } else {
             vm.memory.write_u16(addr, value)?;
         }
@@ -422,7 +437,7 @@ impl Execute for Store4 {
         let value: u32 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
-            write_stdout(u32::reinterpret(value));
+            vm.io.write_bytes(u32::reinterpret(value))?;
         } else {
             vm.memory.write_u32(addr, value)?;
         }
@@ -439,7 +454,7 @@ impl Execute for Store8 {
         let value: u64 = source.into_value(vm);
 
         if addr == STDOUT_ADDR {
-            write_stdout(u32::reinterpret(value));
+            vm.io.write_bytes(u32::reinterpret(value))?;
         } else {
             vm.memory.write_u64(addr, value)?;
         }

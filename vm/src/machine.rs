@@ -4,6 +4,7 @@ use crate::{
     memory::{Memory, OutOfBounds},
     registers::Registers,
     flags::Flags,
+    io::Stdio,
     decode::{Instr, DecodeError, Push},
     operands::Source,
     execute::{QUIT_ADDR, Execute, ExecuteError},
@@ -16,7 +17,7 @@ pub enum ProgramStatus {
     Quit,
 }
 
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error)]
 #[error(transparent)]
 pub enum ExecutionError {
     OutOfBounds(#[from] OutOfBounds),
@@ -34,6 +35,8 @@ pub struct Machine {
     pub registers: Registers,
     /// The machine flags/status register
     pub flags: Flags,
+    /// Access to input and output
+    pub io: Stdio,
 }
 
 impl Machine {

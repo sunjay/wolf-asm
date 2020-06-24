@@ -15,6 +15,7 @@ use wolf_vm::{
     write_memory::WriteMemory,
     registers::Registers,
     flags::Flags,
+    io::Stdio,
     machine::{Machine, ProgramStatus},
 };
 
@@ -47,12 +48,14 @@ fn main() -> anyhow::Result<()> {
     // Start with the stack pointer pointing just past the end of the stack
     let registers = Registers::new(MACHINE_MEMORY);
     let flags = Flags::default();
+    let io = Stdio::default();
 
     let mut vm = Machine {
         program_counter: START_ADDR,
         memory,
         registers,
         flags,
+        io,
     };
     vm.push_quit_addr()
         .expect("bug: should always be able to push quit address");
