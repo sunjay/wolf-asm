@@ -12,6 +12,7 @@ impl Stdio {
     /// Reads the next line of input from stdin
     ///
     /// Returns Ok(None) if EOF has been reached
+    #[cfg(not(test))]
     pub fn read_byte(&mut self) -> io::Result<Option<u8>> {
         if self.current >= self.line.len() {
             let stdin = io::stdin();
@@ -27,13 +28,24 @@ impl Stdio {
         }))
     }
 
+    #[cfg(test)]
+    pub fn read_byte(&mut self) -> io::Result<Option<u8>> {
+        Ok(None)
+    }
+
     /// Writes the given 4 bytes to stdout, printing the unicode replacement
     /// character if the bytes are not a valid `char`
+    #[cfg(not(test))]
     pub fn write_bytes(&self, value: u32) -> io::Result<()> {
         let ch = char::from_u32(value)
             .unwrap_or(char::REPLACEMENT_CHARACTER);
 
         let mut stdout = io::stdout();
         write!(stdout, "{}", ch)
+    }
+
+    #[cfg(test)]
+    pub fn write_bytes(&self, _value: u32) -> io::Result<()> {
+        Ok(())
     }
 }

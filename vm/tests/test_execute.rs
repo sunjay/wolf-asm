@@ -4,6 +4,7 @@ use wolf_vm::{
     registers::Registers,
     machine::{Machine, ExecutionError},
     flags::{Flags, CF::*, ZF::*, SF::*, OF::*},
+    io::Stdio,
     execute::Execute,
 };
 use wolf_asm::{
@@ -55,6 +56,7 @@ macro_rules! execute {
             memory: Memory::new(TEST_MEMORY),
             registers: Registers::new(TEST_MEMORY),
             flags: Flags::default(),
+            io: Stdio::default(),
         };
 
         $(
