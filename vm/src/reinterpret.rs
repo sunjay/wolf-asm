@@ -89,4 +89,6 @@ reinterpret_slice! {
 
     fn slice_4_as_2(&[T; 4]) -> &[T; 2];
     fn slice_4_as_1(&[T; 4]) -> &[T; 1];
+
+    fn slice_2_as_1(&[T; 2]) -> &[T; 1];
 }
