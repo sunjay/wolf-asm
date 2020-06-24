@@ -59,11 +59,18 @@ macro_rules! reinterpret_slice {
         $(
             /// Reinterprets a slice as a smaller slice
             #[inline(always)]
-            fn $fname<T>(bytes: &[T; $inp]) -> &[T; $out] {
+            fn $fname<T>(inp: &[T; $inp]) -> &[T; $out] {
                 // Safety: if the size of the input type is greater than the
-                // size of the output type, this is a valid cast/slice
+                // size of the output type, we can take a subslice of the input
+                // and safely cast it to a fixed size array
                 const_assert!($inp > $out);
-                let ptr = bytes.as_ptr() as *const [T; $out];
+                // Taking a subslice is important so the length is guaranteed to
+                // be correct (`out` is now the same length as the return type)
+                let out = unsafe { inp.get_unchecked(0..$out) };
+
+                // Note: This code is the same as the standard library impl:
+                //    impl TryFrom<&[T]> for &[T; N]
+                let ptr = out.as_ptr() as *const [T; $out];
                 unsafe { &*ptr }
             }
         )*
