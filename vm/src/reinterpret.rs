@@ -45,34 +45,34 @@ impl<T: Copy> Reinterpret<T> for T {
     }
 }
 
-/// Reinterprets a slice as a smaller slice
-#[inline(always)]
-fn slice_as_8_bytes(bytes: &[u8; 16]) -> &[u8; 8] {
-    // Safety: 16 > 8, so we can definitely expect this to be a valid cast/slice
-    let ptr = bytes.as_ptr() as *const [u8; 8];
-    unsafe { &*ptr }
+// Source: https://docs.rs/static_assertions/1.1.0/static_assertions/macro.const_assert.html
+#[macro_export]
+macro_rules! const_assert {
+    ($x:expr $(,)?) => {
+        #[allow(unknown_lints, eq_op)]
+        const _: [(); 0 - !{ const ASSERT: bool = $x; ASSERT } as usize] = [];
+    };
 }
 
-/// Reinterprets a slice as a smaller slice
-#[inline(always)]
-fn slice_as_4_bytes(bytes: &[u8; 8]) -> &[u8; 4] {
-    // Safety: 8 > 4, so we can definitely expect this to be a valid cast/slice
-    let ptr = bytes.as_ptr() as *const [u8; 4];
-    unsafe { &*ptr }
+macro_rules! reinterpret_slice {
+    ($(fn $fname:ident(&[T; $inp:literal]) -> &[T; $out:literal];)*) => {
+        $(
+            /// Reinterprets a slice as a smaller slice
+            #[inline(always)]
+            fn $fname<T>(bytes: &[T; $inp]) -> &[T; $out] {
+                // Safety: if the size of the input type is greater than the
+                // size of the output type, this is a valid cast/slice
+                const_assert!($inp > $out);
+                let ptr = bytes.as_ptr() as *const [T; $out];
+                unsafe { &*ptr }
+            }
+        )*
+    };
 }
 
-/// Reinterprets a slice as a smaller slice
-#[inline(always)]
-fn slice_as_2_bytes(bytes: &[u8; 8]) -> &[u8; 2] {
-    // Safety: 8 > 2, so we can definitely expect this to be a valid cast/slice
-    let ptr = bytes.as_ptr() as *const [u8; 2];
-    unsafe { &*ptr }
-}
-
-/// Reinterprets a slice as a smaller slice
-#[inline(always)]
-fn slice_as_1_byte(bytes: &[u8; 8]) -> &[u8; 1] {
-    // Safety: 8 > 1, so we can definitely expect this to be a valid cast/slice
-    let ptr = bytes.as_ptr() as *const [u8; 1];
-    unsafe { &*ptr }
+reinterpret_slice! {
+    fn slice_16_as_8(&[T; 16]) -> &[T; 8];
+    fn slice_8_as_4(&[T; 8]) -> &[T; 4];
+    fn slice_8_as_2(&[T; 8]) -> &[T; 2];
+    fn slice_8_as_1(&[T; 8]) -> &[T; 1];
 }
