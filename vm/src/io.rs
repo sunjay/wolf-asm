@@ -18,6 +18,7 @@ impl Stdio {
     #[cfg(not(test))]
     pub fn read_byte(&mut self) -> io::Result<Option<u8>> {
         if self.current >= self.line.len() {
+            self.line.clear();
             let stdin = io::stdin();
             stdin.lock().read_until(b'\n', &mut self.line)?;
             self.current = 0;
