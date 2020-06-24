@@ -7,19 +7,19 @@
 /// # Implementation Invariants
 ///
 /// While this trait may not always preserve value, it is important that it
-/// preserves signedness during a widening conversion from a signed value to a
-/// signed value.
+/// preserves signedness during a widening conversion from a signed value.
 ///
-/// Similarly, a widening or narrowing conversion between two values of the same
-/// signedness should preserve the value if the value is in the range
-/// representable by the narrower type.
+/// Similarly, a widening or narrowing conversion from a signed value should
+/// preserve the value if the value is in the range representable by the
+/// narrower type.
 ///
 /// Examples:
 /// * `12u64` preserves its value when reinterpreted as: u64, i64, u32, i32,
-///   u16, i16, u8, i8
-/// * `-14i64` preserves its value when reinterpreted as: u64, u32, u16, u8
-/// * `27i8` preserves its value when reinterpreted as: i64, u64
-///   (widening conversion: any wider integer would preserve the value)
+///   u16, i16, u8, i8 because it is in the range of all of those types
+/// * `-14i64` preserves its value when reinterpreted as: i64, i32, i16, i8
+///   because it is in the range of all of those types
+/// * `27i8` preserves its value when reinterpreted as: u64, i64, u32, i32,
+///   u16, i16, u8, i8 because it is in the range of all of those types
 ///
 /// Performance: An implementation of this trait must not panic or perform any
 /// validation whatsoever.
