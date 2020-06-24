@@ -5,6 +5,22 @@ use super::{
     slice_as_4_bytes,
 };
 
+impl Reinterpret<u64> for u128 {
+    #[inline(always)]
+    fn reinterpret(value: u64) -> Self {
+        // Widen with zero-extension
+        value as u128
+    }
+}
+
+impl Reinterpret<u64> for i128 {
+    #[inline(always)]
+    fn reinterpret(value: u64) -> Self {
+        // Widen with zero-extension (since value is always non-negative)
+        value as i128
+    }
+}
+
 impl Reinterpret<u64> for i64 {
     #[inline(always)]
     fn reinterpret(value: u64) -> Self {
