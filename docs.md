@@ -155,9 +155,10 @@ Before syscalls become available, IO is done through memory-mapped IO.
   (32-bits) are sent to standard output. The bytes are interpreted as a unicode
   scalar value. If the bytes are not valid as a unique scalar value, a
   `U+FFFD REPLACEMENT CHARACTER` (&#65533;) is outputted instead.
-* Loading a 1, 2, 4, or 8 byte value from address `0xffff_0004` places the
-  respective next 1, 2, 4, or 8 bytes from standard input into the destination
-  register. At EOF, a value of `0` will be loaded.
+* Loading from the address `0xffff_0004` places the next byte from standard
+  input into the destination register. At EOF, a value of `0` will be loaded.
+  This always loads just a single non-negative byte, regardless of which variant
+  of `load` or `loadu` is used.
 
 ### Example Programs
 
