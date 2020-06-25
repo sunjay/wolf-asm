@@ -888,14 +888,30 @@ impl Execute for Jnz {
 impl Execute for Js {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Js {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Signed if SF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Signed
+        if vm.flags.sign == SF::NegativeSign {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
 impl Execute for Jns {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jns {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Not signed if SF = 0
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Signed
+        if vm.flags.sign == SF::PositiveSign {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
