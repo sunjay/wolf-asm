@@ -216,6 +216,7 @@ fn mul_flags() -> Result<(), ExecutionError> {
     mul!(32u64 * -34i64 == (i64) -1088, {NoCarry, NoOverflow});
     mul!(33u64 * 27u64 == (u64) 891, {NoCarry, NoOverflow});
 
+    mul!(0x1fffffffffffffffi64 * 0x1fffffffffffffffi64 == (i64) -4611686018427387903, {Carry, Overflow});
     // 0x7fffffffffffffff == i64::MAX
     mul!(0x7fffffffffffffffi64 * 0x7fffffffffffffffi64 == (i64) 1, {Carry, Overflow});
 
@@ -248,6 +249,8 @@ fn mulu_flags() -> Result<(), ExecutionError> {
 
     mulu!(33u64 * 27u64 == (u64) 891, {NoCarry, NoOverflow});
 
+    // 0xffffffffffffffff == u64::MAX
+    mulu!(0x1fffffffffffffffu64 * 0x1fffffffffffffffu64 == (u64) 0xc000000000000001, {Carry, Overflow});
     // 0xffffffffffffffff == u64::MAX
     mulu!(0xffffffffffffffffu64 * 0xffffffffffffffffu64 == (u64) 1, {Carry, Overflow});
     // 0x7fffffffffffffff == i64::MAX
