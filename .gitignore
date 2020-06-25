@@ -4,6 +4,7 @@ cat
 count
 fib
 hello
+oscillating_sum
 
 /target
 **/*.rs.bk

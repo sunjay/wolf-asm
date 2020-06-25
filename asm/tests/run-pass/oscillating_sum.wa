@@ -1,0 +1,58 @@
+# Sums the numbers from 1 to n, oscilating between positive and negative
+
+section .code
+
+.const n 1_000_000
+
+main:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $0
+  push $1
+  push $2
+  push $3
+
+  # Initialize sum
+  mov $1, 0
+  # Initialize counter
+  mov $0, 1
+  # Initialize multiplier
+  mov $2, 1
+
+loop:
+  # Add to sum
+  mov $3, $0
+  mul $3, $2
+  add $1, $3
+
+  # Check if we're done
+  cmp $0, n
+  jae done
+
+  # Increment counter
+  add $0, 1
+  # Negate multiplier
+  mov $3, 0
+  sub $3, $2
+  mov $2, $3
+
+  # Continue looping
+  jmp loop
+
+done:
+  # Print the result
+  call print_int
+  call print_newline
+
+  # Pop registers used in this routine
+  pop $3
+  pop $2
+  pop $1
+  pop $0
+
+  pop $fp
+  ret
+
+.include 'print.wa'
