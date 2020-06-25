@@ -720,7 +720,16 @@ impl Execute for Jge {
 impl Execute for Ja {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Ja {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Above if CF = 0 and ZF = 0
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Above_(unsigned_comparison)
+        let flags = &vm.flags;
+        if flags.carry == CF::NoCarry && flags.zero == ZF::NonZero {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
