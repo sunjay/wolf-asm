@@ -752,14 +752,45 @@ impl Execute for Jae {
 impl Execute for Jl {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jl {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Lesser
+        let flags = &vm.flags;
+        match (flags.sign, flags.overflow) {
+            // Lesser if SF != OF
+            (SF::NegativeSign, OF::NoOverflow) |
+            (SF::PositiveSign, OF::Overflow) => {
+                vm.program_counter = addr;
+            },
+
+            // Not greater than
+            _ => {},
+        }
+
+        Ok(())
     }
 }
 
 impl Execute for Jle {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jle {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Less_or_Equal
+        let flags = &vm.flags;
+        match (flags.sign, flags.overflow, flags.zero) {
+            // Less than or equal if SF != OF or ZF = 1
+            (_, _, ZF::Zero) |
+            (SF::NegativeSign, OF::NoOverflow, _) |
+            (SF::PositiveSign, OF::Overflow, _) => {
+                vm.program_counter = addr;
+            },
+
+            // Not less than or equal
+            _ => {},
+        }
+
+        Ok(())
     }
 }
 
