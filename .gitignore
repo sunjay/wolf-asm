@@ -2,6 +2,7 @@
 hello
 cat
 calc
+fib
 
 /target
 **/*.rs.bk
