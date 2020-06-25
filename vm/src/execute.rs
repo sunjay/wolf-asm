@@ -647,9 +647,9 @@ impl Execute for Je {
         let Je {loc} = self;
         let addr: u64 = loc.into_value(vm);
 
+        // Equal if ZF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Equal
         if vm.flags.zero == ZF::Zero {
-            // Equal if ZF = 1
-            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Equal
             vm.program_counter = addr;
         }
 
@@ -662,9 +662,9 @@ impl Execute for Jne {
         let Jne {loc} = self;
         let addr: u64 = loc.into_value(vm);
 
+        // Not equal if ZF = 0
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Equal
         if vm.flags.zero == ZF::NonZero {
-            // Not equal if ZF = 0
-            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Equal
             vm.program_counter = addr;
         }
 
@@ -778,9 +778,9 @@ impl Execute for Jz {
         let Jz {loc} = self;
         let addr: u64 = loc.into_value(vm);
 
+        // Zero if ZF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Zero
         if vm.flags.zero == ZF::Zero {
-            // Zero if ZF = 1
-            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Zero
             vm.program_counter = addr;
         }
 
@@ -793,9 +793,9 @@ impl Execute for Jnz {
         let Jnz {loc} = self;
         let addr: u64 = loc.into_value(vm);
 
+        // Not zero if ZF = 0
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Zero
         if vm.flags.zero == ZF::NonZero {
-            // Not zero if ZF = 0
-            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Zero
             vm.program_counter = addr;
         }
 
