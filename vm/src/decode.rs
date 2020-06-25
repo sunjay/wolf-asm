@@ -117,6 +117,7 @@ instr! {
         And(struct And {dest: Destination, source: Source}),
         Or(struct Or {dest: Destination, source: Source}),
         Xor(struct Xor {dest: Destination, source: Source}),
+        Not(struct Not {dest: Destination}),
 
         Test(struct Test {source1: Source, source2: Source}),
         Cmp(struct Cmp {source1: Source, source2: Source}),

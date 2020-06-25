@@ -201,84 +201,86 @@ instr! {
         Or(struct Or {dest: Destination, source: Source}),
         #[opcode = 180, name = "xor"]
         Xor(struct Xor {dest: Destination, source: Source}),
+        #[opcode = 192, name = "not"]
+        Not(struct Not {dest: Destination}),
 
-        #[opcode = 192, name = "test"]
+        #[opcode = 204, name = "test"]
         Test(struct Test {source1: Source, source2: Source}),
-        #[opcode = 204, name = "cmp"]
+        #[opcode = 216, name = "cmp"]
         Cmp(struct Cmp {source1: Source, source2: Source}),
 
-        #[opcode = 216, name = "mov"]
+        #[opcode = 228, name = "mov"]
         Mov(struct Mov {dest: Destination, source: Source}),
 
-        #[opcode = 228, name = "load1"]
+        #[opcode = 240, name = "load1"]
         Load1(struct Load1 {dest: Destination, loc: Location}),
-        #[opcode = 240, name = "loadu1"]
+        #[opcode = 252, name = "loadu1"]
         Loadu1(struct Loadu1 {dest: Destination, loc: Location}),
-        #[opcode = 252, name = "load2"]
+        #[opcode = 264, name = "load2"]
         Load2(struct Load2 {dest: Destination, loc: Location}),
-        #[opcode = 264, name = "loadu2"]
+        #[opcode = 276, name = "loadu2"]
         Loadu2(struct Loadu2 {dest: Destination, loc: Location}),
-        #[opcode = 276, name = "load4"]
+        #[opcode = 288, name = "load4"]
         Load4(struct Load4 {dest: Destination, loc: Location}),
-        #[opcode = 288, name = "loadu4"]
+        #[opcode = 300, name = "loadu4"]
         Loadu4(struct Loadu4 {dest: Destination, loc: Location}),
-        #[opcode = 300, name = "load8"]
+        #[opcode = 312, name = "load8"]
         Load8(struct Load8 {dest: Destination, loc: Location}),
-        #[opcode = 312, name = "loadu8"]
+        #[opcode = 324, name = "loadu8"]
         Loadu8(struct Loadu8 {dest: Destination, loc: Location}),
 
-        #[opcode = 324, name = "store1"]
+        #[opcode = 336, name = "store1"]
         Store1(struct Store1 {loc: Location, source: Source}),
-        #[opcode = 336, name = "store2"]
+        #[opcode = 348, name = "store2"]
         Store2(struct Store2 {loc: Location, source: Source}),
-        #[opcode = 348, name = "store4"]
+        #[opcode = 360, name = "store4"]
         Store4(struct Store4 {loc: Location, source: Source}),
-        #[opcode = 360, name = "store8"]
+        #[opcode = 372, name = "store8"]
         Store8(struct Store8 {loc: Location, source: Source}),
 
-        #[opcode = 372, name = "push"]
+        #[opcode = 384, name = "push"]
         Push(struct Push {source: Source}),
-        #[opcode = 384, name = "pop"]
+        #[opcode = 396, name = "pop"]
         Pop(struct Pop {dest: Destination}),
 
-        #[opcode = 396, name = "jmp"]
+        #[opcode = 408, name = "jmp"]
         Jmp(struct Jmp {loc: Location}),
-        #[opcode = 408, name = "je"]
+        #[opcode = 420, name = "je"]
         Je(struct Je {loc: Location}),
-        #[opcode = 420, name = "jne"]
+        #[opcode = 432, name = "jne"]
         Jne(struct Jne {loc: Location}),
-        #[opcode = 432, name = "jg"]
+        #[opcode = 444, name = "jg"]
         Jg(struct Jg {loc: Location}),
-        #[opcode = 444, name = "jge"]
+        #[opcode = 456, name = "jge"]
         Jge(struct Jge {loc: Location}),
-        #[opcode = 456, name = "ja"]
+        #[opcode = 468, name = "ja"]
         Ja(struct Ja {loc: Location}),
-        #[opcode = 468, name = "jae"]
+        #[opcode = 480, name = "jae"]
         Jae(struct Jae {loc: Location}),
-        #[opcode = 480, name = "jl"]
+        #[opcode = 492, name = "jl"]
         Jl(struct Jl {loc: Location}),
-        #[opcode = 492, name = "jle"]
+        #[opcode = 504, name = "jle"]
         Jle(struct Jle {loc: Location}),
-        #[opcode = 504, name = "jb"]
+        #[opcode = 516, name = "jb"]
         Jb(struct Jb {loc: Location}),
-        #[opcode = 516, name = "jbe"]
+        #[opcode = 528, name = "jbe"]
         Jbe(struct Jbe {loc: Location}),
-        #[opcode = 528, name = "jo"]
+        #[opcode = 540, name = "jo"]
         Jo(struct Jo {loc: Location}),
-        #[opcode = 540, name = "jno"]
+        #[opcode = 552, name = "jno"]
         Jno(struct Jno {loc: Location}),
-        #[opcode = 552, name = "jz"]
+        #[opcode = 564, name = "jz"]
         Jz(struct Jz {loc: Location}),
-        #[opcode = 564, name = "jnz"]
+        #[opcode = 576, name = "jnz"]
         Jnz(struct Jnz {loc: Location}),
-        #[opcode = 576, name = "js"]
+        #[opcode = 588, name = "js"]
         Js(struct Js {loc: Location}),
-        #[opcode = 588, name = "jns"]
+        #[opcode = 600, name = "jns"]
         Jns(struct Jns {loc: Location}),
 
-        #[opcode = 600, name = "call"]
+        #[opcode = 612, name = "call"]
         Call(struct Call {loc: Location}),
-        #[opcode = 612, name = "ret"]
+        #[opcode = 624, name = "ret"]
         Ret(struct Ret {}),
     }
 }

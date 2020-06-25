@@ -316,6 +316,13 @@ impl Execute for Xor {
     }
 }
 
+impl Execute for Not {
+    fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
+        let Not {dest} = self;
+        todo!()
+    }
+}
+
 impl Execute for Test {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Test {source1, source2} = self;
