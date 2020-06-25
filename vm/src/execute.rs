@@ -797,14 +797,31 @@ impl Execute for Jle {
 impl Execute for Jb {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jb {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Below if CF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Below_(unsigned_comparison)
+        if vm.flags.carry == CF::Carry {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
 impl Execute for Jbe {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jbe {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Below or equal if CF = 1 or ZF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Below_or_Equal_(unsigned_comparison)
+        let flags = &vm.flags;
+        if flags.carry == CF::Carry || flags.zero == ZF::Zero {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
