@@ -353,35 +353,135 @@ impl Execute for Remu {
 impl Execute for And {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let And {dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+
+        let result = lhs & rhs;
+
+        let zero = if result == 0 {
+            ZF::Zero
+        } else {
+            ZF::NonZero
+        };
+
+        let sign = if (1u64 << 63) & result > 0 {
+            SF::NegativeSign
+        } else {
+            SF::PositiveSign
+        };
+
+        // Carry and overflow are cleared
+        let carry = CF::NoCarry;
+        let overflow = OF::NoOverflow;
+
+        vm.store_dest(dest, result);
+        vm.flags = Flags {carry, zero, sign, overflow};
+
+        Ok(())
     }
 }
 
 impl Execute for Or {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Or {dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+
+        let result = lhs | rhs;
+
+        let zero = if result == 0 {
+            ZF::Zero
+        } else {
+            ZF::NonZero
+        };
+
+        let sign = if (1u64 << 63) & result > 0 {
+            SF::NegativeSign
+        } else {
+            SF::PositiveSign
+        };
+
+        // Carry and overflow are cleared
+        let carry = CF::NoCarry;
+        let overflow = OF::NoOverflow;
+
+        vm.store_dest(dest, result);
+        vm.flags = Flags {carry, zero, sign, overflow};
+
+        Ok(())
     }
 }
 
 impl Execute for Xor {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Xor {dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+
+        let result = lhs ^ rhs;
+
+        let zero = if result == 0 {
+            ZF::Zero
+        } else {
+            ZF::NonZero
+        };
+
+        let sign = if (1u64 << 63) & result > 0 {
+            SF::NegativeSign
+        } else {
+            SF::PositiveSign
+        };
+
+        // Carry and overflow are cleared
+        let carry = CF::NoCarry;
+        let overflow = OF::NoOverflow;
+
+        vm.store_dest(dest, result);
+        vm.flags = Flags {carry, zero, sign, overflow};
+
+        Ok(())
     }
 }
 
 impl Execute for Not {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Not {dest} = self;
-        todo!()
+        let value: u64 = dest.into_value(vm);
+
+        let result = !value;
+        vm.store_dest(dest, result);
+
+        Ok(())
     }
 }
 
 impl Execute for Test {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Test {source1, source2} = self;
-        todo!()
+        let lhs: u64 = source1.into_value(vm);
+        let rhs: u64 = source2.into_value(vm);
+
+        let result = lhs & rhs;
+
+        let zero = if result == 0 {
+            ZF::Zero
+        } else {
+            ZF::NonZero
+        };
+
+        let sign = if (1u64 << 63) & result > 0 {
+            SF::NegativeSign
+        } else {
+            SF::PositiveSign
+        };
+
+        // Carry and overflow are cleared
+        let carry = CF::NoCarry;
+        let overflow = OF::NoOverflow;
+
+        vm.flags = Flags {carry, zero, sign, overflow};
+
+        Ok(())
     }
 }
 
