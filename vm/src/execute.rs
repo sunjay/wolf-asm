@@ -675,7 +675,22 @@ impl Execute for Jne {
 impl Execute for Jg {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jg {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Greater
+        let flags = &vm.flags;
+        match (flags.sign, flags.overflow, flags.zero) {
+            // Greater if SF = OF and ZF = 0
+            (SF::NegativeSign, OF::Overflow, ZF::NonZero) |
+            (SF::PositiveSign, OF::NoOverflow, ZF::NonZero) => {
+                vm.program_counter = addr;
+            },
+
+            // Not greater than
+            _ => {},
+        }
+
+        Ok(())
     }
 }
 
