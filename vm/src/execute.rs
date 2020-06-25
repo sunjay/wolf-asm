@@ -736,7 +736,16 @@ impl Execute for Ja {
 impl Execute for Jae {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jae {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Above or equal if CF = 0 or ZF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Above_or_Equal_(unsigned_comparison)
+        let flags = &vm.flags;
+        if flags.carry == CF::NoCarry || flags.zero == ZF::Zero {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
