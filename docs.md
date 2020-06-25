@@ -351,10 +351,12 @@ TODO: https://en.wikibooks.org/wiki/X86_Assembly/Shift_and_Rotate
   store the result in `dest`
 * `xor dest, source` - perform bitwise XOR operation on `dest` and `source` and
   store the result in `dest`
+* `not dest` - perform bitwise NOT operation (each 1 is set to 0, and each 0 is
+  set to 1) on `dest` and store the result in `dest`
 
 ### Comparison
 
-* `test source1 source2` - bitwise logical and that throws away its result but
+* `test source1 source2` - bitwise logical AND that throws away its result but
   sets the ZF (zero), and SF (sign) bits
 * `cmp source1 source2` - comparison performed as a (signed) subtraction that
   throws away its result but sets the ZF (zero), SF (sign), CF (carry), and
