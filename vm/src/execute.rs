@@ -828,14 +828,30 @@ impl Execute for Jbe {
 impl Execute for Jo {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jo {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // Overflow if OF = 1
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Overflow
+        if vm.flags.overflow == OF::Overflow {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
 impl Execute for Jno {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Jno {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        // No overflow if OF = 0
+        // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Not_Overflow
+        if vm.flags.overflow == OF::NoOverflow {
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
