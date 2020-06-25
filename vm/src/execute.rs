@@ -158,7 +158,29 @@ impl Execute for Mul {
 impl Execute for Mull {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mull {dest_hi, dest, source} = self;
-        todo!()
+
+        // mull loads values as signed and then widens them so we can detect
+        // overflow
+        let lhs: i64 = dest.into_value(vm);
+        let rhs: i64 = source.into_value(vm);
+        let lhs = i128::reinterpret(lhs);
+        let rhs = i128::reinterpret(rhs);
+
+        let (result, overflow) = lhs.overflowing_mul(rhs);
+        // Cast to u128 so we can freely manipulate the bits (`>>` has different
+        // behaviour for i128)
+        let result = u128::reinterpret(result);
+
+        vm.store_dest(dest, result);
+        vm.store_dest(dest_hi, result >> 64);
+        // Update carry and overflow only, all other flags are undefined
+        vm.flags = Flags {
+            carry: if overflow { CF::Carry } else { CF::NoCarry },
+            overflow: if overflow { OF::Overflow } else { OF::NoOverflow },
+            ..vm.flags
+        };
+
+        Ok(())
     }
 }
 
@@ -193,7 +215,26 @@ impl Execute for Mulu {
 impl Execute for Mullu {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mullu {dest_hi, dest, source} = self;
-        todo!()
+
+        // mullu loads values as unsigned and then widens them so we can detect
+        // overflow
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+        let lhs = u128::reinterpret(lhs);
+        let rhs = u128::reinterpret(rhs);
+
+        let (result, overflow) = lhs.overflowing_mul(rhs);
+
+        vm.store_dest(dest, result);
+        vm.store_dest(dest_hi, result >> 64);
+        // Update carry and overflow only, all other flags are undefined
+        vm.flags = Flags {
+            carry: if overflow { CF::Carry } else { CF::NoCarry },
+            overflow: if overflow { OF::Overflow } else { OF::NoOverflow },
+            ..vm.flags
+        };
+
+        Ok(())
     }
 }
 

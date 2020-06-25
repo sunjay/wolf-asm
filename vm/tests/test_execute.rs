@@ -216,7 +216,7 @@ fn mul_flags() -> Result<(), ExecutionError> {
     mul!(32u64 * -34i64 == (i64) -1088, {NoCarry, NoOverflow});
     mul!(33u64 * 27u64 == (u64) 891, {NoCarry, NoOverflow});
 
-    mul!(0x1fffffffffffffffi64 * 0x1fffffffffffffffi64 == (i64) -4611686018427387903, {Carry, Overflow});
+    mul!(0x7ffffffffffffffi64 * 0x7ffffffffffffffi64 == (i64) -1152921504606846975, {Carry, Overflow});
     // 0x7fffffffffffffff == i64::MAX
     mul!(0x7fffffffffffffffi64 * 0x7fffffffffffffffi64 == (i64) 1, {Carry, Overflow});
 
@@ -249,12 +249,83 @@ fn mulu_flags() -> Result<(), ExecutionError> {
 
     mulu!(33u64 * 27u64 == (u64) 891, {NoCarry, NoOverflow});
 
-    // 0xffffffffffffffff == u64::MAX
     mulu!(0x1fffffffffffffffu64 * 0x1fffffffffffffffu64 == (u64) 0xc000000000000001, {Carry, Overflow});
     // 0xffffffffffffffff == u64::MAX
     mulu!(0xffffffffffffffffu64 * 0xffffffffffffffffu64 == (u64) 1, {Carry, Overflow});
     // 0x7fffffffffffffff == i64::MAX
     mulu!(0x7fffffffffffffffi64 * 0x7fffffffffffffffi64 == (i64) 1, {Carry, Overflow});
+
+    Ok(())
+}
+
+#[test]
+fn mull_flags() -> Result<(), ExecutionError> {
+    macro_rules! mull {
+        (
+            $a:literal * $b:literal == [($ctyhi:ty) $chi:expr, ($cty:ty) $c:expr],
+            {$carry:ident, $overflow:ident$(,)?}
+        ) => (
+            execute! {
+                program: [
+                    Mov {dest: r(0), source: $a},
+                    Mull {dest_hi: r(1), dest: r(0), source: $b},
+                ],
+                postconditions: [
+                    reg r(1) => ($ctyhi) $chi,
+                    reg r(0) => ($cty) $c,
+                    flag carry => $carry,
+                    flag overflow => $overflow,
+                ],
+            }
+        );
+    }
+
+    mull!(32u64 * 0u64 == [(u64) 0, (u64) 0], {NoCarry, NoOverflow});
+    mull!(32u64 * 1u64 == [(u64) 0, (u64) 32], {NoCarry, NoOverflow});
+    mull!(32u64 * -1i64 == [(i64) -1, (i64) -32], {NoCarry, NoOverflow});
+
+    mull!(32u64 * -34i64 == [(i64) -1, (i64) -1088], {NoCarry, NoOverflow});
+    mull!(33u64 * 27u64 == [(u64) 0, (u64) 891], {NoCarry, NoOverflow});
+
+    mull!(0x7ffffffffffffffi64 * 0x7ffffffffffffffi64 == [(u64) 0x3fffffffffffff, (i64) -1152921504606846975], {NoCarry, NoOverflow});
+    // 0x7fffffffffffffff == i64::MAX
+    mull!(0x7fffffffffffffffi64 * 0x7fffffffffffffffi64 == [(u64) 0x3fffffffffffffff, (i64) 1], {NoCarry, NoOverflow});
+
+    Ok(())
+}
+
+#[test]
+fn mullu_flags() -> Result<(), ExecutionError> {
+    macro_rules! mullu {
+        (
+            $a:literal * $b:literal == [($ctyhi:ty) $chi:expr, ($cty:ty) $c:expr],
+            {$carry:ident, $overflow:ident$(,)?}
+        ) => (
+            execute! {
+                program: [
+                    Mov {dest: r(0), source: $a},
+                    Mullu {dest_hi: r(1), dest: r(0), source: $b},
+                ],
+                postconditions: [
+                    reg r(1) => ($ctyhi) $chi,
+                    reg r(0) => ($cty) $c,
+                    flag carry => $carry,
+                    flag overflow => $overflow,
+                ],
+            }
+        );
+    }
+
+    mullu!(32u64 * 0u64 == [(u64) 0, (u64) 0], {NoCarry, NoOverflow});
+    mullu!(32u64 * 1u64 == [(u64) 0, (u64) 32], {NoCarry, NoOverflow});
+
+    mullu!(33u64 * 27u64 == [(u64) 0, (u64) 891], {NoCarry, NoOverflow});
+
+    mullu!(0x1fffffffffffffffi64 * 0x1fffffffffffffffi64 == [(i64) 0x3ffffffffffffff, (i64) -4611686018427387903], {NoCarry, NoOverflow});
+    // 0xffffffffffffffff == u64::MAX
+    mullu!(0xffffffffffffffffu64 * 0xffffffffffffffffu64 == [(u64) 0xfffffffffffffffe, (u64) 1], {NoCarry, NoOverflow});
+    // 0x7fffffffffffffff == i64::MAX
+    mullu!(0x7fffffffffffffffi64 * 0x7fffffffffffffffi64 == [(u64) 0x3fffffffffffffff, (i64) 1], {NoCarry, NoOverflow});
 
     Ok(())
 }
