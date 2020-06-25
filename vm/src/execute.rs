@@ -645,7 +645,15 @@ impl Execute for Jmp {
 impl Execute for Je {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Je {loc} = self;
-        todo!()
+        let addr: u64 = loc.into_value(vm);
+
+        if vm.flags.zero == ZF::Zero {
+            // Equal if ZF = 1
+            // See: https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Jump_if_Equal
+            vm.program_counter = addr;
+        }
+
+        Ok(())
     }
 }
 
