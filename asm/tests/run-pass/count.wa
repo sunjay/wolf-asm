@@ -1,0 +1,41 @@
+# Generates and prints the first n numbers
+#
+# Note: if n is too large, the values will overflow
+
+section .code
+
+.const n 10_000
+
+main:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $1
+
+  # Initialize counter
+  mov $1, 1
+
+loop:
+  # Print the next number
+  call print_int
+  call print_newline
+
+  # Check if we're done
+  cmp $1, n
+  jae done
+
+  # Increment counter
+  add $1, 1
+
+  # Continue looping
+  jmp loop
+
+done:
+  # Pop registers used in this routine
+  pop $1
+
+  pop $fp
+  ret
+
+.include 'print.wa'

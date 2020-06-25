@@ -1,8 +1,9 @@
 # Executables from example asm programs
-hello
-cat
 calc
+cat
+count
 fib
+hello
 
 /target
 **/*.rs.bk
