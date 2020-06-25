@@ -319,14 +319,34 @@ impl Execute for Divru {
 impl Execute for Rem {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Rem {dest, source} = self;
-        todo!()
+        let lhs: i64 = dest.into_value(vm);
+        let rhs: i64 = source.into_value(vm);
+
+        let remainder = match lhs.checked_rem_euclid(rhs) {
+            Some(value) => value,
+            None => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.store_dest(dest, remainder);
+
+        Ok(())
     }
 }
 
 impl Execute for Remu {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Remu {dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+
+        let remainder = match lhs.checked_rem_euclid(rhs) {
+            Some(value) => value,
+            None => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.store_dest(dest, remainder);
+
+        Ok(())
     }
 }
 
