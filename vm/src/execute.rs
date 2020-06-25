@@ -241,21 +241,56 @@ impl Execute for Mullu {
 impl Execute for Div {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Div {dest, source} = self;
-        todo!()
+        let lhs: i64 = dest.into_value(vm);
+        let rhs: i64 = source.into_value(vm);
+
+        let quotient = match lhs.checked_div_euclid(rhs) {
+            Some(value) => value,
+            None => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.store_dest(dest, quotient);
+
+        Ok(())
     }
 }
 
 impl Execute for Divr {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Divr {dest_rem, dest, source} = self;
-        todo!()
+        let lhs: i64 = dest.into_value(vm);
+        let rhs: i64 = source.into_value(vm);
+
+        let quotient = lhs.checked_div_euclid(rhs);
+        let remainder = lhs.checked_rem_euclid(rhs);
+        let (quotient, remainder) = match (quotient, remainder) {
+            (Some(quotient), Some(remainder)) => (quotient, remainder),
+            (Some(_), None) |
+            (None, Some(_)) |
+            (None, None) => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.store_dest(dest, quotient);
+        vm.store_dest(dest_rem, remainder);
+
+        Ok(())
     }
 }
 
 impl Execute for Divu {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Divu {dest, source} = self;
-        todo!()
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+
+        let quotient = match lhs.checked_div_euclid(rhs) {
+            Some(value) => value,
+            None => return Err(ExecuteError::DivideByZero),
+        };
+
+        vm.store_dest(dest, quotient);
+
+        Ok(())
     }
 }
 
