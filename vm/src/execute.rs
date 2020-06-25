@@ -130,7 +130,28 @@ impl Execute for Sub {
 impl Execute for Mul {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mul {dest, source} = self;
-        todo!()
+
+        // mul loads values as signed and then widens them so we can detect
+        // overflow
+        let lhs: i64 = dest.into_value(vm);
+        let rhs: i64 = source.into_value(vm);
+        let lhs = i128::reinterpret(lhs);
+        let rhs = i128::reinterpret(rhs);
+
+        let (result, overflow) = lhs.overflowing_mul(rhs);
+
+        // Check if the higher bits are set (i.e. result cannot fit in i64)
+        let overflow = overflow || result != i64::reinterpret(result) as i128;
+
+        vm.store_dest(dest, result);
+        // Update carry and overflow only, all other flags are undefined
+        vm.flags = Flags {
+            carry: if overflow { CF::Carry } else { CF::NoCarry },
+            overflow: if overflow { OF::Overflow } else { OF::NoOverflow },
+            ..vm.flags
+        };
+
+        Ok(())
     }
 }
 
@@ -144,7 +165,28 @@ impl Execute for Mull {
 impl Execute for Mulu {
     fn execute(self, vm: &mut Machine) -> Result<(), ExecuteError> {
         let Mulu {dest, source} = self;
-        todo!()
+
+        // mulu loads values as unsigned and then widens them so we can detect
+        // overflow
+        let lhs: u64 = dest.into_value(vm);
+        let rhs: u64 = source.into_value(vm);
+        let lhs = u128::reinterpret(lhs);
+        let rhs = u128::reinterpret(rhs);
+
+        let (result, overflow) = lhs.overflowing_mul(rhs);
+
+        // Check if the higher bits are set (i.e. result cannot fit in u64)
+        let overflow = overflow || result != u64::reinterpret(result) as u128;
+
+        vm.store_dest(dest, result);
+        // Update carry and overflow only, all other flags are undefined
+        vm.flags = Flags {
+            carry: if overflow { CF::Carry } else { CF::NoCarry },
+            overflow: if overflow { OF::Overflow } else { OF::NoOverflow },
+            ..vm.flags
+        };
+
+        Ok(())
     }
 }
 
