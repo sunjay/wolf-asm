@@ -92,3 +92,19 @@ Run the generated machine code using the command:
 ```bash
 cargo run -p wolf-vm -- hello
 ```
+
+## Running Tests
+
+To run tests, use the following command:
+
+```bash
+cargo test --all
+```
+
+This will run the tests for the assembler and for the VM.
+
+To regenerate the test output files, use the command:
+
+```bash
+TESTASSEMBLER=overwrite cargo test --all
+```

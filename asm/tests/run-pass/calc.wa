@@ -24,4 +24,4 @@ main:
   pop $fp
   ret
 
-.include 'print.wa'
+.include 'lib/print.wa'

@@ -1,0 +1,55 @@
+error: maximum `.include` recursion depth reached while reading files:
+    51. tests/ui/include-infinite-recursion.wa
+    50. tests/ui/include-infinite-recursion.wa
+    49. tests/ui/include-infinite-recursion.wa
+    48. tests/ui/include-infinite-recursion.wa
+    47. tests/ui/include-infinite-recursion.wa
+    46. tests/ui/include-infinite-recursion.wa
+    45. tests/ui/include-infinite-recursion.wa
+    44. tests/ui/include-infinite-recursion.wa
+    43. tests/ui/include-infinite-recursion.wa
+    42. tests/ui/include-infinite-recursion.wa
+    41. tests/ui/include-infinite-recursion.wa
+    40. tests/ui/include-infinite-recursion.wa
+    39. tests/ui/include-infinite-recursion.wa
+    38. tests/ui/include-infinite-recursion.wa
+    37. tests/ui/include-infinite-recursion.wa
+    36. tests/ui/include-infinite-recursion.wa
+    35. tests/ui/include-infinite-recursion.wa
+    34. tests/ui/include-infinite-recursion.wa
+    33. tests/ui/include-infinite-recursion.wa
+    32. tests/ui/include-infinite-recursion.wa
+    31. tests/ui/include-infinite-recursion.wa
+    30. tests/ui/include-infinite-recursion.wa
+    29. tests/ui/include-infinite-recursion.wa
+    28. tests/ui/include-infinite-recursion.wa
+    27. tests/ui/include-infinite-recursion.wa
+    26. tests/ui/include-infinite-recursion.wa
+    25. tests/ui/include-infinite-recursion.wa
+    24. tests/ui/include-infinite-recursion.wa
+    23. tests/ui/include-infinite-recursion.wa
+    22. tests/ui/include-infinite-recursion.wa
+    21. tests/ui/include-infinite-recursion.wa
+    20. tests/ui/include-infinite-recursion.wa
+    19. tests/ui/include-infinite-recursion.wa
+    18. tests/ui/include-infinite-recursion.wa
+    17. tests/ui/include-infinite-recursion.wa
+    16. tests/ui/include-infinite-recursion.wa
+    15. tests/ui/include-infinite-recursion.wa
+    14. tests/ui/include-infinite-recursion.wa
+    13. tests/ui/include-infinite-recursion.wa
+    12. tests/ui/include-infinite-recursion.wa
+    11. tests/ui/include-infinite-recursion.wa
+    10. tests/ui/include-infinite-recursion.wa
+     9. tests/ui/include-infinite-recursion.wa
+     8. tests/ui/include-infinite-recursion.wa
+     7. tests/ui/include-infinite-recursion.wa
+     6. tests/ui/include-infinite-recursion.wa
+     5. tests/ui/include-infinite-recursion.wa
+     4. tests/ui/include-infinite-recursion.wa
+     3. tests/ui/include-infinite-recursion.wa
+     2. tests/ui/include-infinite-recursion.wa
+     1. tests/ui/include-infinite-recursion.wa
+
+error: aborting due to 1 previous error
+
