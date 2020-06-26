@@ -97,8 +97,8 @@ impl fmt::Display for TokenKind {
             Literal(lit) => write!(f, "{}", lit),
             Colon => write!(f, "`:`"),
             Comma => write!(f, "`,`"),
-            ParenOpen => write!(f, "("),
-            ParenClose => write!(f, ")"),
+            ParenOpen => write!(f, "`(`"),
+            ParenClose => write!(f, "`)`"),
             Newline => write!(f, "a newline"),
             Eof => write!(f, "end of file"),
 
