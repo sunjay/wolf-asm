@@ -21,13 +21,18 @@ main:
   push $1
   push $2
 
+  # Allocate a board sized block on the stack
+  sub $sp, BOARD_BYTES
+  # This will be the address of the board representation
+  mov $1, $sp
+
+  # Initialize the board memory
   call init_board
 
 main_loop:
+  # Print the current state of the board
   call print_board
   call print_newline
-  call prompt_move
-  call make_move
 
   # Check if the game is over
   call check_winner
@@ -38,6 +43,10 @@ main_loop:
   call check_board_full
   cmp $2, 0
   jne main_print_tie
+
+  # Ask for a move and modify the board
+  call prompt_move
+  call make_move
 
   # Continue looping
   jmp main_loop
@@ -53,6 +62,9 @@ main_print_tie:
   jmp main_done
 
 main_done:
+  # Free the board sized region on the stack
+  add $sp, BOARD_BYTES
+
   # Pop registers used in this routine
   pop $2
   pop $1

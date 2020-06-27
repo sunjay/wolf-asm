@@ -18,7 +18,7 @@
 
 ################################################################################
 #
-# Initializes the tic-tac-toe board and places its address in $1
+# Initializes the tic-tac-toe board whose address is in $1
 #
 ################################################################################
 init_board:
@@ -26,12 +26,32 @@ init_board:
   mov $fp, $sp
 
   # Push registers used in this routine
+  push $1
   push $2
 
-  #TODO
+  # Initialize the board tiles to be empty
+
+  # Address of one past the end of tiles
+  mov $2, $1
+  add $2, TILES
+
+init_board_tiles:
+  cmp $1, $2
+  je init_board_current_piece
+
+  # Store NONE in the tile to represent that this tile is empty
+  store1 $1, NONE
+
+  add $1, 1
+  jmp init_board_tiles
+
+init_board_current_piece:
+  # Start the game with X as the current piece
+  store1 $1, PIECE_X
 
   # Pop registers used in this routine
   pop $2
+  pop $1
 
   pop $fp
   ret
@@ -81,7 +101,8 @@ check_winner:
 ################################################################################
 #
 # Checks the board whose address is in $1 to see if there is no more room for
-# additional pieces. Stores a non-zero value in $2 if the board is full.
+# additional pieces. Stores a non-zero value in $2 if the board is full and zero
+# if the board still has empty tiles.
 #
 ################################################################################
 check_board_full:
