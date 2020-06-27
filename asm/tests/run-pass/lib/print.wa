@@ -59,7 +59,7 @@ print_int:
 
   # Check if value is negative
   cmp $1, 0
-  jge positive
+  jge print_int_positive
 
   # Number is negative
 
@@ -72,7 +72,7 @@ print_int:
   mov $1, $2
 
 # Determine the digits of the number assuming it is positive
-positive:
+print_int_positive:
   # The digits are stored onto the stack in backwards order and then printed
   # back-to-front
 
@@ -87,10 +87,10 @@ positive:
 
   # Check if we've reached zero
   cmp $1, 0
-  jne positive
+  jne print_int_positive
 
 # Print the digits in the reverse of the order they are stored on the stack
-printdigits:
+print_int_printdigits:
   # Get the next digit
   pop $2
   # Add to the digit so it becomes the right ASCII code (ASCII 48 = zero `0`)
@@ -101,10 +101,53 @@ printdigits:
   # Decrement the digit counter
   sub $3, 1
   # Continue printing if there are still digits
-  jnz printdigits
+  jnz print_int_printdigits
 
   # Load registers used in this procedure
   pop $3
+  pop $2
+  pop $1
+  pop $0
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Prints the null terminated byte string whose address is stored in $1
+#
+# $1 is not modified during the course of this procedure.
+#
+################################################################################
+print_ntstring:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $0
+  push $1
+  push $2
+
+  # Store the STDOUT address
+  mov $0, STDOUT
+
+print_ntstring_loop:
+  # Load the current byte
+  loadu1 $2, $1
+
+  # Check if we've reached the null terminator
+  cmp $2, 0
+  je print_ntstring_done
+
+  # Print the byte
+  store1 $0, $2
+
+  # Continue to the next byte
+  add $1, 1
+  jmp print_ntstring_loop
+
+print_ntstring_done:
+  # Pop registers used in this routine
   pop $2
   pop $1
   pop $0
