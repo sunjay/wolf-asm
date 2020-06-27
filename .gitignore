@@ -5,6 +5,7 @@ count
 fib
 hello
 oscillating_sum
+tic-tac-toe
 
 /target
 **/*.rs.bk

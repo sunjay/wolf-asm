@@ -1,0 +1,98 @@
+# Plays the game tic-tac-toe
+#
+# When prompted for your move, you will be asked to enter a number between
+# 1 and 9. The tiles are numbered as follows:
+#
+#     -------------
+#     | 1 | 2 | 3 |
+#     -------------
+#     | 4 | 5 | 6 |
+#     -------------
+#     | 7 | 8 | 9 |
+#     -------------
+
+section .code
+
+main:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $1
+  push $2
+
+  call init_board
+
+main_loop:
+  call print_board
+  call print_newline
+  call prompt_move
+  call make_move
+
+  # Check if the game is over
+  call check_winner
+  cmp $2, 0
+  jne main_print_winner
+
+  # Check if the board is full (tie)
+  call check_board_full
+  cmp $2, 0
+  jne main_print_tie
+
+  # Continue looping
+  jmp main_loop
+
+main_print_winner:
+  #TODO
+
+  jmp main_done
+
+main_print_tie:
+  #TODO
+
+  jmp main_done
+
+main_done:
+  # Pop registers used in this routine
+  pop $2
+  pop $1
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Prompts the player for a move and stores the move (0-8) in $2
+#
+################################################################################
+prompt_move:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $2
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $2
+
+  pop $fp
+  ret
+
+.include 'tic-tac-toe/board.wa'
+.include 'tic-tac-toe/printer.wa'
+
+section .static
+
+move_prompt:
+  .bytes 'Enter your move (1-9): \0'
+
+x_wins_message:
+  .bytes 'X wins!\0'
+
+o_wins_message:
+  .bytes 'O wins!\0'
+
+tie_wins_message:
+  .bytes 'Tie!\0'

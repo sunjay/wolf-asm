@@ -1,0 +1,100 @@
+################################################################################
+#
+# Routines for managing the representation of the board.
+#
+################################################################################
+
+# The number of tiles on a tic-tac-toe board
+.const TILES 9
+# A value representing the absence of a value (like null)
+.const NONE 0
+# The constant value used to repesent piece X
+.const PIECE_X 1
+# The constant value used to repesent piece O
+.const PIECE_O 2
+# Total size of the representation of the board
+# TILES bytes + 1 byte for current piece (PIECE_X or PIECE_O)
+.const BOARD_BYTES 10
+
+################################################################################
+#
+# Initializes the tic-tac-toe board and places its address in $1
+#
+################################################################################
+init_board:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $2
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $2
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Modifies the tic-tac-toe board whose address is in $1 by placing the current
+# piece at the position (0-8) stored in $2.
+#
+################################################################################
+make_move:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $2
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $2
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Checks the board whose address is in $1 to see if the game has been won.
+# Stores NONE, PIECE_X, or PIECE_O in $2.
+#
+################################################################################
+check_winner:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $3
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $3
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Checks the board whose address is in $1 to see if there is no more room for
+# additional pieces. Stores a non-zero value in $2 if the board is full.
+#
+################################################################################
+check_board_full:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $3
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $3
+
+  pop $fp
+  ret

@@ -1,0 +1,27 @@
+################################################################################
+#
+# Routines for printing the board
+#
+################################################################################
+
+################################################################################
+#
+# Prints the tic-tac-toe board whose address is stored in $1
+#
+################################################################################
+print_board:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $1
+
+  #TODO
+
+  # Pop registers used in this routine
+  pop $1
+
+  pop $fp
+  ret
+
+.include '../lib/print.wa'
