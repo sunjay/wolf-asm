@@ -4,6 +4,15 @@
 #
 ################################################################################
 
+# ASCII 124 = '|'
+.const VERT_BAR 124
+# ASCII 32 = ' '
+.const SPACE 32
+# ASCII 120 = 'x'
+.const CHAR_X 120
+# ASCII 111 = '0'
+.const CHAR_O 111
+
 ################################################################################
 #
 # Prints the tic-tac-toe board whose address is stored in $1
@@ -14,14 +23,115 @@ print_board:
   mov $fp, $sp
 
   # Push registers used in this routine
+  push $0
+  push $1
+  push $2
+  push $11
+  push $12
+
+  # Address for STDOUT
+  mov $0, STDOUT
+
+  # Print initial horizontal line
+  call print_horizontal_line
+
+  # Row counter
+  mov $11, 0
+
+print_board_rows:
+  cmp $11, ROWS
+  jae print_board_done
+
+  # Column counter
+  mov $12, 0
+
+  # Print the initial separator
+  store1 $0, VERT_BAR
+
+print_board_cols:
+  cmp $12, COLS
+  jae print_board_cols_done
+
+  # Left padding
+  store1 $0, SPACE
+
+  # Print the current column
+  loadu1 $2, $1
+
+print_board_tile_x:
+  # Check for piece x
+  cmp $2, PIECE_X
+  jne print_board_tile_o
+  store1 $0, CHAR_X
+  jmp print_board_tile_done
+
+print_board_tile_o:
+  # Check for piece o
+  cmp $2, PIECE_O
+  jne print_board_tile_empty
+  store1 $0, CHAR_O
+  jmp print_board_tile_done
+
+print_board_tile_empty:
+  # Print a space
+  store1 $0, SPACE
+
+print_board_tile_done:
+  # Right padding
+  store1 $0, SPACE
+  # Right separator
+  store1 $0, VERT_BAR
+
+  # Increment to next tile
+  add $1, 1
+
+  # Increment column counter
+  add $12, 1
+
+  # Continue the inner loop
+  jmp print_board_cols
+
+print_board_cols_done:
+  call print_newline
+  # Print horizontal line after every row
+  call print_horizontal_line
+
+  # Increment row counter
+  add $11, 1
+
+  # Continue the loop
+  jmp print_board_rows
+
+print_board_done:
+  # Pop registers used in this routine
+  pop $12
+  pop $11
+  pop $2
+  pop $1
+  pop $0
+
+  pop $fp
+  ret
+
+# Prints a horizontal line followed by a newline
+print_horizontal_line:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
   push $1
 
-  #TODO
+  mov $1, horizontal_line
+  call print_ntstring
+  call print_newline
 
   # Pop registers used in this routine
   pop $1
 
   pop $fp
   ret
+
+horizontal_line:
+  .bytes '-------------\0'
 
 .include '../lib/print.wa'

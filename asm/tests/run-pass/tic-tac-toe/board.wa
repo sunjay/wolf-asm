@@ -4,6 +4,10 @@
 #
 ################################################################################
 
+# The number of rows on a tic-tac-toe board
+.const ROWS 3
+# The number of columns on a tic-tac-toe board
+.const COLS 3
 # The number of tiles on a tic-tac-toe board
 .const TILES 9
 # A value representing the absence of a value (like null)
