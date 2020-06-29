@@ -44,9 +44,9 @@ main_loop:
   je main_print_winner_o
 
   # Check if the board is full (tie)
-  call check_board_full
+  call check_board_empty_tiles
   cmp $2, 0
-  jne main_print_tie
+  je main_print_tie
 
   call print_current_piece
   # Ask for a move from the user
