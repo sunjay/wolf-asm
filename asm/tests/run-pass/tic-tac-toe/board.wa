@@ -292,7 +292,7 @@ check_winner_diagonals_tile_done:
   add $21, 4
   # Move to next diagonal 2 address
   # Assumes board is 3x3
-  add $21, 2
+  add $22, 2
 
   # Increment diagonal counter
   add $11, 1
