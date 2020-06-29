@@ -1,11 +1,13 @@
 # Executables from example asm programs
-calc
-cat
-count
-fib
-hello
-oscillating_sum
-tic-tac-toe
+/calc
+/cat
+/count
+/fib
+/hello
+/oscillating_sum
+/tic-tac-toe
+
+/vm/benches/oscillating_sum
 
 /target
 **/*.rs.bk
