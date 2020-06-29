@@ -46,6 +46,7 @@ main_loop:
   cmp $2, 0
   jne main_print_tie
 
+  call print_current_piece
   # Ask for a move from the user
   call prompt_move
   # Check for EOF
@@ -77,6 +78,52 @@ main_done:
   # Pop registers used in this routine
   pop $2
   pop $1
+
+  pop $fp
+  ret
+
+################################################################################
+#
+# Prints the current piece of board whose address is stored in $1
+#
+################################################################################
+print_current_piece:
+  push $fp
+  mov $fp, $sp
+
+  # Push registers used in this routine
+  push $0
+  push $1
+  push $2
+
+  mov $0, STDOUT
+
+  # Get the current piece
+  call current_piece
+
+  mov $1, current_piece_message
+  call print_ntstring
+
+  # Print the piece
+  cmp $2, PIECE_X
+  jne print_current_piece_o
+
+print_current_piece_x:
+  store1 $0, CHAR_X
+
+  jmp print_current_piece_done
+
+print_current_piece_o:
+  store1 $0, CHAR_O
+
+print_current_piece_done:
+  # End with a newline
+  call print_newline
+
+  # Pop registers used in this routine
+  pop $2
+  pop $1
+  pop $0
 
   pop $fp
   ret
@@ -179,6 +226,9 @@ prompt_move_done:
 .include 'tic-tac-toe/printer.wa'
 
 section .static
+
+current_piece_message:
+  .bytes 'Current piece: \0'
 
 move_prompt:
   .bytes 'Enter your move (1-9): \0'

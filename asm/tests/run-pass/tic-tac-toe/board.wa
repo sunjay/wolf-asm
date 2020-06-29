@@ -83,6 +83,23 @@ make_move:
 
 ################################################################################
 #
+# Gets the current piece from the board whose address is in $1 and stores
+# PIECE_X or PIECE_O in $2.
+#
+################################################################################
+current_piece:
+  push $fp
+  mov $fp, $sp
+
+  mov $2, $1
+  add $2, TILES
+  loadu1 $2, $2
+
+  pop $fp
+  ret
+
+################################################################################
+#
 # Checks the board whose address is in $1 to see if the game has been won.
 # Stores NONE, PIECE_X, or PIECE_O in $2.
 #
