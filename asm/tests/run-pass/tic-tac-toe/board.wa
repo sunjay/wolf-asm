@@ -18,6 +18,7 @@
 .const PIECE_O 2
 # Total size of the representation of the board
 # TILES bytes + 1 byte for current piece (PIECE_X or PIECE_O)
+# TILES bytes are the values of each tile stored row-wise
 .const BOARD_BYTES 10
 
 ################################################################################
@@ -134,10 +135,203 @@ check_winner:
 
   # Push registers used in this routine
   push $3
+  push $4
+  push $5
+  push $6
+  push $7
+  push $11
+  push $12
+  push $21
+  push $22
 
-  mov $2, NONE #TODO
+  # Start with no winner
+  mov $2, NONE
 
+  ###### Check each row and each column ######
+
+  # Address of tile in current row
+  mov $21, $1
+
+  # Row counter
+  mov $11, 0
+
+check_winner_rows:
+  cmp $11, ROWS
+  jae check_winner_diagonals
+
+  # Address of tile in current column
+  mov $22, $1
+  # Add row counter to get to the start address of the current column (works
+  # because board is square so proceeding through columns is the same as
+  # proceeding through rows with an additional offset)
+  add $22, $11
+
+  # The last value found in the current tile of the current row
+  loadu1 $3, $21
+  # The number of times this value has been found in the current row
+  mov $4, 0
+  # The last value found in the current tile of the current column
+  loadu1 $5, $22
+  # The number of times this value has been found in the current column
+  mov $6, 0
+
+  # Column counter
+  mov $12, 0
+
+check_winner_cols:
+  cmp $12, COLS
+  jae check_winner_cols_done
+
+check_winner_row_tile:
+  # Check value of current row
+  loadu1 $7, $21
+  cmp $3, $7
+  jne check_winner_col_tile
+
+  # Found a tile that is the same
+  add $4, 1
+
+check_winner_col_tile:
+  # Check value of current row
+  loadu1 $7, $22
+  cmp $5, $7
+  jne check_winner_tile_done
+
+  # Found a tile that is the same
+  add $6, 1
+
+check_winner_tile_done:
+  # Move to next address in current row
+  add $21, 1
+  # Move to next address in current column
+  add $22, COLS
+
+  # Increment column counter
+  add $12, 1
+
+  jmp check_winner_cols
+
+check_winner_cols_done:
+check_winner_row_win:
+  # Check if a winner was found in the current row
+  cmp $3, NONE
+  je check_winner_col_win
+  cmp $4, COLS
+  jne check_winner_col_win
+
+  # Return winner
+  mov $2, $3
+  jmp check_winner_done
+
+check_winner_col_win:
+  # Check if a winner was found in the current column
+  cmp $5, NONE
+  je check_winner_cols_continue
+  cmp $6, ROWS
+  jne check_winner_cols_continue
+
+  # Return winner
+  mov $2, $5
+  jmp check_winner_done
+
+check_winner_cols_continue:
+  # Increment row counter
+  add $11, 1
+
+  jmp check_winner_rows
+
+check_winner_diagonals:
+  ###### Check each diagonal (assumes board is square and 3x3) ######
+
+  # Address of first tile in diagonal 1 (top-left to bottom-right)
+  mov $21, $1
+
+  # Address of first tile in diagonal 2 (top-right to bottom-left)
+  mov $22, $1
+  add $22, COLS
+  sub $22, 1
+
+  # The first value in diagonal 1
+  loadu1 $3, $21
+  # The number of times this value was found in diagonal 1
+  mov $4, 0
+  # The first value in diagonal 2
+  loadu1 $5, $22
+  # The number of times this value was found in diagonal 2
+  mov $6, 0
+
+  # Counter for both diagonals (assumes board is square)
+  mov $11, 0
+
+check_winner_diagonals_loop:
+  # Works assuming board is square
+  cmp $11, ROWS
+  jae check_winner_diagonals_done
+
+check_winner_diagonal1_tile:
+  # Check value of diagonal 1
+  loadu1 $7, $21
+  cmp $3, $7
+  jne check_winner_diagonal2_tile
+
+  # Found a tile that is the same
+  add $4, 1
+
+check_winner_diagonal2_tile:
+  # Check value of diagonal 2
+  loadu1 $7, $22
+  cmp $5, $7
+  jne check_winner_diagonals_tile_done
+
+  # Found a tile that is the same
+  add $6, 1
+
+check_winner_diagonals_tile_done:
+  # Move to next diagonal 1 address
+  # Assumes board is 3x3
+  add $21, 4
+  # Move to next diagonal 2 address
+  # Assumes board is 3x3
+  add $21, 2
+
+  # Increment diagonal counter
+  add $11, 1
+
+  jmp check_winner_diagonals_loop
+
+check_winner_diagonals_done:
+check_winner_diagonal1_win:
+  # Check if a winner was found in diagonal 1 (assumes board is square)
+  cmp $3, NONE
+  je check_winner_diagonal2_win
+  cmp $4, ROWS
+  jne check_winner_diagonal2_win
+
+  # Return winner
+  mov $2, $3
+  jmp check_winner_done
+
+check_winner_diagonal2_win:
+  # Check if a winner was found in diagonal 2 (assumes board is square)
+  cmp $5, NONE
+  je check_winner_done
+  cmp $6, ROWS
+  jne check_winner_done
+
+  # Return winner
+  mov $2, $5
+  jmp check_winner_done
+
+check_winner_done:
   # Pop registers used in this routine
+  pop $22
+  pop $21
+  pop $12
+  pop $11
+  pop $7
+  pop $6
+  pop $5
+  pop $4
   pop $3
 
   pop $fp
