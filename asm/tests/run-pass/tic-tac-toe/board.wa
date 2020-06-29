@@ -63,7 +63,11 @@ init_board_current_piece:
 ################################################################################
 #
 # Modifies the tic-tac-toe board whose address is in $1 by placing the current
-# piece at the position (0-8) stored in $2.
+# piece at the position (0-8) stored in $2. Sets the current piece to the
+# opposite piece.
+#
+# This routine assumes that $2 is in the range 0-8 and does *not* check if the
+# requested tile is empty before overwriting it.
 #
 ################################################################################
 make_move:
@@ -71,12 +75,32 @@ make_move:
   mov $fp, $sp
 
   # Push registers used in this routine
+  push $1
   push $2
+  push $3
+  push $4
 
-  #TODO
+  # Read the current piece into $3
+  mov $3, $1
+  add $3, TILES
+  loadu1 $4, $3
+
+  # Set the selected tile to the current piece
+  add $2, $1
+  store1 $2, $4
+
+  # Set the current piece to the opposite piece
+  # This code works because PIECE_X and PIECE_O are consecutive integers
+  mov $2, PIECE_O
+  sub $2, $4
+  add $2, PIECE_X
+  store1 $3, $2
 
   # Pop registers used in this routine
+  pop $4
+  pop $3
   pop $2
+  pop $1
 
   pop $fp
   ret
