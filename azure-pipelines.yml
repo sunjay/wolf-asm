@@ -2,15 +2,15 @@
 
 strategy:
   matrix:
-    windows-stable:
-      imageName: 'windows-latest'
-      rustup_toolchain: stable
-    windows-beta:
-      imageName: 'windows-latest'
-      rustup_toolchain: beta
-    windows-nightly:
-      imageName: 'windows-latest'
-      rustup_toolchain: nightly
+    # windows-stable:
+    #   imageName: 'windows-latest'
+    #   rustup_toolchain: stable
+    # windows-beta:
+    #   imageName: 'windows-latest'
+    #   rustup_toolchain: beta
+    # windows-nightly:
+    #   imageName: 'windows-latest'
+    #   rustup_toolchain: nightly
 
     mac-stable:
       imageName: 'macos-latest'
