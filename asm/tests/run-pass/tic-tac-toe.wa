@@ -38,8 +38,10 @@ main_loop:
 
   # Check if the game is over
   call check_winner
-  cmp $2, 0
-  jne main_print_winner
+  cmp $2, PIECE_X
+  je main_print_winner_x
+  cmp $2, PIECE_O
+  je main_print_winner_o
 
   # Check if the board is full (tie)
   call check_board_full
@@ -61,13 +63,24 @@ main_loop:
   # Continue looping
   jmp main_loop
 
-main_print_winner:
-  #TODO
+main_print_winner_x:
+  mov $1, x_wins_message
+  call print_ntstring
+  call print_newline
+
+  jmp main_done
+
+main_print_winner_o:
+  mov $1, o_wins_message
+  call print_ntstring
+  call print_newline
 
   jmp main_done
 
 main_print_tie:
-  #TODO
+  mov $1, tie_message
+  call print_ntstring
+  call print_newline
 
   jmp main_done
 
@@ -239,5 +252,5 @@ x_wins_message:
 o_wins_message:
   .bytes 'O wins!\0'
 
-tie_wins_message:
+tie_message:
   .bytes 'Tie!\0'
