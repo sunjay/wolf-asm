@@ -94,7 +94,7 @@ check_winner:
   # Push registers used in this routine
   push $3
 
-  #TODO
+  mov $2, NONE #TODO
 
   # Pop registers used in this routine
   pop $3
@@ -116,7 +116,7 @@ check_board_full:
   # Push registers used in this routine
   push $3
 
-  #TODO
+  mov $2, 0 #TODO
 
   # Pop registers used in this routine
   pop $3
