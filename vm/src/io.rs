@@ -45,7 +45,10 @@ impl Stdio {
             .unwrap_or(char::REPLACEMENT_CHARACTER);
 
         let mut stdout = io::stdout();
-        write!(stdout, "{}", ch)
+        write!(stdout, "{}", ch)?;
+        stdout.flush()?;
+
+        Ok(())
     }
 
     #[cfg(test)]
