@@ -109,14 +109,12 @@ fn run_assembler(source_path: &Path) -> Result<(TempPath, String), String> {
     // Check if assembler failed
     if !output.status.success() {
         let stderr = String::from_utf8(output.stderr)
-            .unwrap_or_else(|err| panic!("Assembler stderr for '{}' was not valid UTF-8: {}", executable.path().display(), err))
-            .replace("\r\n", "\n");
+            .unwrap_or_else(|err| panic!("Assembler stderr for '{}' was not valid UTF-8: {}", executable.path().display(), err));
         return Err(stderr);
     }
 
     let stdout = String::from_utf8(output.stdout)
-        .unwrap_or_else(|err| panic!("Assembler stdout for '{}' was not valid UTF-8: {}", executable.path().display(), err))
-        .replace("\r\n", "\n");
+        .unwrap_or_else(|err| panic!("Assembler stdout for '{}' was not valid UTF-8: {}", executable.path().display(), err));
 
     Ok((executable.into_temp_path(), stdout))
 }
