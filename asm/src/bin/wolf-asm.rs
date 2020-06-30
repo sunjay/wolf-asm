@@ -121,8 +121,12 @@ fn main() {
         current_dir.join(output_path)
     };
 
-    let root_file = source_files.write().add_file(&program_path)
-        .unwrap_or_else(|err| quit!(&diag, "Could not read source file `{}`: {}", program_path.display(), err));
+    // Need this separate statement so we don't hold the write() lock in the
+    // error case and end up with a deadlock
+    let root_file = source_files.write().add_file(&program_path);
+    let root_file = root_file.unwrap_or_else(|err| {
+        quit!(&diag, "Could not read source file `{}`: {}", program_path.display(), err)
+    });
     let program = {
         // New scope because we want to drop this lock guard as soon as possible
         let files = source_files.read();
