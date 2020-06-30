@@ -1,0 +1,4 @@
+[../tests/ui/labels.wa:17:11-17:24] error: unknown label `does_not_exist`
+
+error: aborting due to 1 previous error
+

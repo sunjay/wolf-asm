@@ -26,9 +26,8 @@ that document for a reference of the language syntax and supported instructions.
 
 ## Example Programs
 
-See `asm/tests/run-pass` for several example programs written using the
-language. You can also run programs in `asm/tests/ui` to see some of the error
-messages.
+See `tests/run-pass` for several example programs written using the language.
+You can also run programs in `tests/ui` to see some of the error messages.
 
 Here is a program that outputs `hello, world!\n` and then quits:
 
@@ -81,7 +80,7 @@ Make sure you have [Rust](https://rustup.rs) installed.
 Run the assembler using the command:
 
 ```bash
-cargo run -p wolf-asm -- asm/tests/run-pass/hello.wa
+cargo run -p wolf-asm -- tests/run-pass/hello.wa
 ```
 
 This will generate an executable `hello` in the current directory. Note: this

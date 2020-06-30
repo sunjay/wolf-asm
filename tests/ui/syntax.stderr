@@ -1,0 +1,52 @@
+[../tests/ui/syntax.wa:2:9-2:16] error: expected `.static` or `.code`, found `.statics`
+
+[../tests/ui/syntax.wa:7:9] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:9:7] error: expected an identifier, found a newline
+
+[../tests/ui/syntax.wa:12:9] error: expected a byte string literal, found a newline
+
+[../tests/ui/syntax.wa:15:4] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:16:4] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:17:4] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:18:4] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:19:6] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:20:8] error: expected an integer, found a newline
+
+[../tests/ui/syntax.wa:21:7] error: expected a byte string literal, found a newline
+
+[../tests/ui/syntax.wa:24:8-24:10] error: expected a newline, found `.b2`
+
+[../tests/ui/syntax.wa:30:8] error: expected a newline or `,`, found `:`
+
+[../tests/ui/syntax.wa:31:1] error: expected one of an identifier, `section`, or `.`, found an integer
+
+[../tests/ui/syntax.wa:34:5-34:11] error: expected one of `:`, a newline, an integer, a register, or an identifier, found `section`
+
+[../tests/ui/syntax.wa:39:8-39:9] error: expected a newline or `,`, found a register
+
+[../tests/ui/syntax.wa:40:12-40:13] error: expected a newline or `,`, found a register
+
+[../tests/ui/syntax.wa:43:12] error: expected one of an integer, a register, or an identifier, found a newline
+
+[../tests/ui/syntax.wa:46:4] error: expected one of `:`, a newline, an integer, a register, or an identifier, found `,`
+
+[../tests/ui/syntax.wa:57:15-57:16] error: expected a newline or `,`, found a register
+
+[../tests/ui/syntax.wa:58:17] error: expected `)`, found a newline
+
+[../tests/ui/syntax.wa:60:15] error: expected a register, found `(`
+
+[../tests/ui/syntax.wa:62:13] error: expected a newline or `,`, found `(`
+
+[../tests/ui/syntax.wa:64:11] error: expected one of an integer, a register, or an identifier, found `(`
+
+[../tests/ui/syntax.wa:66:13-66:14] error: expected a newline or `,`, found an integer
+
+error: aborting due to 25 previous errors
+

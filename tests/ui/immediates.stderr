@@ -1,0 +1,29 @@
+[../tests/ui/immediates.wa:7:9-7:22] error: immediate value `140737488355327` (`0x7fffffffffff`) for this instruction must fit in a 46-bit signed number
+[../tests/ui/immediates.wa:7:9-7:22] note: that means the value must be between `-35184372088832` and `35184372088831` (`0x1fffffffffff`)
+
+[../tests/ui/immediates.wa:8:9-8:23] error: immediate value `281474976710656` (`0x1000000000000`) for this instruction must fit in a 46-bit signed number
+[../tests/ui/immediates.wa:8:9-8:23] note: that means the value must be between `-35184372088832` and `35184372088831` (`0x1fffffffffff`)
+
+[../tests/ui/immediates.wa:14:5-14:18] error: immediate value `140737488355327` (`0x7fffffffffff`) for this instruction must fit in a 46-bit signed number
+[../tests/ui/immediates.wa:14:5-14:18] note: that means the value must be between `-35184372088832` and `35184372088831` (`0x1fffffffffff`)
+
+[../tests/ui/immediates.wa:15:5-15:19] error: immediate value `281474976710656` (`0x1000000000000`) for this instruction must fit in a 46-bit signed number
+[../tests/ui/immediates.wa:15:5-15:19] note: that means the value must be between `-35184372088832` and `35184372088831` (`0x1fffffffffff`)
+
+[../tests/ui/immediates.wa:22:16-22:25] error: immediate value `1073741823` (`0x3fffffff`) for this instruction must fit in a 30-bit signed number
+[../tests/ui/immediates.wa:22:16-22:25] note: that means the value must be between `-536870912` and `536870911` (`0x1fffffff`)
+
+[../tests/ui/immediates.wa:24:8-24:17] error: immediate value `2147483647` (`0x7fffffff`) for this instruction must fit in a 26-bit signed number
+[../tests/ui/immediates.wa:24:8-24:17] note: that means the value must be between `-33554432` and `33554431` (`0x1ffffff`)
+
+[../tests/ui/immediates.wa:24:20-24:29] error: immediate value `2147483647` (`0x7fffffff`) for this instruction must fit in a 26-bit signed number
+[../tests/ui/immediates.wa:24:20-24:29] note: that means the value must be between `-33554432` and `33554431` (`0x1ffffff`)
+
+[../tests/ui/immediates.wa:28:14-28:26] error: immediate value `2199023255551` (`0x1ffffffffff`) for this instruction must fit in a 40-bit signed number
+[../tests/ui/immediates.wa:28:14-28:26] note: that means the value must be between `-549755813888` and `549755813887` (`0x7fffffffff`)
+
+[../tests/ui/immediates.wa:32:6-32:21] error: immediate value `9007199254740991` (`0x1fffffffffffff`) for this instruction must fit in a 52-bit signed number
+[../tests/ui/immediates.wa:32:6-32:21] note: that means the value must be between `-2251799813685248` and `2251799813685247` (`0x7ffffffffffff`)
+
+error: aborting due to 9 previous errors
+

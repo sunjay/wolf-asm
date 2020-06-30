@@ -16,7 +16,7 @@ fn ui() {
         .map(|val| val == "overwrite")
         .unwrap_or(false);
 
-    let tests_dir = Path::new("tests/ui");
+    let tests_dir = Path::new("../tests/ui");
     // Relative paths make the output easier to read
     let tests_dir = tests_dir.strip_prefix(env::current_dir().unwrap()).unwrap_or(&tests_dir);
 
@@ -59,7 +59,7 @@ fn ui() {
 
 #[test]
 fn run_pass() {
-    let tests_dir = Path::new("tests/run-pass");
+    let tests_dir = Path::new("../tests/run-pass");
 
     let test_files = tests_dir.read_dir()
         .unwrap_or_else(|err| panic!("Failed to read test files directory '{}': {}", tests_dir.display(), err));
