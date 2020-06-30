@@ -105,5 +105,9 @@ This will run the tests for the assembler and for the VM.
 To regenerate the test output files, use the command:
 
 ```bash
-TESTASSEMBLER=overwrite cargo test --all
+TESTASSEMBLER=overwrite TESTVM=overwrite cargo test --all
 ```
+
+You can omit either `TESTASSEMBLER=overwrite` or `TESTVM=overwrite` depending on
+whether you intend to overwrite the assembler test output files or the VM test
+output files.

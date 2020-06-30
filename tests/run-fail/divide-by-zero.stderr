@@ -1,0 +1,4 @@
+Error: Failed to execute instruction at `0x20`
+
+Caused by:
+    Divided a number by zero

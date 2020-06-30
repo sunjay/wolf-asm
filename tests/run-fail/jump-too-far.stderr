@@ -1,0 +1,4 @@
+Error: Failed to execute instruction at `0x1038`
+
+Caused by:
+    Invalid memory access: attempt to access `0x1038` when address must be less than `0x1000`

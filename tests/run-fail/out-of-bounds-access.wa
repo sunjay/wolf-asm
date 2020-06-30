@@ -1,0 +1,13 @@
+# This program loads a memory address that is beyond the size of the
+# memory in the virtual machine
+
+section .code
+
+mov $1, 1024
+mov $2, 4
+mov $3, 100
+
+mulu $1, $2
+add $1, $3
+
+loadu8 $1, $1

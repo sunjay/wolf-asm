@@ -32,7 +32,7 @@ fn ui() {
         println!("[ui] Running assembler on {}", entry_path.display());
         match run_assembler(&entry_path) {
             Ok(_) => {
-                panic!("Assembler should have failed for '{}'", entry.path().display());
+                panic!("Assembler should have failed for '{}'", entry_path.display());
             },
             Err(stderr) => {
                 // Check the stderr output against what's expected

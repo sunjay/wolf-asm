@@ -1,0 +1,11 @@
+# This program has some valid instructions and invalid instructions
+
+section .code
+
+nop
+add $1, $2
+# Not a valid instruction (runtime exception)
+.b8 0xF0F0F0F0F0F0F0F0
+# These instructions will not run
+nop
+sub $1, $1

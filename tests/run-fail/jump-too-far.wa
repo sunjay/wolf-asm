@@ -1,0 +1,6 @@
+# This programs jumps past the end of memory, resulting in an out of bounds
+# exception in the VM
+
+section .code
+
+jmp 64($sp)

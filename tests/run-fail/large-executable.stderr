@@ -1,0 +1,4 @@
+Error: Failed to load executable into memory
+
+Caused by:
+    Invalid memory access: attempt to access `0x1000` when address must be less than `0x1000`

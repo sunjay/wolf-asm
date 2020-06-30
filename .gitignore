@@ -7,6 +7,12 @@
 /oscillating_sum
 /tic-tac-toe
 
+/divide-by-zero
+/invalid-instruction
+/jump-too-far
+/large-executable
+/out-of-bounds-access
+
 /vm/benches/oscillating_sum
 
 /target

@@ -1,0 +1,11 @@
+# This program divides a number by zero and triggers an exception at runtime
+
+section .code
+
+mov $1, 10
+mov $2, 0x35
+
+sub $2, $1
+sub $2, $2
+
+divu $1, $2

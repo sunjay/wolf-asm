@@ -1,0 +1,4 @@
+Error: Failed to execute instruction at `0x10`
+
+Caused by:
+    Invalid instruction: opcode `3855` is not supported
