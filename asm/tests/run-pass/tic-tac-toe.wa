@@ -226,6 +226,9 @@ prompt_move_validate:
   cmp $4, NONE
   jne prompt_move_ask
 
+  # Extra newline for better formatting after prompt
+  call print_newline
+
 prompt_move_done:
   # Pop registers used in this routine
   pop $4
